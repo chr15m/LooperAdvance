@@ -1,0 +1,27 @@
+BUILDING THIS
+-------------
+
+You'll need:
+* sox		-> http://sox.sf.net/
+* python	-> http://www.python.org/
+* pygame	-> http://www.pygame.org/
+* GCC cross compiled for the Gameboy Advance (search on google if you don't know how to do this)
+
+Steps
+-----
+* copy your .wav files into samples/
+* make -C samples/
+* make RELEASE=1
+
+You can also use the following options with make:
+
+* TARGET=buildname
+	buildname can be any of `ls [a-z]*test.cc`
+	e.g. make TARGET=clarkinoutest
+	which will build clarkinoutest.gba
+	(default is TARGET=looper)
+
+* THEME=themename
+	themename should be a directory under screens/
+	see the readme under screens/ and also the example 'basic'
+	you can modify those graphics to make your own theme

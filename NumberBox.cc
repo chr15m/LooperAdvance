@@ -15,13 +15,14 @@
 
 #include "NumberBox.hh"
 
-NumberBox::NumberBox(u16 ix, u16 iy, u16 iwidth, u16 imin, u16 imax, u16 ibigstep, Keys *inkeys): Widget (ix, iy, inkeys)
+NumberBox::NumberBox(u16 ix, u16 iy, u16 iwidth, u16 imin, u16 imax, u16 ibigstep, Keys *inkeys, bool dowrap): Widget (ix, iy, inkeys)
 {
 	width = iwidth;
 	min = imin;
 	max = imax;
 	bigstep = ibigstep;	
 	value = min;
+	wrap = dowrap;
 }
 
 void NumberBox::SetValue(u16 newVal)
@@ -64,9 +65,20 @@ Widget *NumberBox::Process()
 		
 		// check our bounds
 		if (tmpval > max)
-			tmpval = max;
+		{
+			if (wrap)
+				tmpval = min;
+			else
+				tmpval = max;
+		}
+		
 		if (tmpval < min)
-			tmpval = min;
+		{
+			if (wrap)
+				tmpval = max;
+			else
+				tmpval = min;
+		}
 		
 		if (value != tmpval)
 		{

@@ -43,7 +43,7 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	debug("sbOn: 0x%lx", (u32)sbOn);
 	nbPitch = new NumberBox(10, 4, 6, 1, 100000, 100, inkeys);
 	sbPan = new SelectBox(10, 5, 5, inkeys);
-	nbBeats = new NumberBox(10, 6, 2, 1, 64, 8, inkeys);
+	nbBeats = new NumberBox(10, 6, 2, 1, 64, 8, inkeys, true);
 	sbReset = new SelectBox(10, 7, 5, inkeys);
 	sbSample = new SelectBox(10, 8, 10, inkeys);
 	
@@ -59,9 +59,9 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	lbNotes = new Label(2, 12, "Steps");
 	lbStep = new Label(2, 13, "Step");
 	
-	nbNote = new NumberBox(10, 13, 3, 0, 0, 8, inkeys);
-	nbNBeat = new NumberBox(10, 15, 3, 0, 0, 20, inkeys);
-	nbNSwing = new NumberBox(10, 16, 3, 0, 255, 20, inkeys);
+	nbNote = new NumberBox(10, 13, 3, 1, 1, 8, inkeys);
+	nbNBeat = new NumberBox(10, 15, 3, 0, 0, 8, inkeys, true);
+	nbNSwing = new NumberBox(10, 16, 3, 0, 255, 10, inkeys, true);
 	nbNPitch = new NumberBox(10, 17, 3, 0, 255, 12, inkeys);
 	sbNAction = new SelectBox(9, 18, 6, inkeys);
 	

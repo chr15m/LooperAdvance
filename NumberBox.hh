@@ -26,9 +26,10 @@ private:
 	u16 max;	// maximum value this number box can go to
 	u16 value;	// current value
 	u16 bigstep;	// how big the big steps should be
-	
+	bool wrap;
+
 public:
-	NumberBox(u16 x, u16 y, u16 iwidth, u16 imin, u16 imax, u16 ibigstep, Keys *inkeys);
+	NumberBox(u16 x, u16 y, u16 iwidth, u16 imin, u16 imax, u16 ibigstep, Keys *inkeys, bool dowrap=false);
 	
 	void SetValue(u16 newVal);
 	u16 GetValue();

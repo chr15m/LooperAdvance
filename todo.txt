@@ -13,12 +13,13 @@ Looper Advance Live (1.0):
 		+ try implementing as dma fifo based instead of timer callback
 			+ write mixing routine
 			- write panning/volume code and per-sample mixers
-			- think about a callback system for effects
+			+ think about a callback system for effects
 
 - interface changes:
 	+ rename beat and note to slice and step (Jordan)
 	+ display current note position for this loop (Jordan)
 	+ B is a delete button in the editbox
+	+ option to 'wrap' on select/number boxes (Evans)
 
 * RELEASE *
 
@@ -26,7 +27,6 @@ Looper Advance Live (1.0):
 	- b button = browse notes (Jordan)
 	- start button = on/off (Jordan)
 	- holding down button on select & number boxes will scroll (Evans)
-	- option to 'wrap' on select/number boxes (Evans)
 	- note numbering should line up on specific note selector (Jordan)
 	- letter selection not so buggy (specific set of characters)
 	- allow for different volumes (Evans)

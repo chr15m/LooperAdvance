@@ -81,7 +81,7 @@ int main()
 	REG_BG3CNT = BIT07 | BIT08 | BIT09 | BIT10 | BIT11 | BIT12;
 	
 	// initialise video memory
-	bzero((void *)VideoBuffer, 0x8000);
+	bzero((char *)VideoBuffer, 0x8000);
 	
 	// load the splash screen
 	DMACopy((void*)splash_tiles, (u16*)VideoBuffer, SPLASH_TILES_SIZE, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT);

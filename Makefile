@@ -47,7 +47,7 @@ INCLUDE	= -I$(shell pwd)
 
 # what to build if we're building the whole program
 ifeq ($(TARGET),looper)
-	GAMEOBJECTS = Keys.o Page.o First.o Loop.o Widget.o Label.o EditBox.o SelectBox.o NumberBox.o GlobalData.o charset.o samples/samples.o splash.o screens.o
+	GAMEOBJECTS = Keys.o Page.o First.o Loop.o Widget.o Label.o EditBox.o SelectBox.o NumberBox.o GlobalData.o Sample.o ClarkMix.o charset.o samples/samples.o splash.o screens.o
 endif
 
 ifeq ($(TARGET),audiotest)
@@ -67,7 +67,7 @@ ifeq ($(TARGET),audiolayertest)
 endif
 
 ifeq ($(TARGET),clarkinoutest)
-	GAMEOBJECTS = samples/samples.o Sample.o ClarkMix.o
+	GAMEOBJECTS = samples/samples.o Sample.o ClarkMix.o Keys.o
 endif
 
 ifdef RELEASE
@@ -127,6 +127,7 @@ clean:
 	rm -f *.elf *.gba *~ *.log *.bak *.o
 	rm -f `find -name \*.o -print -or -name \*~ -print`  
 	rm -f .depend .hdepend .sdepend
+	rm screens.* splash.*
 	make clean -C samples/
 
 run: $(TARGET).gba

@@ -13,7 +13,7 @@ Looper Advance Live (1.0):
 	- note numbering should line up on specific note selector (Jordan)
 	- letter selection not so buggy (specific set of characters)
 	- allow for different volumes (Evans)
-	- allow for different pans
+	- allow for different pans (Christer)
 	- selecting a pitch - a keyboard appears (Crispin)
 
 - implement nanoloop/lsdj/midi sync code

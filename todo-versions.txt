@@ -1,7 +1,7 @@
 Looper Advance Live (2.0):
 --------------------------
 
-- allow for different panning positions
+- use strings to edit loop patterns (slice arrangements) (Christer)
 
 - fix time stretching
 

@@ -11,13 +11,32 @@ GlobalData::GlobalData()
 void GlobalData::Init()
 {
 	// initialize our globals
-	counter = 0;
+	Reset();
 	songdata = NULL;
 	currentsong = NULL;
 	offset = 0;
 	magic = 0xABCD;
 	zero = 0x00;
 	full = 0xFF;
+}
+
+// tick over once and recalculate all the song positions etc.
+void GlobalData::Tick()
+{
+	counter++;
+	if (globals.currentsong)
+	{
+		setbeat = counter * currentsong->bpm/3600.0;		
+		if (!(counter % 60/(currentsong->bpm/60)))
+			incbeat++;
+	}
+}
+
+void GlobalData::Reset()
+{
+	counter = 0;
+	setbeat = 0;
+	incbeat = 0;
 }
 
 // create a new blank song

@@ -63,7 +63,7 @@ char *SelectBox::GetChoiceString()
 // add a new choice to the linked list of choices
 void SelectBox::NewChoice(char *text, s16 myval)
 {
-	dprintf("Address: 0x%x\n", last);
+	debug("Address: 0x%x", last);
 	// if we have at least one already then add another one
 	if (last != NULL)
 	{
@@ -136,16 +136,20 @@ Widget *SelectBox::Process()
 				which = which->next;
 				if (maxtime)
 					timer = maxtime;
+				else
+					timer = 2;
 			}
 			
 			if (keys->TestKey(keyDown) == pressed && which->prev)
 			{
 				which = which->prev;
+				timer = 2;
 			}
 			
 			if (keys->TestKey(keyLeft) == pressed && which->prev)
 			{
 				which = which->prev;
+				timer = 2;
 			}
 			
 			if (keys->TestKey(keyRight) == pressed && which->next)
@@ -153,6 +157,8 @@ Widget *SelectBox::Process()
 				which = which->next;
 				if (maxtime)
 					timer = maxtime;
+				else
+					timer = 2;
 			}
 		}
 	}
@@ -192,7 +198,7 @@ void SelectBox::Draw()
 		sprintf(text, "[%-*s]", width, "");
 	
 	// if the timer is started, keep counting down
-	if (timer==1)
+	if (timer==1 && maxtime)
 		Choose(0);
 	
 	if (timer)

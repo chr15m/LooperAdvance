@@ -24,8 +24,7 @@ public:
 	inline void Keys::Jiffie()
 	{
 		u16 i=NUM_KEY_STATES;
-		// dprint("KeyManager: Jiffie()\n");
-				
+		
 		while(i)
 		{
 			i--;
@@ -42,7 +41,6 @@ public:
 	//! test if an individual key has changed state
 	inline KeyState Keys::TestKey(u16 key)
 	{
-		// dprint("KeyManager: TestKey()\n");
 		if (currentstate[key] == oldstate[key])
 			return unchanged;
 		else
@@ -52,7 +50,6 @@ public:
 	//! test if a key is currently down
 	inline bool Keys::IsPressed(u16 key)
 	{
-		// dprint("KeyManager: IsPressed()\n");
 		return !(REG_JP & keymap[key]);
 	}	
 };

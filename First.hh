@@ -18,15 +18,15 @@ private:
 	SelectBox *sbDelButton;
 	SelectBox *sbSaveButton;
 	SelectBox *sbAddButton;
-	
-	Widget *selected;
-	structSongData *songdata;
-	structSongData *currentsong;
-	u16 oldsong;
+	Label *lbSongName;
+	EditBox *ebSongName;
+	Label *lbBPM;
+	NumberBox *nbBPM;
+	SelectBox *sbAddLoopButton;
 	
 public:
 	First(Keys *inkeys);
 	virtual ~First();
-	void Draw();
-	void Process();
+	inline void DoDraw() {};
+	void DoProcess();
 };

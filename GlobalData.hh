@@ -55,13 +55,16 @@ typedef struct structSongData
 class GlobalData
 {
 private:
-	
-public:
-	u32 counter;
 	u32 offset;
 	u16 magic;
 	u8 zero;
 	u8 full;
+	
+public:
+	u32 counter;
+	u32 setbeat;	// this is the beat which is calculated by formula
+	u32 incbeat;	// this is the beta which increments ever time the counter flips over
+	
 	struct structSongData *songdata;
 	struct structSongData *currentsong;
 	struct structLoopData *currentloop;
@@ -69,6 +72,9 @@ public:
 	
 	GlobalData();
 	void Init();
+	
+	void Tick();
+	void Reset();
 	
 	void SetSong(u16 whichsong);
 	void SetName(char *name);

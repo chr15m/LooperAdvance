@@ -19,6 +19,9 @@ typedef struct structWidgetList
 private:
 	Keys *keys;
 
+protected:
+	Widget *selected;
+
 public:
 	// these are the links to the next page if they hit right and left on the shoulder buttons
 	Page *right;
@@ -27,8 +30,8 @@ public:
 	structWidgetList *last;
 	
 	Page();
-	virtual void Draw()=0;
-	virtual void Process()=0;
+	virtual void DoDraw()=0;
+	virtual void DoProcess()=0;
 	
 	//! this sets what managers to use
 	inline void UseKeys(Keys *inkeys)
@@ -67,6 +70,21 @@ public:
 		}
 		
 		return newPage;
+	}
+
+	inline void Process()
+	{
+		DoProcess();
+		// tell our next page to do it's processing
+		if (right)
+		{
+			right->Process();
+		}
+	}
+	
+	inline void Draw()
+	{
+		selected = selected->Process();
 	}
 	
 	//! add a widget to our list

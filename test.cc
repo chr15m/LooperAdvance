@@ -21,7 +21,7 @@ void (*IntrTable[])() =
 	0  // cart
 };
 
-structGlobals globals;
+GlobalData globals;
 
 int main()
 {
@@ -29,10 +29,7 @@ int main()
 	u16 i=0;
 	Keys *keys = new Keys();
 	
-	// initialize our globals
-	globals.counter = 0;
-	globals.bpm = 180;
-	globals.songdata = NULL;
+	globals.Init();
 	
 	// set up a nice screen mode
 	REG_DISPCNT = SCREENMODE0 | BG1_ENABLE; // 4 | ( 1 << 10 );
@@ -113,7 +110,11 @@ int main()
 		ebEditEx->Draw();
 		sbTimeEx->Draw();
 		
-		globals.counter++;
+		if (sbSelectEx->Pressed())
+			debug("Selected!");
+		
+		if (sbTimeEx->Pressed())
+			debug("Pressed!");
 	}
 }
 

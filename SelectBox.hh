@@ -34,8 +34,15 @@ public:
 	void ClearChoices();
 	bool IsEmpty();
 	char *GetChoiceString();
+
 	void AutoOff(u16 time = 10);
 	u16 GetFrame();
+
+	inline bool Pressed()
+	{
+		return (GetFrame() == 1);
+	}
+
 	Widget *Process();
 	void Draw();
 };

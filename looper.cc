@@ -35,10 +35,8 @@ int main()
 	Keys *keys = new Keys();
 	First *firstpage = new First(keys);
 	Page *selected = firstpage;
-	Page *traverse;
 
 	globals.Init();
-	firstpage->right = NULL;
 	
 	// set up a nice screen mode
 	REG_DISPCNT = SCREENMODE0 | BG1_ENABLE; // 4 | ( 1 << 10 );
@@ -76,20 +74,16 @@ int main()
 	
 	while (1)
 	{
-		dprintf("Main loop\n");
-
 		// this is zerosync
 		while(REG_VCOUNT);
-		kramWorker();		// do the stuff
+		// figure out all our latest song positions
+		globals.Tick();
+		// calculate audio stuff
+		kramWorker();
+		// check keys
 		keys->Jiffie();
-		
-		// cycle through each page and process it
-		traverse = firstpage;
-		while (traverse)
-		{
-			traverse->Process();
-			traverse = traverse->right;
-		}
+		// automatically cascades all pages and processes them
+		firstpage->Process();
 		
 		// this is vsync
 		while(REG_VCOUNT != 160);
@@ -98,7 +92,5 @@ int main()
 		BlankScreen();
 		selected = selected->Cycle();
 		selected->Draw();
-		
-		globals.counter++;
 	}
 }

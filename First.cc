@@ -12,20 +12,36 @@ First::First(Keys *inkeys)
 	sbDelButton = new SelectBox(9, 3, 6, inkeys);
 	sbSaveButton = new SelectBox(2, 5, 13, inkeys);
 	
+	lbSongName = new Label(2, 8, "Name");
+	ebSongName = new EditBox(7, 8, 13, inkeys);
+	lbBPM = new Label(2, 10, "BPM");
+	nbBPM = new NumberBox(7, 10, 3, 1, 600, 10, inkeys);
+	
+	sbAddLoopButton = new SelectBox(18, 17, 8, inkeys);
+	
 	AddWidget(lbSong);
 	AddWidget(sbSong);
 	AddWidget(sbNewButton);
 	AddWidget(sbDelButton);
 	AddWidget(sbSaveButton);
+	AddWidget(lbSongName);
+	AddWidget(ebSongName);
+	AddWidget(lbBPM);
+	AddWidget(nbBPM);
+	AddWidget(sbAddLoopButton);
 	
 	sbSong->SetTransitions(NULL, NULL, NULL, sbNewButton);
 	sbNewButton->SetTransitions(NULL, sbDelButton, sbSong, sbSaveButton);
 	sbDelButton->SetTransitions(sbNewButton, NULL, sbSong, sbSaveButton);
-	sbSaveButton->SetTransitions(NULL, NULL, sbNewButton, NULL);
-	
+	sbSaveButton->SetTransitions(NULL, NULL, sbNewButton, ebSongName);
+	ebSongName->SetTransitions(NULL, NULL, sbSaveButton, nbBPM);
+	nbBPM->SetTransitions(NULL, sbAddLoopButton, ebSongName, sbAddLoopButton);
+	sbAddLoopButton->SetTransitions(nbBPM, NULL, nbBPM, NULL);
+		
 	sbNewButton->AutoOff();
 	sbDelButton->AutoOff();
 	sbSaveButton->AutoOff();
+	sbAddLoopButton->AutoOff();
 	
 	sbNewButton->NewChoice("New", 0);
 	sbNewButton->NewChoice("---", 1);
@@ -35,7 +51,10 @@ First::First(Keys *inkeys)
 	
 	sbSaveButton->NewChoice("Write Changes", 0);
 	sbSaveButton->NewChoice("-------------", 1);
-	
+
+	sbAddLoopButton->NewChoice("Add Loop", 0);
+	sbAddLoopButton->NewChoice("-------------", 1);
+
 	UseKeys(inkeys);
 	
 	sbSong->ClearChoices();
@@ -50,41 +69,48 @@ First::~First()
 	delete sbNewButton;
 	delete sbDelButton;
 	delete sbSaveButton;
+	delete lbSongName;
+	delete ebSongName;
+	delete lbBPM;
+	delete nbBPM;
+	delete sbAddLoopButton;
 }
 
-void First::Draw()
+void First::DoProcess()
 {
-	u16 beat;
-	
-	selected = selected->Process();
-	
-	if (globals.currentsong)
-		beat = globals.counter * globals.currentsong->bpm/3600;
-}
-
-void First::Process()
-{
-	u16 i;
-	
 	dprintf("First Process: %ld\n", (u32)this);
 	
 	// if they've clicked the save button, then save
-	if (sbSaveButton->GetChoice() == 1 && sbSaveButton->GetFrame() == 1)
+	if (sbSaveButton->Pressed())
 	{
 		dprintf("Saving\n");
 		globals.SaveSongs();
 	}
-	
-	// if they've chosen a new song, load it
-	if (oldsong != sbSong->GetChoice())
+	// if they've chosen a new song
+	else if (sbSong->Pressed())
 	{
-		// dataptr = (structSongData *)&(songs::data[sbSong->GetChoice()]);
-//		ptrLoop = (Loop *)right;
-//		while(ptrLoop)
-//		{
-//			ptrLoop->SetParameters(dataptr->loops[i].sample, dataptr->loops[i].pan, dataptr->loops[i].pitch, dataptr->loops[i].divisions);
-//			ptrLoop = (Loop *)ptrLoop->right;
-//		}
-//		oldsong = sbSong->GetChoice();
+		// remove all our old loops
+		
+		// for every loop in this song, create it's loop
+		
+	}
+	// if they're creating a new song, add it on the end and switch to it
+	else if (sbNewButton->Pressed())
+	{
+		
+	}
+	// if they're deleting a song
+	else if (sbDelButton->Pressed())
+	{
+		// delete all our old loops
+		
+		// delete the current song
+		
+		// update the current interface data
+	}
+	else if (sbAddLoopButton->Pressed())
+	{
+		// insert a new loop into our section (and add one to the data)
+		
 	}
 }

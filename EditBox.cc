@@ -90,7 +90,7 @@ void EditBox::Draw()
 {	
 	char outxt[width+2];
 	
-	sprintf(outxt, "[%*-s]", width, text);
+	sprintf(outxt, "[%-*s]", width, text);
 	
 	if (selected)
 	{

@@ -37,9 +37,19 @@
 
 #define BUFFER_SIZE 256
 
-// 16khz play back freq
-#define PLAYER_FREQ 0xFBFF
-//#define PLAYER_FREQ 0xFD06
+// pow(2, 14) = 16384
+
+// python: hex(pow(2,16) - pow(2,24) / freq)
+
+// freq = pow(2, 14) = 16384 Hz
+#define PLAYER_FREQ 0xFC00
+#define PLAYER_ACTUAL_FREQ 16384
+
+// 16kHz:
+// #define PLAYER_FREQ 0xFBFF
+
+// 22050:
+// #define PLAYER_FREQ 0xFD06
 
 #include "gba.h"
 #include "typedefs.h"
@@ -70,10 +80,10 @@ private:
 	structSampleList *samplelist;
 	// last one in the linked list
 	structSampleList *last;
+	u8 numberOfSamples;
 	
 	// internal stuff
 	void mixBuffers(void) __attribute__ ((section (".iwram")));
-	void switchBuffers(void) __attribute__ ((section (".iwram")));
 	
 public:
 	ClarkMix();
@@ -91,6 +101,7 @@ namespace Audio
 {
         extern void AudioCallBack() __attribute__ ((section (".iwram")));
         extern ClarkMix *ClarkMixPtr;
+	extern u8 mixDownSizes[32];
 };
 
 #endif

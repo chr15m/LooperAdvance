@@ -16,6 +16,7 @@
 #include "GlobalData.hh"
 
 const u32 frequency[12] = {44100, 46722, 49500, 52444, 55562, 58866, 62366, 66075, 70004, 74167, 78577, 83249};
+const u32 freqbyte[12] = {256, 46722, 49500, 52444, 55562, 58866, 62366, 66075, 70004, 74167, 78577, 83249};
 
 GlobalData::GlobalData()
 {
@@ -365,7 +366,7 @@ void GlobalData::NewNote()
 		// set defaults
 		currentnote->noteEnd = note_continue;
 		currentnote->offset = 0;
-		currentnote->pitch = 128;
+		currentnote->pitch = 24;
 		currentnote->swing = 0;
 		currentnote->next = NULL;
 	}

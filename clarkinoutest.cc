@@ -53,6 +53,8 @@ int main()
         while (keys->TestKey(keyA) != pressed)
         {
                 keys->Jiffie();
+		// mix our buffer if it needs it
+		mixer->DoMix();
         }
         keys->Jiffie();
 
@@ -65,6 +67,8 @@ int main()
         while (keys->TestKey(keyA) != pressed)
         {
                 keys->Jiffie();
+		// mix our buffer if it needs it
+		mixer->DoMix();
         }
         keys->Jiffie();
 
@@ -80,6 +84,8 @@ int main()
         while (keys->TestKey(keyA) != pressed)
         {
                 keys->Jiffie();
+		// mix our buffer if it needs it
+		mixer->DoMix();
         }
         keys->Jiffie();
 
@@ -96,6 +102,8 @@ int main()
         while (keys->TestKey(keyA) != pressed)
         {
                 keys->Jiffie();
+		// mix our buffer if it needs it
+		mixer->DoMix();
         }
         keys->Jiffie();
 
@@ -122,6 +130,8 @@ int main()
 			dprintf("Reset loop, pan: %d\n", rotpan);
 		}
 		keys->Jiffie();
+		// mix our buffer if it needs it
+		mixer->DoMix();
 	}
 
 	

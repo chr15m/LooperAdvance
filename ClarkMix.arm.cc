@@ -35,6 +35,8 @@ void Audio::AudioCallBack()
 		((ClarkMix *)Audio::ClarkMixPtr)->InterruptProcess();
 }
 
+u8 Audio::mixDownSizes[32] = {1, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5};
+
 ClarkMix *Audio::ClarkMixPtr=NULL;
 
 ClarkMix::ClarkMix(void)
@@ -51,6 +53,8 @@ ClarkMix::ClarkMix(void)
 		(u32)fifoBbuf0[i] = 0;
 		(u32)fifoBbuf1[i] = 0;
 	}
+	
+	numberOfSamples = 0;
 	
 	// turn on the sound chip
 	REG_SOUNDCNT_X = SND_ENABLED;
@@ -90,31 +94,10 @@ ClarkMix::ClarkMix(void)
 	mix = false;
 } 
 
-// swap which buffer we're using
-void ClarkMix::switchBuffers(void)
-{
-    if (bufferSwitch == 0)
-	{
-		curBufA = fifoAbuf1;
-		curBufB = fifoBbuf1;
-		mixBufA = fifoAbuf0;
-		mixBufB = fifoBbuf0;
-		bufferSwitch = 1;
-	} 
-	else
-	{
-		curBufA = fifoAbuf0;
-		curBufB = fifoBbuf0;
-		mixBufA = fifoAbuf1;
-		mixBufB = fifoBbuf1;
-		bufferSwitch = 0;
-	}
-}
-
 // mix together everything down into the buffers
 void ClarkMix::mixBuffers(void)
 {
-	SetBG(31, 0, 0);
+	// SetBG(31, 0, 0);
 	u16 b;
 	structSampleList *traverse = samplelist;
 	s8 *myBufA = mixBufA;
@@ -134,11 +117,11 @@ void ClarkMix::mixBuffers(void)
 	{
 		debugloop("Mixing sample: %s\n", traverse->sample->GetName());
 		
-		traverse->sample->MixDown(myBufA, myBufB, BUFFER_SIZE);
+		traverse->sample->MixDown(myBufA, myBufB, BUFFER_SIZE, Audio::mixDownSizes[numberOfSamples - 1]);
 		traverse = traverse->next;
 	}
 	
-	SetBG(SCREENS_BG_R, SCREENS_BG_B, SCREENS_BG_G);
+	// SetBG(SCREENS_BG_R, SCREENS_BG_B, SCREENS_BG_G);
 }
 
 // Interrupt process
@@ -147,7 +130,22 @@ void ClarkMix::InterruptProcess(void)
  	REG_DMA1CNT &= ~ENABLE_DMA;
 	REG_DMA2CNT &= ~ENABLE_DMA;
 
-	switchBuffers();
+	if (bufferSwitch == 0)
+	{
+		curBufA = fifoAbuf1;
+		curBufB = fifoBbuf1;
+		mixBufA = fifoAbuf0;
+		mixBufB = fifoBbuf0;
+		bufferSwitch = 1;
+	} 
+	else
+	{
+		curBufA = fifoAbuf0;
+		curBufB = fifoBbuf0;
+		mixBufA = fifoAbuf1;
+		mixBufB = fifoBbuf1;
+		bufferSwitch = 0;
+	}
 	
 	REG_DMA1SAD = (u32)curBufA;
 	REG_DMA2SAD = (u32)curBufB;
@@ -166,9 +164,10 @@ void ClarkMix::DoMix()
 {
 	if (mix)
 	{
+		// make sure we don't double mix
 		mix = false;
 		mixBuffers();
-		debug("Mix");
+		debugloop("Mix");
 	}
 }
 
@@ -190,6 +189,8 @@ void ClarkMix::Manage(Sample *newsample)
 		last = samplelist;
 	}
 	
+	numberOfSamples++;
+	
 	debug("%s\n", newsample->GetName());
 	debug("samples: 0x%lx\n", (u32)samplelist);
 	debug("last: 0x%lx\n", (u32)last);
@@ -209,6 +210,7 @@ void ClarkMix::Forget(Sample *which)
 		{
 			samplelist = traverse->next;
 			delete traverse;
+			numberOfSamples--;
 		}
 		// if it's the next on in line, pop it out
 		else if (traverse->next->sample == which)
@@ -219,6 +221,7 @@ void ClarkMix::Forget(Sample *which)
 			// if we've deleted the last one, make sure we reset last
 			if (traverse->next == NULL)
 				last = traverse;
+			numberOfSamples--;
 		}
 		traverse = traverse->next;
 	}

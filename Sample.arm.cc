@@ -26,7 +26,8 @@ Sample::Sample(SampleData *usedata)
 	
 	// initial settings
 	volume = 0;
-	panning = 0;
+	panshift[0] = 0;
+	panshift[1] = 0;
 	velocity = 256;
 	playing = true;
 	
@@ -42,12 +43,13 @@ Sample::~Sample()
 // tell this sample which actual data to use
 void Sample::SetData(SampleData *usedata)
 {
-	debug("Set Sample Data to 0x%lx\n", (u32)usedata);
+	debug("Set Sample Data to 0x%lx", (u32)usedata);
 	sampledata = usedata;
 	loopStart = 0;
 	loopEnd = 0;
 	volume = 0;
-	panning = 0;
+	panshift[0] = 0;
+	panshift[1] = 0;
 	velocity = 256;
 	playing = true;
 }
@@ -55,28 +57,28 @@ void Sample::SetData(SampleData *usedata)
 // Set this sample to play
 void Sample::Play()
 {
-	debug("\n");
+	debug("Play");
 	playing = true;
 }
 
 // Pause this sample
 void Sample::Pause()
 {
-	debug("\n");
+	debug("Pause");
 	playing = false;
 }
 
 // play or pause depending on a value
 void Sample::SetPlaying(bool play)
 {
-	debug("Value: %d\n", play);
+	debug("Value: %d", play);
 	playing = play;
 }
 
 // set the velocity of this sample
 void Sample::SetVelocity(u16 vel)
 {
-	debug("Velocity: %d\n", vel);
+	debug("Velocity: %d", vel);
 	velocity = vel;
 }
 
@@ -84,41 +86,44 @@ void Sample::SetVelocity(u16 vel)
 void Sample::SetPosition(u32 position)
 {
 	nextchunk = position << 8;
-	debug("Set position to: %ld (%ld)\n", nextchunk, ((nextchunk>>8) / sampledata->length));
+	debug("Set position to: %ld (%ld)", nextchunk, ((nextchunk>>8) / sampledata->length));
 }
 
 // set the loop end position
 void Sample::SetLoopStart(u32 start)
 {
 	loopStart = start;
-	debug("Set loop start to: %ld\n", start);
+	debug("Set loop start to: %ld", start);
 }
 
 void Sample::SetLoopEnd(u32 end)
 {
 	loopEnd = end;
-	debug("Set loop end to: %ld\n", end);
+	debug("Set loop end to: %ld", end);
 }
 
 // set the panning position of this sample
 void Sample::SetPanning(s8 pan)
 {
-	debug("Set pan to: %d\n", pan);
-	panning = pan;	
-	if (panning > 8)
-		panning = 8;
-	if (panning < -8)
-		panning = -8;
+	// figure out our pan shifting
+	panshift[0] = 0;
+	panshift[1] = 0;
+	if (pan < 0)
+		panshift[0] = - pan + 2;
+	else if (pan > 0)
+		panshift[1] = pan + 2;
+	
+	debug("Set panning to l=%d r=%d", panshift[0], panshift[1]);
 }
 
 // set the volume of this sample
 void Sample::SetVolume(u8 vol)
 {
-	if (vol > 7)
-		vol = 7;
+	if (vol > 8)
+		vol = 8;
 	
-	volume = 8 - vol;
-	debug("Set volume to %d\n", volume);
+	volume = (8 - vol);
+	debug("Set volume to %d", volume);
 }
 
 // get the current playback position of this sample
@@ -139,37 +144,28 @@ char *Sample::GetName()
 	return sampledata->name;
 }
 
-void Sample::MixDown(s8 *mixBufA, s8 *mixBufB, u16 buffSize)
+void Sample::MixDown(s8 *mixBufA, s8 *mixBufB, u16 buffSize, u8 mixshifter)
 {
+	if (((nextchunk + velocity) >> 8) + buffSize > sampledata->length)
+		nextchunk = 0;
+	
 	if (playing)
 	{
 		u32 chunkR = 0;
 		u16 b;
 		s8 *dataptr = (s8 *)sampledata->data;
-		// we want to make sure we don't overstep by 4 if playing a sample of length not divisible by four
-		u32 end = sampledata->length - 5;
-		u16 val=0;
-		
-		// figure out our pan shifting
-		panshift[0] = 0;
-		panshift[1] = 0;
-		if (panning < 0)
-			panshift[0] = - panning;
-		else if (panning > 0)
-			panshift[1] = panning;
+		s8 val = 0;
 		
 		// note, we lost a fair bit of precision doing all this
 		// but it's only in chunks of four samples, so it's not so bad.
-		for (b=0; b<buffSize; b++)
+		for (b = 0; b < buffSize; b++)
 		{
 			chunkR = (nextchunk += velocity) >> 8;
+			
 			// fill up our buffers byte by byte
-			val = dataptr[chunkR] >> volume;
+			val = dataptr[chunkR] >> volume >> mixshifter;
 			mixBufA[b] += val >> panshift[0];
 			mixBufB[b] += val >> panshift[1];
-			
-			if ((u32)chunkR >= end)
-				nextchunk = 0;
 		}
 	}
 }

@@ -464,11 +464,15 @@ void *Loop::Reset(void *ignore)
 {
 	// (1000 * (tracks[selected].sample->len) / (tracks[selected].sample->freq) ) / (tracks[selected].bpl * T * 4 / 1000
 	// (256 * (tracks[selected].sample->len) / (tracks[selected].sample->freq) ) / (tracks[selected].bpl * T * 4 / 256)
-	u32 p1 = 6 * sample->GetLength();
-	u32 p2 = nbBeats->GetValue() * globals.currentsong->bpm;
+	
+	// 256 * ((length / PLAYER_ACTUAL_FREQ) / (beats_per_loop * (60/BPM)))
+	// = 4 * length * BPM / player_freq * bpl
+	
+	u32 p1 = (sample->GetLength() * globals.currentsong->bpm) << 2;
+	u32 p2 = nbBeats->GetValue() * PLAYER_ACTUAL_FREQ;
 	u32 result = p1 / p2;
 	
-	debug("New pitch: %d", result);
+	debug("New pitch: %ld", result);
 	
 	nbPitch->SetValue(result);
 	Pitch(&result);
@@ -570,30 +574,20 @@ void Loop::UpdateParameters()
 void Loop::UpdateParametersNotes()
 {
 	u16 newpos = notes[beat]->offset;
-	s16 newpitch = notes[beat]->pitch - 128;
-	s16 octave=0;
-	s16 note=0;
+	s16 octave = 0;
+	s16 note = 0;
+	u32 oct_pitch = 0;
 	
 	debug("Note lookup: %d", beat);
 	
-	if (newpitch < 0)
-	{
-		octave = (newpitch + 1) / 12;
-		note = newpitch % 12;
-		debug("Octave: %d, Note: %d", -(octave - 1), (12 + note) % 12);	
-		//sample->SetFrequency();
-		// kramSetFreq(handle, (((nbPitch->GetValue() * frequency[(12 + note) % 12]) >> -(octave - 1)) / 1000));
-		sample->SetVelocity((nbPitch->GetValue() >> -(octave - 1)) + note * ((nbPitch->GetValue() - (nbPitch->GetValue() << 1)) / 12));
-	}
-	else
-	{
-		octave = newpitch / 12;
-		note = newpitch % 12;
-		debug("Octave: %d, Note: %d", octave, note);
-		//sample->SetFrequency();
-		//kramSetFreq(handle, (((nbPitch->GetValue() * frequency[note]) << octave) / 1000));
-		sample->SetVelocity((nbPitch->GetValue() << octave) + note * ((nbPitch->GetValue() - (nbPitch->GetValue() << 1)) / 12));
-	}
+	octave = notes[beat]->pitch / 12;
+	note = (notes[beat]->pitch % 12);
+	oct_pitch = nbPitch->GetValue() << octave;
+	debug("Octave: %d, Note: %d", octave, note);
+	//sample->SetFrequency();
+	// kramSetFreq(handle, (((nbPitch->GetValue() * frequency[(12 + note) % 12]) >> -(octave - 1)) / 1000));
+	//sample->SetVelocity((notes[beat]->pitch << octave) * (note + 12) / 12);
+	sample->SetVelocity((oct_pitch + (note * oct_pitch) / 12) >> 2);
 	
 	sample->SetPanning(sbPan->GetChoice() * 16 - 8);
 	if (newpos)

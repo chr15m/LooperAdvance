@@ -34,7 +34,6 @@ private:
 	
 	// parameters for the sample
 	u8 volume;
-	s8 panning;
 	u32 velocity;
 	bool playing;
 	s8 panshift[2];
@@ -63,7 +62,7 @@ public:
 	u32 GetLength() __attribute__ ((section (".iwram")));
 	char *GetName() __attribute__ ((section (".iwram")));
 	
-	void MixDown(s8 *mixBufA, s8 *mixBufB, u16 buffSize) __attribute__ ((section (".iwram")));
+	void MixDown(s8 *mixBufA, s8 *mixBufB, u16 buffSize, u8 mixshifter) __attribute__ ((section (".iwram")));
 };
 
 typedef struct structSampleList

@@ -1,6 +1,7 @@
 #include "looper.hh"
 #include "charset.hh"
 #include "Widgets.hh"
+#include "SelectBox.hh"
 
 // IntrTable for crt0
 void (*IntrTable[])() =
@@ -23,11 +24,33 @@ void (*IntrTable[])() =
 
 GlobalData globals;
 
+class Thing
+{
+public:
+	Thing()
+	{
+		dprintf("Hi!\n");
+	}
+	
+	const void CallMe(void *)
+	{
+		dprintf("callback madness\n");
+	}
+};
+
+void myfunc(void *data)
+{
+	structSelectList *stuff = (structSelectList *)data;
+		
+	dprintf("%s = %ld\n", stuff->text, stuff->value);
+}
+
 int main()
 {
 	Widget *selected;
 	u16 i=0;
 	Keys *keys = new Keys();
+	Thing *a = new Thing();
 	
 	globals.Init();
 	
@@ -78,6 +101,8 @@ int main()
 	sbSelectEx->NewChoice("Hello", 0);
 	sbSelectEx->NewChoice("Blah", 1);
 	sbSelectEx->NewChoice("Pants", 2);
+	// sbSelectEx->SetCallBack(&myfunc);
+	sbSelectEx->SetCallBack(&a->CallMe);
 	
 	// more crap for another box
 	sbTimeEx->NewChoice("Hello", 0);
@@ -117,4 +142,3 @@ int main()
 			debug("Pressed!");
 	}
 }
-

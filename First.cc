@@ -4,6 +4,7 @@
 
 #include "First.hh"
 
+// initialise
 First::First(Keys *inkeys)
 {
 	lbSong = new Label(2, 1, "Song");
@@ -55,13 +56,34 @@ First::First(Keys *inkeys)
 	sbAddLoopButton->NewChoice("Add Loop", 0);
 	sbAddLoopButton->NewChoice("-------------", 1);
 
+	// set up our callback functions for each UI element
+	cbSaveButton.MakeCallback(this, &First::SaveButton);
+	sbSaveButton->UseCallBack(&cbSaveButton);
+	
+	cbSong.MakeCallback(this, &First::Song);
+	sbSong->UseCallBack(&cbSong);
+
+	cbNewButton.MakeCallback(this, &First::NewButton);
+	sbNewButton->UseCallBack(&cbNewButton);
+
+	cbDelButton.MakeCallback(this, &First::DelButton);
+	sbDelButton->UseCallBack(&cbDelButton);
+
+	cbAddLoopButton.MakeCallback(this, &First::AddLoopButton);
+	sbAddLoopButton->UseCallBack(&cbAddLoopButton);
+
+	cbBPM.MakeCallback(this, &First::BPM);
+	nbBPM->UseCallBack(&cbBPM);
+	
+	
 	UseKeys(inkeys);
 	
-	sbSong->ClearChoices();
+	RebuildSongList();
 	sbSong->Select();
 	selected = sbSong;
 }
 
+// destructor
 First::~First()
 {
 	delete lbSong;
@@ -76,41 +98,78 @@ First::~First()
 	delete sbAddLoopButton;
 }
 
+// if they've clicked the save button, then save
+void *First::SaveButton(void *data)
+{
+	debug("Save button callback");
+	globals.SaveSongs();
+	return NULL;
+}
+
+// if they've moved the song selecta
+void *First::Song(void *data)
+{
+	debug("Song select callback");
+	// change currentsong variable to point at the newly selected song
+	// remove all our old loops
+	// for every loop in this song, create it's loop
+	// set the BPM to be this song's BPM
+	// set the songname field to be this song's songname
+	return NULL;
+}
+
+
+// if they've pressed the new button
+// creating a new song, add it on the end and switch to it
+void *First::NewButton(void *data)
+{
+	debug("New button callback");
+	// create a new song in the songdata
+	// rebuild the choices
+	// choose the new song
+	return NULL;
+}
+
+// if they're deleting a song
+void *First::DelButton(void *data)
+{
+	debug("Del button callback");
+	// delete all the live loops
+	// delete the current song
+	// rebuild choices
+	return NULL;
+}
+
+// if they press the loop-add button
+void *First::AddLoopButton(void *data)
+{
+	debug("AddLoop button callback");
+	// add a loop to currentsong
+	// add a live loop
+	return NULL;
+}
+
+// if they change the BPM
+void *First::BPM(void *data)
+{
+	debug("BPM: %ld", *(u16 *)data);
+	return NULL;
+}
+
 void First::DoProcess()
 {
-	dprintf("First Process: %ld\n", (u32)this);
+}
+
+// this function takes all the songs in songdata and makes a list of them
+void First::RebuildSongList()
+{
+	structSongData *traverse = globals.songdata;
 	
-	// if they've clicked the save button, then save
-	if (sbSaveButton->Pressed())
+	sbSong->ClearChoices();
+	
+	while (traverse)
 	{
-		dprintf("Saving\n");
-		globals.SaveSongs();
-	}
-	// if they've chosen a new song
-	else if (sbSong->Pressed())
-	{
-		// remove all our old loops
-		
-		// for every loop in this song, create it's loop
-		
-	}
-	// if they're creating a new song, add it on the end and switch to it
-	else if (sbNewButton->Pressed())
-	{
-		
-	}
-	// if they're deleting a song
-	else if (sbDelButton->Pressed())
-	{
-		// delete all our old loops
-		
-		// delete the current song
-		
-		// update the current interface data
-	}
-	else if (sbAddLoopButton->Pressed())
-	{
-		// insert a new loop into our section (and add one to the data)
-		
+		sbSong->NewChoice(traverse->name, (u32)traverse);
+		traverse = traverse->next;
 	}
 }

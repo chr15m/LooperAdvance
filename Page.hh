@@ -2,11 +2,12 @@
 
 // Represents a single loop-page
 #include "looper.hh"
-#include "Keys.hh"
-#include "Widgets.hh"
 
 #ifndef _PAGE_HH_
 #define _PAGE_HH_
+
+#include "Keys.hh"
+#include "Widgets.hh"
 
 class Page
 {

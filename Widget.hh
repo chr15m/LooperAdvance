@@ -1,9 +1,10 @@
 #include "looper.hh"
 #include "charset.hh"
-#include "Keys.hh"
 
 #ifndef _WIDGET_HH_
 #define _WIDGET_HH_
+
+#include "Keys.hh"
 
 #define MAXSTRING	30
 
@@ -22,9 +23,11 @@ protected:
 
 public:
 	Widget(u16 x, u16 y, Keys *inkeys);
+	cCallback *callback;
 	
 	void SetTransitions(Widget *newL, Widget *newR, Widget *newU, Widget *newD);
 	void Select();
+	void UseCallBack(cCallback *pCBFunc);
 	virtual void Draw()=NULL;
 	virtual Widget *Process()=NULL;
 };

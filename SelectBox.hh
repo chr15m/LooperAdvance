@@ -5,17 +5,17 @@
 #ifndef _SELECTBOX_HH_
 #define _SELECTBOX_HH_
 
-class SelectBox : public Widget
-{
 // this type is a linked list of select box items
 typedef struct structSelectList
 {
 	char *text;
-	s16 value;
+	u32 value;
 	structSelectList *next;
 	structSelectList *prev;
 } structSelectList;
 
+class SelectBox : public Widget
+{
 private:
 	u16 width;			// how many characters wide is this?
 	u16 timer;			// if it's an auto-reset button
@@ -26,23 +26,32 @@ private:
 
 public:
 	SelectBox(u16 x, u16 y, u16 iwidth, Keys *inkeys);
-	
+
+	// choose the choice-th entry in the list
 	void Choose(u16 choice);
-	void ChooseByValue(u16 value);
-	u16 GetChoice();
-	void NewChoice(char *text, s16 myval);
+	// choose the choice with the value given
+	void ChooseByValue(u32 value);
+	// get the current choice value
+	u32 GetChoice();
+	// create a new choice
+	void NewChoice(char *text, u32 myval);
+	// forget all the choice
 	void ClearChoices();
+	// if the list is empty
 	bool IsEmpty();
+	// get the string of the current choice
 	char *GetChoiceString();
 
+	// set this select box to turn off after a number of ticks
 	void AutoOff(u16 time = 10);
+	// get the current count-down frame
 	u16 GetFrame();
 
 	inline bool Pressed()
 	{
 		return (GetFrame() == 1);
 	}
-
+	
 	Widget *Process();
 	void Draw();
 };

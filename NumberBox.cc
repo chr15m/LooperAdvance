@@ -42,7 +42,13 @@ Widget *NumberBox::Process()
 		if (tmpval < min)
 			tmpval = min;
 		
-		value = tmpval;
+		if (value != tmpval)
+		{
+			value = tmpval;
+			
+			if (callback)
+				callback->Execute(&value);
+		}
 	}
 	else
 	{

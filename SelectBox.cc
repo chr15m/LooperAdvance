@@ -30,7 +30,7 @@ void SelectBox::Choose(u16 choice)
 }
 
 // choose an item by it's value
-void SelectBox::ChooseByValue(u16 inval)
+void SelectBox::ChooseByValue(u32 inval)
 {
 	structSelectList *travel = first;
 	
@@ -43,7 +43,7 @@ void SelectBox::ChooseByValue(u16 inval)
 }
 
 // get which choice we have selected
-u16 SelectBox::GetChoice()
+u32 SelectBox::GetChoice()
 {
 	if (which)
 		return which->value;
@@ -61,7 +61,7 @@ char *SelectBox::GetChoiceString()
 }
 
 // add a new choice to the linked list of choices
-void SelectBox::NewChoice(char *text, s16 myval)
+void SelectBox::NewChoice(char *text, u32 myval)
 {
 	debug("Address: 0x%x", last);
 	// if we have at least one already then add another one
@@ -198,8 +198,16 @@ void SelectBox::Draw()
 		sprintf(text, "[%-*s]", width, "");
 	
 	// if the timer is started, keep counting down
-	if (timer==1 && maxtime)
-		Choose(0);
+	if (timer==1)
+	{	
+		if (maxtime)
+			Choose(0);
+		
+		if (callback)
+		{
+			callback->Execute(which);
+		}
+	}
 	
 	if (timer)
 		timer--;

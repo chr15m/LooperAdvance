@@ -5,6 +5,7 @@
 #include "emudp.h"
 #include "screenmode.h"
 #include "helpers.h"
+#include "callback.h"
 #include "GlobalData.hh"
 
 #ifndef _LOOPER_HH_

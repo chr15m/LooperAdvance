@@ -7,6 +7,8 @@ Widget::Widget(u16 ix, u16 iy, Keys *inkeys)
 	
 	left = right = up = down = NULL;	
 	keys = inkeys;
+	
+	callback = NULL;
 }
 
 void Widget::SetTransitions(Widget *newL, Widget *newR, Widget *newU, Widget *newD)
@@ -21,4 +23,9 @@ void Widget::SetTransitions(Widget *newL, Widget *newR, Widget *newU, Widget *ne
 void Widget::Select()
 {
 	selected = true;
+}
+
+void Widget::UseCallBack(cCallback *pCBFunc)
+{
+	callback = pCBFunc;
 }

@@ -7,6 +7,8 @@
 #ifndef GBA_HEADER
 #define GBA_HEADER
 
+#include "directsound.h"
+
 #define OAMData  		((vu32*)0x7000000)
 #define VideoBuffer 		((vu16*)0x6000000)
 #define OAMmem			((vu16*)0x6010000)
@@ -136,7 +138,7 @@
 #define REG_SGWR3      *(volatile u32*)0x400009C
 #define REG_SGWR3_L    *(volatile u16*)0x400009C
 #define REG_SGWR3_H    *(volatile u16*)0x400009E
-#define REG_SGFIF0A    *(volatile u32*)0x40000A0
+#define REG_SGFIFOA    *(volatile u32*)0x40000A0
 #define REG_SGFIFOA_L  *(volatile u16*)0x40000A0
 #define REG_SGFIFOA_H  *(volatile u16*)0x40000A2
 #define REG_SGFIFOB    *(volatile u32*)0x40000A4

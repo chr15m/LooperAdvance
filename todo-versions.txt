@@ -1,0 +1,33 @@
+Looper Advance Live (2.0):
+--------------------------
+
+- allow for different panning positions
+
+- fix time stretching
+
+- interface changes
+	- pause button = remember/recall current loop settings
+	- better letter selection (more intuitive?)
+
+- when adding a new loop, jumps to that loop
+
+- 'clone loop' button
+
+- fix to make bpm more correct
+
+- make load/save format more robust (data types stored)
+
+- make a windowing library to have sprite windows appear on top of stuff
+
+- use STL for linked lists
+
+Looper Advance:
+---------------
+
+- parameters on pages can be set as being tracker controllable
+
+- make a 'tracker' style page (for longer tracks)
+	- loops can be turned on and off at any point
+	- tracker controllable parameters can be modified over time
+
+- make a new type of page sample triggers like a tracker instead of loops

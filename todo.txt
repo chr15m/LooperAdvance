@@ -1,11 +1,17 @@
 Looper Advance Live (1.0):
 --------------------------
 
-- make a python script to import tile sets from images
+- re-write the hardware access layer (replace krawall)
+	+ create Sample class which points to ROM sample
+	- create AudioLayer class which manages samples
 
-- nicer font (LCD font?)
+- allow for different volumes (Evans)
+
+- make a python script to import tile sets and palettes etc. from images
 
 - add nifty background to pages
+
+- original gb synths
 
 - interface changes:
 	- b button = browse notes (Jordan)
@@ -17,52 +23,11 @@ Looper Advance Live (1.0):
 	- letter selection not so buggy (specific set of characters)
 	- display current note position for this loop (Jordan)
 
-- allow for different panning positions
-
-- allow for different volumes (Evans)
-
-
-Looper Advance Live (2.0):
---------------------------
-
-- fix time stretching
-
 - creating new notes changes
 	- use settings of last note if less than loop length
 	- use same note 1 loop length ago
 
-- re-write the hardware access layer (replace krawall)
-
-- interface changes
-	- pause button = remember/recall current loop settings
-	- better letter selection (more intuitive?)
-
 - sample note one-shot
-
-- when adding a new loop, jumps to that loop
-
-- 'clone loop' button
-
-- fix to make bpm more correct
-
-- make load/save format more robust (data types stored)
-
-- make a windowing library to have sprite windows appear on top of stuff
-
-- use STL for linked lists
-
-
-Looper Advance:
----------------
-
-- parameters on pages can be set as being tracker controllable
-
-- make a 'tracker' style page (for longer tracks)
-	- loops can be turned on and off at any point
-	- tracker controllable parameters can be modified over time
-
-- make a new type of page sample triggers like a tracker instead of loops
-
 
 Done:
 -----

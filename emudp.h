@@ -13,6 +13,8 @@
 
 ******************************************************/
 
+#include "stdio.h"
+
 #ifndef GBA_DPRINT_H_
 #define GBA_DPRINT_H_
 

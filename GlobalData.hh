@@ -59,17 +59,17 @@ private:
 	u16 magic;
 	u8 zero;
 	u8 full;
-	
+
 public:
 	u32 counter;
 	u32 setbeat;	// this is the beat which is calculated by formula
 	u32 incbeat;	// this is the beta which increments ever time the counter flips over
-	
-	struct structSongData *songdata;
-	struct structSongData *currentsong;
-	struct structLoopData *currentloop;
-	struct structNoteData *currentnote;
-	
+		
+	structSongData *songdata;
+	structSongData *currentsong;
+	structLoopData *currentloop;
+	structNoteData *currentnote;
+
 	GlobalData();
 	void Init();
 	

@@ -15,6 +15,7 @@ EditBox::EditBox(u16 ix, u16 iy, u16 inwidth, Keys *inkeys): Widget (ix, iy, ink
 	width = inwidth;
 	blink = 0;	
 }
+
 EditBox::~EditBox()
 {
 	delete[] text;
@@ -23,9 +24,10 @@ EditBox::~EditBox()
 void EditBox::SetString(char *instring)
 {
 	// copy the incoming string over our text
-	strncpy(instring, text, width);
+	strncpy(text, instring, width);
 	// make sure last char is 0
-	instring[strlen(text)] = 0;
+	text[strlen(instring)] = NULL;
+	text[width] = NULL;
 }
 
 char *EditBox::GetString()

@@ -114,6 +114,7 @@ void *First::SaveButton(void *data)
 void *First::ChangeSongName(void *data)
 {
 	globals.SetName((char *)data);
+	RebuildSongList();
 	return NULL;
 }
 
@@ -176,6 +177,7 @@ void *First::AddLoopButton(void *data)
 void *First::BPM(void *data)
 {
 	debug("BPM: %d", *(u16 *)data);
+	globals.SetBPM(*(u16 *)data);
 	return NULL;
 }
 
@@ -199,12 +201,14 @@ void First::RebuildSongList()
 		traverse = traverse->next;
 	}
 	
+
 	// if we haven't selected one, select the first one
 	if (!selected)
 	{
 		selected = globals.songdata;
 	}
 	
+
 	if (selected)
 	{
 		// with the selected song

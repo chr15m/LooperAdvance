@@ -59,6 +59,7 @@ void GlobalData::NewSong()
 		debug("New song data at: 0x%lx", (u32)songdata);
 	}
 	
+	debug("currentsong: 0x%lx", (u32)currentsong);
 	currentsong->bpm = 180;
 	currentsong->name = new char[1];
 	currentsong->name[0] = '\0';
@@ -157,41 +158,16 @@ void GlobalData::SetSong(u16 whichsong)
 // change the name of the current song
 void GlobalData::SetName(char *inname)
 {
-
-/*	for( int i = 0; i < 20; ++i )
-	    {
-		char *pMem;
-		char *pants;
-		debug("pass %d", i);
-		debug("pMem: 0x%lx", (u32)pants);
-		pMem = new char[10];
-		debug("pMem: 0x%lx", (u32)pants);
-		delete[] pMem;
-		debug("pMem: 0x%lx", (u32)pants);
-	    }
-*/
-	debug("currentsong->name: 0x%lx", (u32)currentsong->name);
-	debug("currentsong->loops: 0x%lx", (u32)currentsong->loops);
-	debug("currentsong->bpm: %d", currentsong->bpm);
-	debug("currentsong->next: 0x%lx", (u32)currentsong->next);
 	if (currentsong)
 	{
 		// forget whatever data this char used to be attached to
 		delete[] currentsong->name;
-		debug("currentsong->name: 0x%lx", (u32)currentsong->name);
-		debug("currentsong->loops: 0x%lx", (u32)currentsong->loops);
-		debug("currentsong->bpm: %d", currentsong->bpm);
-		debug("currentsong->next: 0x%lx", (u32)currentsong->next);
 		// create a new array of characters one longer
 		currentsong->name = new char[strlen(inname) + 1];
-		debug("currentsong->name: 0x%lx", (u32)currentsong->name);
-		debug("currentsong->loops: 0x%lx", (u32)currentsong->loops);
-		debug("currentsong->bpm: %d", currentsong->bpm);
-		debug("currentsong->next: 0x%lx", (u32)currentsong->next);
 		// read in a string
-//		strncpy(currentsong->name, inname, strlen(inname));
+		strncpy(currentsong->name, inname, strlen(inname));
 		// make sure the last element is zero
-//		currentsong->name[strlen(inname)] = '\0';
+		currentsong->name[strlen(inname)] = '\0';
 		debug("set song name to %s", currentsong->name);
 	}
 }

@@ -306,8 +306,9 @@ void First::RebuildSongList()
 		debug("Setting Name='%s' BPM='%d'", globals.currentsong->name, globals.currentsong->bpm);
 		// with the selected song
 		sbSong->ChooseByValue((u32)globals.currentsong);
-		nbBPM->SetValue(globals.currentsong->bpm);
-		ebSongName->SetString(globals.currentsong->name);
+		Song(NULL);
+//		nbBPM->SetValue(globals.currentsong->bpm);
+//		ebSongName->SetString(globals.currentsong->name);
 	}
 }
 

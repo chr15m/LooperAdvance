@@ -1,8 +1,13 @@
 todo:
 - add nifty background to pages
-- make load/save format more robust & backwards compatible for future versions
 - implement time stretching
 - add font (when fenris has done it)
+
+version 2:
+- make load/save format more robust & backwards compatible for future versions (data types stored with data)
+- allow for different panning positions
+- more button functionality (b button = browse notes, start button = on/off, pause button = remember loop settings)
+- when creating new notes, use settings of last note if less than loop length, otherwise use same note 1 loop length ago
 
 done:
 + make a releasable sample bank

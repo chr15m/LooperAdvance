@@ -112,7 +112,9 @@ int main()
 	{
 		if (keys->TestKey(keyA) == pressed)
 		{
-			mysample->SetPosition(mysample->GetLength()/8 * 3);
+			debug("Length: %ld\n", mysample->GetLength());
+			debug("Pos: %ld\n", mysample->GetLength()/8 * (rotpan + 8));
+			mysample->SetPosition(mysample->GetLength()/8 * (rotpan + 8));
 			rotpan++;
 			if (rotpan == 9)
 				rotpan = -8;

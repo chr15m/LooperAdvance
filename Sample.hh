@@ -45,10 +45,12 @@ private:
 public:
 	Sample(SampleData *usedata);
 	~Sample();
-	
+
+	void SetData(SampleData *usedata);
+
 	void Play();
 	void Pause();
-	
+	void SetPlaying(bool);
 	void SetVelocity(u16 vel);
 	void SetPosition(u32 position);
 	void SetPanning(s8 pan);
@@ -57,33 +59,78 @@ public:
 	void SetLoopStart(u32 start);
 	void SetLoopEnd(u32 end);
 	
-	u32 GetPosition();
-	u32 GetLength();
-	char *GetName();
+	u32 GetPosition() __attribute__ ((section (".iwram")));
+	u32 GetLength() __attribute__ ((section (".iwram")));
+	char *GetName() __attribute__ ((section (".iwram")));
 	
 	bool IsPlaying();
 
+	inline bool MixDown(bool first, s8 *mixBufA, s8 *mixBufB, u16 buffSize)
+	{
+		register u16 chunkR = (nextchunk >> 8);
+		register u32 nextchunkR = nextchunk;
+		register u32 velocityR = velocity;
+		register u16 b;
+		register u32 lengthR = sampledata->length;
+		register u32 dataptr = (u32)sampledata->data;
+		
+		if (playing)
+		{
+			if (first)
+			{
+				for (b = 0; b < buffSize; b++)
+				{
+					chunkR = (nextchunkR += velocityR) >> 8;
+					// fill up our buffers byte by byte
+					mixBufA[b] = *((s8 *)dataptr + chunkR);
+					mixBufB[b] = *((s8 *)dataptr + chunkR);
+					if (chunkR >= lengthR - 1)
+						nextchunkR = 0;
+				}
+				first = false;
+			}
+			else
+			{
+				for (b = 0; b < buffSize; b++)
+				{
+					chunkR = (nextchunkR += velocityR) >> 8;
+					// fill up our buffers byte by byte
+					mixBufA[b] += *((s8 *)dataptr + chunkR);
+					mixBufB[b] += *((s8 *)dataptr + chunkR);
+					if (chunkR >= lengthR - 1)
+						nextchunkR = 0;
+				}
+			}
+			nextchunk = nextchunkR;
+		}
+		return first;
+	}
+	
+	//inline s8 GetByte(panVal pan) __attribute__ ((section (".iwram")));
 	inline s8 GetByte(panVal pan)
 	{
-		u32 hop = (nextchunk >> 8);
+		s8 returnchunk = 0;
+		//u32 hop = (nextchunk >> 8);
 		
 		if (playing)
 		{
 			// we're going to have to set this anyway (else)
 			nextchunk += velocity;
 			
-			if ((loopEnd) && (hop >= loopEnd || hop < loopStart))
+			/*if ((loopEnd) && (hop >= loopEnd || hop < loopStart))
 			{
 				nextchunk = loopStart << 8;
 			}
 			else if (hop >= sampledata->length - 1)
-			{
-				nextchunk = 0;
-			}
+			*/
+			//if (hop >= sampledata->length - 1)
+			//{
+			//	nextchunk = 0;
+			//}
+			
+			// calculate the mixed value to return
+			//returnchunk = *((s8 *)sampledata->data + (nextchunk >> 8));
 		}
-		
-		// calculate the mixed value to return
-		s8 returnchunk = *((s8 *)sampledata->data + (nextchunk >> 8)) >> volume >> panshift[pan];
 		
 		return returnchunk;
 	}

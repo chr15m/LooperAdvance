@@ -31,10 +31,14 @@
 #define __CLARKMIX_HH__
 
 // 1/25 sec buffer.
-#define BUFFER_SIZE 256
+
+// 547 - VCOUNT goes down slow (14)
+// 548 - VCOUNT goes up fast (one or two every count)
+
+#define BUFFER_SIZE 547
+
 // 16khz play back freq
 #define PLAYER_FREQ 0xFBFF
-#define SAMPLES_MIX  4
 
 #include "gba.h"
 #include "typedefs.h"
@@ -62,27 +66,27 @@ private:
 	
 	u16 bufferSwitch;
 	
-        // a pointer to a linked list of all the samples we're currently playing
-        structSampleList *samplelist;
-        // last one in the linked list
-        structSampleList *last;
+	// a pointer to a linked list of all the samples we're currently playing
+	structSampleList *samplelist;
+	// last one in the linked list
+	structSampleList *last;
 	
 	// internal stuff
-	void mixBuffers(void);
-	void switchBuffers(void);
+	void mixBuffers(void) __attribute__ ((section (".iwram")));
+	void switchBuffers(void) __attribute__ ((section (".iwram")));
 	
 public:
 	ClarkMix();
 
-	void Manage(Sample* newsample);
-	void Forget(Sample* which);
+	void Manage(Sample* newsample) __attribute__ ((section (".iwram")));
+	void Forget(Sample* which) __attribute__ ((section (".iwram")));
 
-	void InterruptProcess(void);
+	void InterruptProcess(void) __attribute__ ((section (".iwram")));
 };
 
 namespace Audio
 {
-        extern void AudioCallBack();
+        extern void AudioCallBack() __attribute__ ((section (".iwram")));
         extern ClarkMix *ClarkMixPtr;
 };
 

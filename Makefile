@@ -23,7 +23,6 @@ ifndef THEME
 	THEME = basic
 endif
 
-
 GNUDEBUG = -g -ggdb
 
 PLATFORM= arm-thumb-elf-
@@ -47,7 +46,7 @@ INCLUDE	= -I$(shell pwd)
 
 # what to build if we're building the whole program
 ifeq ($(TARGET),looper)
-	GAMEOBJECTS = Keys.o Page.o First.o Loop.o Widget.o Label.o EditBox.o SelectBox.o NumberBox.o GlobalData.o Sample.o ClarkMix.o charset.o samples/samples.o splash.o screens.o
+	GAMEOBJECTS = Keys.o Page.o First.o Loop.o Widget.o Label.o EditBox.o SelectBox.o NumberBox.o GlobalData.o Sample.text.iwram.o ClarkMix.text.iwram.o charset.o samples/samples.o splash.o screens.o
 endif
 
 ifeq ($(TARGET),audiotest)
@@ -72,12 +71,14 @@ endif
 
 ifdef RELEASE
 	#release build
-	CFLAGS 	= -O -Wall -ffreestanding -fomit-frame-pointer -funroll-loops -mcpu=arm7tdmi  $(INCLUDE) -DRAN_SEED=322187 -D_FIXED_NO_FLOATINGPOINT_ -D_VECTOR_NO_FLOATINGPOINT_ -DNO_DPRINT -DNO_COLOUR_PROFILING -DINTERWORK ${GNUDEBUG} -mthumb-interwork -msoft-float -mno-long-calls -DFIXED_USE_BIOS_DIVIDE ${MMFLAGS}
-	CXXFLAGS = -fno-rtti -fno-exceptions
+	#CFLAGS 	= -O2 -Wall -ffreestanding -fomit-frame-pointer -funroll-loops -finline-functions -mcpu=arm7tdmi $(INCLUDE) -DNO_DPRINT -DINTERWORK ${GNUDEBUG} -mthumb-interwork -msoft-float -mlong-calls -DFIXED_USE_BIOS_DIVIDE ${MMFLAGS}
+	CXXFLAGS = -fno-exceptions 
+	CFLAGS = -mthumb-interwork -O3 -mlong-calls -Wall $(INCLUDE) -DNO_DPRINT -msoft-float
 else
 	# debug build
-	CFLAGS 	= -Wall -O -ffreestanding -fomit-frame-pointer -funroll-loops -mcpu=arm7tdmi  $(INCLUDE) -DRAN_SEED=322187 -DUSE_VGBA -mthumb-interwork -msoft-float -mno-long-calls -DUSE_VBA -DINTERWORK -DFIXED_USE_BIOS_DIVIDE ${GNUDEBUG} ${BMDEBUG} ${TMDEBUG} ${SEDEBUG} ${WORLDDEBUG} ${OBJECTDEBUG} ${MMFLAGS}
-	CXXFLAGS = -fno-rtti
+	#CFLAGS 	= -Wall -O2 -ffreestanding -fomit-frame-pointer -funroll-loops -finline-functions -mcpu=arm7tdmi  $(INCLUDE) -DUSE_VGBA -mthumb-interwork -msoft-float -mlong-calls -DUSE_VBA -DINTERWORK -DFIXED_USE_BIOS_DIVIDE ${GNUDEBUG} ${MMFLAGS}
+	CXXFLAGS = 
+	CFLAGS = -mthumb-interwork -O3 -mlong-calls -Wall $(INCLUDE) -DUSE_VBA -DINTERWORK -msoft-float 
 endif
 
 ARCHIVE=$(shell echo `basename ${PWD}``date '+%Y%m%d'`)
@@ -106,8 +107,8 @@ all: $(TARGET).gba
 $(TARGET).gba: $(TARGET).elf
 	$(OBJCOPY) -O binary $(TARGET).elf $(TARGET).gba
 
-$(TARGET).elf: $(RESOURCES) $(TARGET).cc $(TARGET).o $(CRT) $(GAMEOBJECTS) $(SCREENOBJECTS) $(LDSCRIPT) Makefile
-	$(LD) $(LFLAGS) crt0.o $(TARGET).o $(GAMEOBJECTS) $(SCREENOBJECTS) -o $(TARGET).elf $(LIBS)
+$(TARGET).elf: $(RESOURCES) $(TARGET).cc $(TARGET).o $(CRT) $(GAMEOBJECTS) $(LDSCRIPT) Makefile
+	$(LD) $(LFLAGS) crt0.o $(TARGET).o $(GAMEOBJECTS) -o $(TARGET).elf $(LIBS)
 
 # audio stuff
 samples/samples.o: samples/samples.hh samples/samples.cc

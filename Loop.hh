@@ -20,8 +20,9 @@
 #include "Page.hh"
 #include "Widgets.hh"
 #include "samples/samples.hh"
-#include "krawall_fake.h"
 #include "screens.hh"
+#include "Sample.hh"
+#include "ClarkMix.hh"
 
 #ifndef _LOOP_HH_
 #define _LOOP_HH_
@@ -30,12 +31,14 @@ class Loop : public Page
 {
 private:
 	u32 lastbeat;
-	u16 handle;
 	u16 beat;
 	u16 numnotes;
 	ptrNoteData *notes;
 	char beatNumberText[4];
-	
+
+	Sample *sample;
+	ClarkMix *mixer;
+
 	structLoopData *data;
 	
 	EditBox *ebName;
@@ -94,7 +97,7 @@ private:
 	TCallback<Loop> cbNAction;
 	
 public:
-	Loop(Keys *inkeys, structLoopData *whichloop);
+	Loop(Keys *inkeys, structLoopData *whichloop, ClarkMix *imixer);
 	virtual ~Loop();
 	
 	void DoSwap();
@@ -126,7 +129,6 @@ public:
 	void AddNote();
 	void DelNote();
 	void UpdateNotes();
-	u32 GetSize();
 };
 
 #endif

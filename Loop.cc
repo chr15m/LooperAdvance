@@ -18,7 +18,7 @@
 
 #include "Loop.hh"
 
-Loop::Loop(Keys *inkeys, structLoopData *whichloop)
+Loop::Loop(Keys *inkeys, structLoopData *whichloop, ClarkMix *imixer)
 {
 	u16 i;
 	debug("Loop() init at 0x%lx", (u32)whichloop);
@@ -27,9 +27,9 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	data = whichloop;
 	
 	lastbeat = 0;
-	handle = 0;
 	numnotes = 0;
 	notes = NULL;
+	mixer = imixer;
 	
 	// set up the GUI
 	debug("Setting up GUI");
@@ -59,7 +59,7 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	lbNotes = new Label(2, 12, "Steps");
 	lbStep = new Label(2, 13, "Step");
 	
-	nbNote = new NumberBox(10, 13, 3, 1, 1, 8, inkeys);
+	nbNote = new NumberBox(10, 13, 3, 0, 0, 8, inkeys);
 	nbNBeat = new NumberBox(10, 15, 3, 0, 0, 8, inkeys, true);
 	nbNSwing = new NumberBox(10, 16, 3, 0, 255, 10, inkeys, true);
 	nbNPitch = new NumberBox(10, 17, 3, 0, 255, 12, inkeys);
@@ -201,6 +201,11 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	sbOn->Select();
 	selected = sbOn;
 	
+	// create a new sample and tell the mixer to start managing it
+	sample = new Sample((SampleData *)&samples[0]);
+	sample->Pause();
+	mixer->Manage(sample);
+	
 	globals.SetCurrentLoop(data);
 	
 	SampleChange(NULL);
@@ -213,9 +218,8 @@ Loop::~Loop()
 {
 	debug("Deleting loop");
 	
-	// stop playing our sample
-	if (kramHandleValid(handle))
-		kramStop(handle);
+	mixer->Forget(sample);
+	delete sample;
 	
 	delete sbOn;
 	delete nbPitch;
@@ -253,7 +257,7 @@ void *Loop::AddLoopButton(void *mydata)
 		debug("Inserting a new loop");
 		// make our next loop have a new loop
 		old = right;
-		right->left = new Loop(keys, globals.currentloop);
+		right->left = new Loop(keys, globals.currentloop, mixer);
 		right = right->left;
 		right->left = this;
 		right->right = old;
@@ -261,7 +265,7 @@ void *Loop::AddLoopButton(void *mydata)
 	else
 	{
 		debug("Appending a new loop");
-		right = new Loop(keys, globals.currentloop);
+		right = new Loop(keys, globals.currentloop, mixer);
 		right->left = this;
 	}
 	
@@ -458,12 +462,12 @@ void *Loop::Name(void *name)
 void *Loop::Reset(void *ignore)
 {
 	// (1000 * (tracks[selected].sample->len) / (tracks[selected].sample->freq) ) / (tracks[selected].bpl * T * 4 / 1000	
-	u32 p1 = globals.currentsong->bpm * GetSize();
+	u32 p1 = globals.currentsong->bpm * sample->GetLength();
 	u32 p2 = 2646 * nbBeats->GetValue();
 	u16 result = 0;
 	
 	debug("Bpm: %d", globals.currentsong->bpm);
-	debug("Size: %ld", GetSize());
+	debug("Size: %ld", sample->GetLength());
 	debug("Top: %ld", p1);
 	debug("Bottom: %ld", p2);
 
@@ -476,13 +480,6 @@ void *Loop::Reset(void *ignore)
 	return NULL;
 }
 
-// get the size of the current sample in samples
-u32 Loop::GetSize()
-{
-	u16 sample = sbSample->GetChoice();
-	return (u32)samples[sample].length;
-}
-
 // process the audio
 void Loop::DoProcess()
 {
@@ -491,7 +488,7 @@ void Loop::DoProcess()
 	diff = globals.counter - (globals.beat * 3600 / globals.currentsong->bpm);
 	
 	// are we playing a sample?
-	if ((sbSample->GetChoice() != 0xFF) && kramHandleValid(handle))
+	if ((sbSample->GetChoice() != 0xFF))
 	{
 		// if we have notes, then things are handled a bit differently
 		if (notes)
@@ -510,20 +507,20 @@ void Loop::DoProcess()
 			// if cont is not on
 			if (notes[beat]->noteEnd != note_continue && notes[beat]->noteEnd != note_feed)
 			{
-				debug("Pos: %d > %ld > %ld", kramGetPos(handle), (GetSize() / nbBeats->GetValue()) * (notes[beat]->offset - 1), (GetSize() / nbBeats->GetValue()) * (notes[beat]->offset));
-
+				debug("Pos: %ld > %ld > %ld", sample->GetPosition(), (sample->GetLength() / nbBeats->GetValue()) * (notes[beat]->offset - 1), (sample->GetLength() / nbBeats->GetValue()) * (notes[beat]->offset));
+				
 				// if cut is on, then set vol to zero
 				if (notes[beat]->noteEnd == note_stretch)
 				{
 					UpdateParametersNotes();
 				}
 				// are we past the end of this note, or before the beginning?
-				else if ((kramGetPos(handle) < (GetSize() / nbBeats->GetValue()) * (notes[beat]->offset - 1)) || (kramGetPos(handle) > (GetSize() / nbBeats->GetValue()) * (notes[beat]->offset)))
+				else if ((sample->GetPosition() < (sample->GetLength() / nbBeats->GetValue()) * (notes[beat]->offset - 1)) || (sample->GetPosition() > (sample->GetLength() / nbBeats->GetValue()) * (notes[beat]->offset)))
 				{
 					// if cut is on, then set vol to zero
 					if (notes[beat]->noteEnd == note_cut)
 					{
-						kramSetVol(handle, 0);
+						sample->Pause();
 					}
 					else if (notes[beat]->noteEnd == note_loop)
 					{
@@ -566,10 +563,12 @@ void Loop::DoSwap()
 // update the parameters of a specific loop
 void Loop::UpdateParameters()
 {
-	kramSetFreq(handle, ((nbPitch->GetValue() * 441) / 10));
-	kramSetPan(handle, (sbPan->GetChoice() * 128 - 64));
-	kramSetVol(handle, sbOn->GetChoice() * 64);
-	kramSetPos(handle, (GetSize() * (beat % nbBeats->GetValue()))/nbBeats->GetValue());
+	//sample->SetFrequency();
+	//kramSetFreq(handle, ((nbPitch->GetValue() * 441) / 10));
+	sample->SetVelocity(nbPitch->GetValue());
+	sample->SetPanning(sbPan->GetChoice() * 16 - 8);
+	sample->SetPlaying(sbOn->GetChoice());
+	sample->SetPosition((sample->GetLength() * (beat % nbBeats->GetValue()))/nbBeats->GetValue());
 }
 
 // update the parameters if we're using notes
@@ -587,29 +586,32 @@ void Loop::UpdateParametersNotes()
 		octave = (newpitch + 1) / 12;
 		note = newpitch % 12;
 		debug("Octave: %d, Note: %d", -(octave - 1), (12 + note) % 12);	
-		kramSetFreq(handle, (((nbPitch->GetValue() * frequency[(12 + note) % 12]) >> -(octave - 1)) / 1000));
+		//sample->SetFrequency();
+		// kramSetFreq(handle, (((nbPitch->GetValue() * frequency[(12 + note) % 12]) >> -(octave - 1)) / 1000));
+		sample->SetVelocity(nbPitch->GetValue() >> -(octave - 1));
 	}
 	else
 	{
 		octave = newpitch / 12;
 		note = newpitch % 12;
 		debug("Octave: %d, Note: %d", octave, note);
-		kramSetFreq(handle, (((nbPitch->GetValue() * frequency[note]) << octave) / 1000));
+		//sample->SetFrequency();
+		//kramSetFreq(handle, (((nbPitch->GetValue() * frequency[note]) << octave) / 1000));
+		sample->SetVelocity(nbPitch->GetValue() >> -(octave - 1));
 	}
 	
-	kramSetPan(handle, (sbPan->GetChoice() * 128 - 64));
+	sample->SetPanning(sbPan->GetChoice() * 16 - 8);
 	if (newpos)
 	{
-		kramSetVol(handle, sbOn->GetChoice() * 64);
-		kramSetPos(handle, (GetSize() * (newpos - 1))/nbBeats->GetValue());
+		sample->SetPlaying(sbOn->GetChoice());
+		sample->SetPosition((sample->GetLength() * (newpos - 1))/nbBeats->GetValue());
 	}
 	else
 	{
 		// if feed is on then don't stop the note at the end of the loop
 		if (notes[beat]->noteEnd != note_feed)
 		{
-			kramSetVol(handle, 0);
-			kramSetPos(handle, 0);
+			sample->Pause();
 		}
 	}
 }
@@ -625,16 +627,9 @@ void *Loop::SampleChange(void *whichsample)
 		Reset(NULL);
 	}
 	
-	if ((data->sample != 0xFF) && kramHandleValid(handle))
-	{
-		// first stop the current sample
-		kramStop(handle);
-	}
-	
-	handle = kramPlay(samples[data->sample], 1, 0);
+	sample->SetData((SampleData *)&samples[data->sample]);
 	UpdateParameters();
-	debug("New Handle: %d", handle);
-
+	
 	return NULL;
 }
 

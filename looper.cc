@@ -20,6 +20,7 @@
 
 #include "Loop.hh"
 #include "First.hh"
+#include "ClarkMix.hh"
 
 #include "splash.hh"
 #include "screens.hh"
@@ -66,7 +67,8 @@ int main()
 	//IntrTable[4] = kradInterrupt;
 	
 	Keys *keys = new Keys();
-	First *firstpage = new First(keys);
+	ClarkMix *mixer = new ClarkMix();
+	First *firstpage = new First(keys, mixer);
 	Page *selected = firstpage;
 	
 	// set up a nice screen mode

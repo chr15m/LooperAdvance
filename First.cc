@@ -16,9 +16,11 @@
 #include "First.hh"
 
 // initialise
-First::First(Keys *inkeys)
+First::First(Keys *inkeys, ClarkMix *imixer)
 {
 	debug("First page Constructor");
+	
+	mixer = imixer;
 	
 	lbSong = new Label(1, 1, "Song");
 	sbSong = new SelectBox(5, 1, 13, inkeys);
@@ -179,7 +181,7 @@ void *First::Song(void *data)
 	loop = newsong->loops;
 	while (loop)
 	{
-		newloop->right = new Loop(keys, loop);
+		newloop->right = new Loop(keys, loop, mixer);
 		debug("Creating new liveloop: 0x%lx", (u32)newloop->right);
 		newloop->right->left = newloop;
 		newloop = newloop->right;
@@ -252,7 +254,7 @@ void *First::AddLoopButton(void *data)
 		debug("Inserting a new loop");
 		// make our next loop have a new loop
 		old = right;
-		right->left = new Loop(keys, globals.currentloop);
+		right->left = new Loop(keys, globals.currentloop, mixer);
 		right = right->left;
 		right->left = this;
 		right->right = old;
@@ -260,7 +262,7 @@ void *First::AddLoopButton(void *data)
 	else
 	{
 		debug("Appending a new loop");
-		right = new Loop(keys, globals.currentloop);
+		right = new Loop(keys, globals.currentloop, mixer);
 		right->left = this;
 	}
 		

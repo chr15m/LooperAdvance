@@ -21,6 +21,7 @@
 #include "Loop.hh"
 #include "Widgets.hh"
 #include "GlobalData.hh"
+#include "ClarkMix.hh"
 #include "screens.hh"
 
 class First : public Page
@@ -37,6 +38,7 @@ private:
 	NumberBox *nbBPM;
 	SelectBox *sbAddLoopButton;
 	SelectBox *sbDelLoopButton;
+	ClarkMix *mixer;
 	
 	// callbacks
 	TCallback<First> cbSaveButton;
@@ -49,7 +51,7 @@ private:
 	TCallback<First> cbSongName;
 
 public:
-	First(Keys *inkeys);
+	First(Keys *inkeys, ClarkMix *imixer);
 	virtual ~First();
 
 	inline void DoProcess() {};

@@ -1,18 +1,3 @@
-@ MODIFIED FOR KRAWALL
-@ every change is marked with a @ KRAWALL-comment
-@
-@ the difference between the original Crt0 and this version is
-@ that when handling multiple interrupts a timer1-interrupt
-@ will never get interrupted by other interrupts.
-@ this is important because timer1 is connected to kradInterrupt
-@ and it must always be executed as fast as possible.
-@ if another (in the worst case time-consuming) interrupt interrupts
-@ kradInterrupt clicks might occur cause the DMA doesn't get reset
-@ in time.
-@
-@ $Id$
-@
-
 @********************************************************************
 @*   crt0.S v1.28 by Jeff Frohwein                                  *
 @********************************************************************
@@ -131,8 +116,8 @@
 @   of the interrupt stack so you have access to a larger stack.
 
 @ .equ __FastInterrupts, 1
-@ .equ __SingleInterrupts, 1
-.equ __MultipleInterrupts, 1
+.equ __SingleInterrupts, 1
+@ .equ __MultipleInterrupts, 1
 
 
 @ Uncomment the following line to disable sound and enter an
@@ -140,13 +125,13 @@
 @ must have the cart interrupt enabled for this to work and
 @ __ISRinIWRAM, above, must be enabled (not commented out.)
 
-.equ __HandleCartInterrupt, 1
+@ .equ __HandleCartInterrupt, 1
 
 @ The following prevents IRQ stack overflow by switching to
 @ System mode (User stack) when handling multiple interrupts.
 @ To force use of IRQ stack only, comment out the following line.
 
-.equ __SwitchToUserStack, 1
+ .equ __SwitchToUserStack, 1
 
 @ !!!! NOTE: THE COPY ROUTINES IN THIS FILE WORK ON 4 BYTE
 @ BOUNDARIES. YOUR LINKER SCRIPT MUST ALIGN SECTION STARTS
@@ -591,7 +576,6 @@ intr_main:
                                          @ an interrupt occurs)
         strh    r0, [r2, #0x8]
         and     r1, r3, r3, lsr #16      @ r1 = IE & IF
-        mov     r3, #0                   @ KRAWALL
         ldr     r12, =IntrTable
 
         ands    r0, r1, #1               @ V-blank interrupt
@@ -607,7 +591,6 @@ intr_main:
         bne     jump_intr
         add     r12,r12, #4
         ands    r0, r1, #0x10            @ Timer 1 interrupt
-        movne   r3, #1                   @ KRAWALL
         bne     jump_intr
         add     r12,r12, #4
         ands    r0, r1, #0x20            @ Timer 2 interrupt
@@ -644,21 +627,15 @@ loop:   bne     loop                     @ Infinite loop if cart removed
 jump_intr:
         strh    r0, [r2, #2]             @ Clear IF
 
-        cmp     r3, #0                   @ KRAWALL, should interrupts be allowed now? (r3 == 0)
-                                         @ (NO for Timer1, kradInterrupt must not be interrupted)
-
 @ Enable multiple interrupts & switch to system
 @ mode if __SwitchToUserStack is defined.
 
         mrs     r3, cpsr
    .ifdef __SwitchToUserStack
-        bicne   r3, r3, #0x1f            @ KRAWALL: do not enable IRQ
-        biceq   r3, r3, #0xdf            @ KRAWALL: ok, enable IRQ
-@        bic     r3, r3, #0xdf            @ \__
+        bic     r3, r3, #0xdf            @ \__
         orr     r3, r3, #0x1f            @ /  --> Enable IRQ & FIQ. Set CPU mode to System.
    .else
-        biceq   r3, r3, #0xc0            @ KRAWALL: ok, enable IRQ & FIQ
-@        bic     r3, r3, #0xc0            @ Enable IRQ & FIQ
+        bic     r3, r3, #0xc0            @ Enable IRQ & FIQ
    .endif
         msr     cpsr, r3
 

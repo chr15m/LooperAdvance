@@ -18,14 +18,34 @@ todo:
 - fix time stretching
 - fix to make bpm more correct
 
-- when creating new notes, use settings of last note if less than loop length, otherwise use same note 1 loop length ago
+- creating new notes changes
+	- use settings of last note if less than loop length
+	- use same note 1 loop length ago
 - when adding a new loop, jumps to that loop
 - 'clone loop' button
 
-- add font (when fenris has done it)
+- nicer font
 - add nifty background to pages
 
-- make load/save format more robust & backwards compatible for future versions (data types stored with data)
+- make load/save format more robust (data types stored)
+
+Feature Wishlist:
+
+- re-write the hardware access layer (replace krawall)
+
+- parameters on pages can be set as being tracker controllable
+
+- make a 'tracker' style page (for longer tracks)
+	- loops can be turned on and off at any point
+	- tracker controllable parameters can be modified over time
+
+- make a new type of page sample triggers like a tracker
+
+- make a python script to import pictures in to be used in the tile set
+
+- make a windowing library to have sprite windows appear on top of stuff
+
+- use STL for linked lists
 
 done:
 + make a releasable sample bank

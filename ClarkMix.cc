@@ -194,3 +194,62 @@ void ClarkMix::setPanning(s8 panning, u8 bank) {
 void ClarkMix::setPitch(u16 pitch, u8 bank) {
 	toMix[bank].pitch = pitch;
 }
+
+// add a sample to the linked list of samples to be managed
+void ClarkMix::Manage(Sample *newsample)
+{
+	newsample->SetChunkSize(BUFFER_SIZE);
+	/*
+	dprintf("%s\n", newsample->GetName());
+	dprintf("samples: 0x%lx\n", (u32)samplelist);
+	dprintf("last: 0x%lx\n", (u32)last);
+	*/
+	if (samplelist)
+	{
+		last->next = new structSampleList();
+		last->next->next = NULL;
+		last->next->sample = newsample;
+		last = last->next;
+	}
+	else
+	{
+		samplelist = new structSampleList();
+		samplelist->next = NULL;
+		samplelist->sample = newsample;
+		last = samplelist;
+	}
+	/*
+	dprintf("samplelist: 0x%lx\n", (u32)samplelist);
+	dprintf("last: 0x%lx\n", (u32)last);
+	dprintf("\n");
+	*/
+}
+
+// forget about a sample which we were managing (drop it from the linked list)
+void ClarkMix::Forget(Sample *which)
+{
+	structSampleList *traverse = samplelist;
+	structSampleList *tmpptr = NULL;
+	
+	while (traverse)
+	{
+		tmpptr = NULL;
+		// if it's our first one, delete the head
+		if (traverse->sample == which)
+		{
+			samplelist = traverse->next;
+			delete traverse;
+		}
+		// if it's the next on in line, pop it out
+		else if (traverse->next->sample == which)
+		{
+			tmpptr = traverse->next->next;
+			delete traverse->next;
+			traverse->next = tmpptr;
+			// if we've deleted the last one, make sure we reset last
+			if (traverse->next == NULL)
+				last = traverse;
+		}
+		traverse = traverse->next;
+	}
+}

@@ -61,7 +61,7 @@ ifeq ($(TARGET),audiolayertest)
 endif
 
 ifeq ($(TARGET),clarkinoutest)
-	GAMEOBJECTS = samples/samples.o ClarkMix.o
+	GAMEOBJECTS = samples/samples.o Sample.o ClarkMix.o
 endif
 
 ifdef RELEASE

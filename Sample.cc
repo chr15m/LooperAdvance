@@ -93,7 +93,7 @@ char *Sample::GetName()
 }
 
 // set the size of the array of data to be returned by GetChunk
-void Sample::SetChunkSize(u16 setsize)
+void Sample::SetChunkSize(u8 setsize)
 {
 	chunksize = setsize;
 }

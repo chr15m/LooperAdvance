@@ -29,14 +29,17 @@
 #ifndef __CLARKMIX_HH__
 #define __CLARKMIX_HH__
 
-#define BUFFER_SIZE 640   // 1/25 sec buffer.
-#define PLAYER_FREQ 0xFBFF // 16khz play back freq
+// 1/25 sec buffer.
+#define BUFFER_SIZE 640
+// 16khz play back freq
+#define PLAYER_FREQ 0xFBFF
 #define SAMPLES_MIX  4
 
 #include "gba.h"
 #include "typedefs.h"
 #include "directsound.h"
 #include "stdio.h"
+#include "Sample.hh"
 
 #define DONT_LOOP 0xFFFFFFFF
 
@@ -73,13 +76,21 @@ private:
 	struct sample toMix[SAMPLES_MIX];
 	
 	u16 bufferSwitch;
-
+	
+        // a pointer to a linked list of all the samples we're currently playing
+        structSampleList *samplelist;
+        // last one in the linked list
+        structSampleList *last;
+	
 	// internal stuff
 	void mixBuffers(void);
 	void switchBuffers(void);
 	
 public:
 	ClarkMix();
+
+	void Manage(Sample* newsample);
+	void Forget(Sample* which);
 
 	void InterruptProcess(void);
 

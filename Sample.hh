@@ -38,6 +38,10 @@ private:
 	s8 panning;
 	u32 frequency;
 	bool playing;
+
+	u32 loopStart;
+	u32 loopLength;
+
 public:
 	Sample(SampleData *usedata);
 	~Sample();
@@ -54,7 +58,7 @@ public:
 	u32 GetLength();
 	char *GetName();
 	
-	void SetChunkSize(u16 chunksize);
+	void SetChunkSize(u8 chunksize);
 	s8* GetChunk();
 };
 

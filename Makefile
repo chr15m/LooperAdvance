@@ -48,6 +48,10 @@ ifeq ($(TARGET),audiotest)
 	GAMEOBJECTS = samples/samples.o
 endif
 
+ifeq ($(TARGET),audiobuffertest)
+	GAMEOBJECTS = samples/samples.o
+endif
+
 ifeq ($(TARGET),sampletest)
 	GAMEOBJECTS = samples/samples.o Sample.o
 endif

@@ -1,3 +1,4 @@
+
 Looper Advance Live (1.0):
 --------------------------
 
@@ -15,6 +16,8 @@ Looper Advance Live (1.0):
 	- make a nice theme
 
 * RELEASE *
+
+- implement nanoloop sync code
 
 - interface changes:
 	- b button = browse notes (Jordan)

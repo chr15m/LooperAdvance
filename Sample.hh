@@ -24,13 +24,6 @@
 
 class Sample
 {
-
-typedef struct structSampleList
-{
-	Sample *sample;
-	structSampleList *next;
-};
-
 private:
 	// number of samples to jump forward each time
 	u16 chunksize;
@@ -64,4 +57,9 @@ public:
 	s8* GetChunk();
 };
 
+typedef struct structSampleList
+{
+	Sample *sample;
+	structSampleList *next;
+};
 #endif

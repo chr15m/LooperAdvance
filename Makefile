@@ -27,19 +27,21 @@ export LANGUAGE=en
 
 include Makefile.inc
 
+# default stuff
+
 %.text.iwram.o : %.text.iwram.c
 	$(CC) $(CFLAGS) -marm -c $< -o $@
 
-%.o : %.c
+%.o : %.c samples.h 
 	$(CC) $(CFLAGS) -mthumb -c $< -o $@
 
-%.o : %.s
+%.o : %.s samples.h
 	$(AS) $< -o $@
 
 %.text.iwram.o : %.text.iwram.cc
 	$(CXX) $(CFLAGS) $(CXXFLAGS) -marm -c $< -o $@
 	
-%.o : %.cc
+%.o : %.cc samples.h
 	$(CXX) $(CFLAGS) $(CXXFLAGS) -mthumb -c $< -o $@
 
 all: $(TARGET)
@@ -57,12 +59,14 @@ $(ELF): $(RESOURCES) main.cc $(GAMEOBJECTS) $(CRT) $(LDSCRIPT) Makefile
 samplenames.cc modules.h samples.h instruments.h samples.s instruments.s: samples.xm
 	../krawall/converter/converter.linux samples.xm
 	./samplenames.py
-	
+
+samples.xm: ../samples.xm
+	ln -s ../samples.xm
+
 clean:
 	rm -f *.elf *.gba *~ *.log *.bak *.o
 	rm -f `find -name \*.o -print -or -name \*~ -print`  
 	rm -f .depend .hdepend .sdepend
-	# audio stuff:
 	@touch `find`
 
 #build dependencies

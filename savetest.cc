@@ -64,7 +64,7 @@ int main()
 //	globals.NewSong();
 //	globals.NewLoop();
 //	globals.NewNote();
-	globals.DelSong();	
+//	globals.DelSong();	
 	globals.DelSong();	
 	globals.SaveSongs();
 	

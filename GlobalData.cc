@@ -35,7 +35,7 @@ void GlobalData::NewSong()
 	{
 		// initialise a fresh song
 		songdata = new structSongData;
-		currentsong = songdata;		
+		currentsong = songdata;	
 	}
 	
 	currentsong->bpm = 180;
@@ -65,10 +65,10 @@ void GlobalData::DelSong()
 			songdata = songtrav->next;
 			
 			// remember what we want to delete
-			deletesong = currentsong;
+			deletesong = currentsong;			
 			
-			// set the current song to be the new first song
-			currentsong = songdata;
+			// set the traveller to point at something sane
+			songtrav = songdata;
 		}
 		else
 		{
@@ -85,9 +85,6 @@ void GlobalData::DelSong()
 			
 			// unlink the song to be deleted
 			songtrav->next = songtrav->next->next;
-			
-			// set currentsong to be the loop we're on now
-			currentsong = songtrav;
 		}
 		
 		// delete all the loops associated with the deleted song
@@ -95,6 +92,9 @@ void GlobalData::DelSong()
 		{
 			DelLoop();
 		}
+
+		// set currentsong to be the song we're on now
+		currentsong = songtrav;
 		
 		// delete the name array associated
 		delete[] deletesong->name;
@@ -113,7 +113,16 @@ void GlobalData::DelSong()
 // choose a different song
 void GlobalData::SetSong(u16 whichsong)
 {
+	u16 counter=0;
+	structSongData *songtrav = songdata;
 	
+	while(counter != whichsong && songtrav)
+	{
+		songtrav = songtrav->next;
+		counter++;
+	}
+	
+	if (songtrav) currentsong = songtrav;
 }
 
 // change the name of the current song
@@ -126,29 +135,34 @@ void GlobalData::SetName(char *name)
 void GlobalData::NewLoop()
 {
 	// if we have some loops, then append it to the end
-	debug("Adding a loop.");
-	
-	if (currentsong->loops)
+	if (currentsong)
 	{
-		currentloop->next = new structLoopData;
-		currentloop = currentloop->next;
+		debug("Adding a loop.");
+		
+		if (currentsong->loops)
+		{
+			currentloop->next = new structLoopData;
+			currentloop = currentloop->next;
+		}
+		else
+		{
+			// initialise a fresh song
+			currentsong->loops = new structLoopData;
+			currentloop = currentsong->loops;
+		}
+		
+		// set defaults
+		currentloop->name = new char[1];
+		currentloop->name[0] = '\0';
+		currentloop->sample = 0;
+		currentloop->pan = false;
+		currentloop->pitch = 1000;
+		currentloop->divisions = 0;
+		currentloop->notes = NULL;
+		currentloop->next = NULL;
+		
+		debug("Loop addresses (base, current): 0x%x, 0x%x", currentsong->loops, currentloop);
 	}
-	else
-	{
-		// initialise a fresh song
-		currentsong->loops = new structLoopData;
-		currentloop = currentsong->loops;
-	}
-	
-	// set defaults
-	currentloop->name = new char[1];
-	currentloop->name[0] = '\0';
-	currentloop->sample = 0;
-	currentloop->pan = false;
-	currentloop->pitch = 1000;
-	currentloop->divisions = 0;
-	currentloop->notes = NULL;
-	currentloop->next = NULL;
 }
 
 // delete a loop from somewhere in this song
@@ -156,6 +170,8 @@ void GlobalData::DelLoop()
 {
 	structLoopData *looptrav = currentsong->loops;
 	structLoopData *deleteloop = NULL;
+	
+	debug("Loop addresses (base, current): 0x%x, 0x%x", looptrav, currentloop);
 	
 	// if we even have any loops
 	if (looptrav)
@@ -174,7 +190,7 @@ void GlobalData::DelLoop()
 			deleteloop = currentloop;
 			
 			// set the current loop to be the new first loop
-			currentloop = currentsong->loops;
+			currentloop = looptrav = currentsong->loops;
 		}
 		else
 		{
@@ -191,10 +207,9 @@ void GlobalData::DelLoop()
 			
 			// unlink the loop to be deleted
 			looptrav->next = looptrav->next->next;
-			
-			// set currentloop to be the loop we're on now
-			currentloop = looptrav;
 		}
+		
+		debug("Removing note data.");
 		
 		// delete all the notes associated with the unused loop
 		while (deleteloop->notes)
@@ -202,6 +217,10 @@ void GlobalData::DelLoop()
 			DelNote();
 		}
 
+		// now we can update our current song pointer
+		// set currentloop to be the loop we're on now
+		currentloop = looptrav;
+		
 		// delete the name array
 		delete[] deleteloop->name;
 
@@ -212,28 +231,31 @@ void GlobalData::DelLoop()
 
 // add another note to this loop
 void GlobalData::NewNote()
-{
+{	
 	// if we have some loops, then append it to the end
-	debug("Adding a note.");
-	
-	if (currentloop->notes)
+	if (currentloop)
 	{
-		currentnote->next = new structNoteData;
-		currentnote = currentnote->next;
+		debug("Adding a note.");
+		
+		if (currentloop->notes)
+		{
+			currentnote->next = new structNoteData;
+			currentnote = currentnote->next;
+		}
+		else
+		{
+			// initialise a fresh song
+			currentloop->notes = new structNoteData;
+			currentnote = currentloop->notes;
+		}
+		
+		// set defaults
+		currentnote->noteEnd = note_cut;
+		currentnote->offset = 0;
+		currentnote->pitch = 0;
+		currentnote->swing = 0;
+		currentnote->next = NULL;
 	}
-	else
-	{
-		// initialise a fresh song
-		currentloop->notes = new structNoteData;
-		currentnote = currentloop->notes;
-	}
-	
-	// set defaults
-	currentnote->noteEnd = note_cut;
-	currentnote->offset = 0;
-	currentnote->pitch = 0;
-	currentnote->swing = 0;
-	currentnote->next = NULL;
 }
 
 // delete a note from the end of this loop
@@ -246,14 +268,25 @@ void GlobalData::DelNote()
 	{
 		debug("Deleting a note.");
 		
-		// find the last note
-		while (notetrav->next)
+		if (notetrav->next)
 		{
-			notetrav = notetrav->next;
+			// find the last note
+			while (notetrav->next->next)
+			{
+				notetrav = notetrav->next;
+			}
+			
+			// the next note is the last one so delete it
+			delete notetrav->next;
+			
+			// set the current ref to NULL so we know we're the end of the list
+			notetrav->next = NULL;
 		}
-		
-		// we're on the last note now, delete it
-		delete notetrav;
+		else
+		{
+			// tell this loop we don't currently have any notes
+			currentloop->notes = NULL;
+		}
 	}
 }
 
@@ -293,6 +326,8 @@ void GlobalData::SaveSongs()
 		looptrav = songtrav->loops;
 		while (looptrav)
 		{
+			debug("Writing loop.");
+			
 			// write the loop name
 			WriteString(looptrav->name);
 			// write the sample number
@@ -310,6 +345,8 @@ void GlobalData::SaveSongs()
 			{
 				while (notetrav)
 				{
+					debug("Writing note.");
+					
 					// write the note end action;
 					WriteNumber(notetrav->noteEnd, sizeof(u8));
 					// write the beat offset
@@ -451,13 +488,11 @@ void GlobalData::LoadSongs()
 				
 				while (!CheckMagic())
 				{
-					debug("Raw: %x", *(u16 *)(SRAM + offset));
-					
 					// create a new note
 					debug("Creating a new note struct.");
 					NewNote();
 					
-					debug("Reading basic  data.");
+					debug("Reading basic note data.");
 					
 					// write the note end action;
 					ReadNumber(&currentnote->noteEnd, sizeof(u8));

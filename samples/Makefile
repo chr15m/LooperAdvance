@@ -16,10 +16,15 @@
 
 WAVS	= $(shell ls *.wav)
 RAWS	= $(WAVS:.wav=.raw)
-
-samples.cc samples.hh : $(RAWS) buildsamplebank.py
-	./buildsamplebank.py $(RAWS)
 	
 %.raw : %.wav
 	@echo converting $<
-	@sox $< -r 22050 -c 1 -u -b $@
+	@sox $< -r 22050 -c 1 -s -b $@
+
+samples.cc samples.hh : $(RAWS) buildsamplebank.py
+	@./buildsamplebank.py $(RAWS)
+
+clean:
+	rm -rf *.raw
+	rm -rf samples.cc samples.hh samples.o
+	

@@ -42,7 +42,7 @@ private:
 	NumberBox *nbNPitch;
 	NumberBox *nbNSwing;
 	SelectBox *sbNAction;
-
+	
 	// notes labels
 	Label *lbNotes;
 	Label *lbNote;
@@ -86,8 +86,11 @@ public:
 	void *AddLoopButton(void *data);
 	void *DelLoopButton(void *data);
 	structLoopData *GetAddress();
+
 	void UpdateWidgets();
 	void UpdateParameters();
+	void UpdateParametersNotes();
+
 	void *Name(void *name);
 	void *Pitch(void *number);
 	void *Pan(void *number);

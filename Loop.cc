@@ -425,7 +425,6 @@ u32 Loop::GetSize()
 void Loop::DoProcess()
 {
 //	u32 diff = 0;
-	beat = globals.beat % nbBeats->GetValue();
 	
 	// are we playing a sample?
 	if ((sbSample->GetChoice() != 0xFF) && kramHandleValid(handle))
@@ -433,12 +432,12 @@ void Loop::DoProcess()
 		// if we have notes, then things are handled a bit differently
 		if (notes)
 		{
+			beat = globals.beat % numnotes;
 			// figure out if we're at the swing point
 			// diff = globals.beat *  - counter;
 //			if (diff == notes[beat]->swing)
 //			{
 				// update the parameters
-//				UpdateParameters();
 //			}
 				
 			// if cont is not on
@@ -446,9 +445,16 @@ void Loop::DoProcess()
 					// if cut is on, then set vol to zero
 					// if loop is on, then 
 						// if bounce is on then i do'nt konw what the hell to do
+			// otherwise it's simple style parameter updates
+			if (beat != lastbeat)
+			{
+				UpdateParametersNotes();
+				lastbeat = beat;
+			}
 		}
 		else
 		{
+			beat = globals.beat % nbBeats->GetValue();
 			// otherwise it's simple style parameter updates
 			if (beat != lastbeat)
 			{
@@ -474,6 +480,40 @@ void Loop::UpdateParameters()
 	kramSetPan(handle, (sbPan->GetChoice() * 128 - 64));
 	kramSetVol(handle, sbOn->GetChoice() * 64);
 	kramSetPos(handle, (GetSize() * (beat % nbBeats->GetValue()))/nbBeats->GetValue());
+}
+
+// update the parameters if we're using notes
+void Loop::UpdateParametersNotes()
+{
+	u16 newpos = notes[beat]->offset;
+	debug("Note lookup: %d", beat);
+	
+	s16 octave = notes[beat]->pitch / 12;
+	octave -= 10;
+	s16 note = notes[beat]->pitch % 12;
+	
+	debug("Octave: %d, Note: %d", octave, note);
+	
+	if (octave >= 0)
+	{
+		kramSetFreq(handle, (((nbPitch->GetValue() * frequency[note]) << octave) / 1000));	
+	}
+	else
+	{
+		kramSetFreq(handle, (((nbPitch->GetValue() * frequency[note]) >> -octave) / 1000));				
+	}
+	
+	kramSetPan(handle, (sbPan->GetChoice() * 128 - 64));
+	if (newpos)
+	{
+		kramSetVol(handle, sbOn->GetChoice() * 64);
+		kramSetPos(handle, (GetSize() * (newpos - 1))/nbBeats->GetValue());
+	}
+	else
+	{
+		kramSetVol(handle, 0);
+		kramSetPos(handle, 0);
+	}
 }
 
 // what to do when they select a different sample
@@ -531,7 +571,7 @@ void *Loop::NBeat(void *number)
 {
 	u8 offset = (u8)*(u32 *)number;
 	notes[nbNote->GetValue()]->offset = offset;
-	debug("note %d (0x%lx) Beat = %d", nbNote->GetValue(), notes[nbNote->GetValue()], notes[nbNote->GetValue()]->offset);
+	debug("note %d (0x%lx) Beat = %d", nbNote->GetValue(), (u32)notes[nbNote->GetValue()], notes[nbNote->GetValue()]->offset);
 	return NULL;
 }
 
@@ -539,7 +579,7 @@ void *Loop::NSwing(void *number)
 {
 	u8 swing = (u8)*(u32 *)number;
 	notes[nbNote->GetValue()]->swing = swing;
-	debug("note %d (0x%lx) swing = %d", nbNote->GetValue(), notes[nbNote->GetValue()], notes[nbNote->GetValue()]->swing);
+	debug("note %d (0x%lx) swing = %d", nbNote->GetValue(), (u32)notes[nbNote->GetValue()], notes[nbNote->GetValue()]->swing);
 	return NULL;
 }
 
@@ -547,13 +587,13 @@ void *Loop::NPitch(void *number)
 {
 	u8 pitch = (u8)*(u32 *)number;
 	notes[nbNote->GetValue()]->pitch = pitch;
-	debug("note %d (0x%lx) pitch = %d", nbNote->GetValue(), notes[nbNote->GetValue()], notes[nbNote->GetValue()]->pitch);
+	debug("note %d (0x%lx) pitch = %d", nbNote->GetValue(), (u32)notes[nbNote->GetValue()], notes[nbNote->GetValue()]->pitch);
 	return NULL;
 }
 
 void *Loop::NAction(void *which)
 {
 	notes[nbNote->GetValue()]->noteEnd = (noteType)((structSelectList *)which)->value;
-	debug("note %d (0x%lx) action = %d", nbNote->GetValue(), notes[nbNote->GetValue()], notes[nbNote->GetValue()]->noteEnd);
+	debug("note %d (0x%lx) action = %d", nbNote->GetValue(), (u32)notes[nbNote->GetValue()], notes[nbNote->GetValue()]->noteEnd);
 	return NULL;
 }

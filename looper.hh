@@ -11,5 +11,8 @@
 #ifndef _LOOPER_HH_
 #define _LOOPER_HH_ 1
 
+extern const u32 frequency[12];
+
+
 #endif  // _LOOPER_HH_
 

@@ -69,4 +69,5 @@ inline void BlankScreen()
 	u32 zero=52;
 	DMACopy((void*)&zero, (u16*)&VideoBuffer[0x7C00], 0x400, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_FIXED | DMA_DEST_INCREMENT);
 }
+
 #endif //_HELPERS_H_

@@ -63,6 +63,7 @@ private:
 	s8* mixBufA;
 	s8* mixBufB;
 	
+	bool mix;
 	u16 bufferSwitch;
 	
 	// a pointer to a linked list of all the samples we're currently playing
@@ -76,6 +77,9 @@ private:
 	
 public:
 	ClarkMix();
+	
+	// this does the actual work of mixing fresh buffers full
+	void DoMix(void) __attribute__ ((section (".iwram")));
 
 	void Manage(Sample* newsample) __attribute__ ((section (".iwram")));
 	void Forget(Sample* which) __attribute__ ((section (".iwram")));

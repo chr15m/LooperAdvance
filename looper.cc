@@ -67,9 +67,6 @@ int main()
 	//IntrTable[4] = kradInterrupt;
 	
 	Keys *keys = new Keys();
-	ClarkMix *mixer = new ClarkMix();
-	First *firstpage = new First(keys, mixer);
-	Page *selected = firstpage;
 	
 	// set up a nice screen mode
 	REG_DISPCNT = SCREENMODE0 | BG3_ENABLE | BG2_ENABLE | BG1_ENABLE | BG0_ENABLE;
@@ -122,7 +119,11 @@ int main()
 	REG_BG1VOFS = 0;
 	
 	// CST_ROM0_1ST_3WAIT | CST_ROM0_2ND_1WAIT | CST_PREFETCH_ENABLE
-	REG_WSCNT = ( 5 << 2 ) | ( 1 << 14 );	// set rom-timing
+	//REG_WSCNT = ( 5 << 2 ) | ( 1 << 14 );	// set rom-timing
+	
+	ClarkMix *mixer = new ClarkMix();
+	First *firstpage = new First(keys, mixer);
+	Page *selected = firstpage;
 	
 	while (1)
 	{
@@ -136,6 +137,10 @@ int main()
 		// automatically cascades all pages and processes them
 		firstpage->Process();
 		
+		// mix our buffer if it needs it
+		mixer->DoMix();
+		
+		debug("Loop");
 		//SetBG(0, 0, 0);
 		
 		// this is vsync
@@ -146,5 +151,8 @@ int main()
 		BlankScreen();
 		selected = selected->Cycle();
 		selected->Draw();
+		
+		// mix our buffer if it needs it
+		mixer->DoMix();
 	}
 }

@@ -87,6 +87,7 @@ ClarkMix::ClarkMix(void)
 	REG_IE = INT_TM1;
 	
 	REG_IME = INT_ENABLE;
+	mix = false;
 } 
 
 // swap which buffer we're using
@@ -116,13 +117,15 @@ void ClarkMix::mixBuffers(void)
 	SetBG(31, 0, 0);
 	u16 b;
 	structSampleList *traverse = samplelist;
+	s8 *myBufA = mixBufA;
+	s8 *myBufB = mixBufB;
 	
 	// for some reason DMA copy doesn't work in here
 	// if all our samples are off, we still want to zero out the buffer
 	for (b = 0; b < (BUFFER_SIZE>>2); b++)
 	{
-		*((u32 *)mixBufA + b) = 0;
-		*((u32 *)mixBufB + b) = 0;
+		*((u32 *)myBufA + b) = 0;
+		*((u32 *)myBufB + b) = 0;
 	}
 	
 	// fill the buffer with nice fellows
@@ -131,7 +134,7 @@ void ClarkMix::mixBuffers(void)
 	{
 		debugloop("Mixing sample: %s\n", traverse->sample->GetName());
 		
-		traverse->sample->MixDown(mixBufA, mixBufB, BUFFER_SIZE);
+		traverse->sample->MixDown(myBufA, myBufB, BUFFER_SIZE);
 		traverse = traverse->next;
 	}
 	
@@ -151,10 +154,22 @@ void ClarkMix::InterruptProcess(void)
 	
 	REG_DMA1CNT = ENABLE_DMA | START_ON_FIFO_EMPTY | DMA_32 | DMA_REPEAT ;
 	REG_DMA2CNT = ENABLE_DMA | START_ON_FIFO_EMPTY | DMA_32 | DMA_REPEAT ;
-	
-	mixBuffers();
+
+	// are we already trying to mix? (oh no!) (shouldn't mix unless we interrupt our own mixing process)
+	DoMix();
+	mix = true;
 	
         REG_IF |= REG_IF;
+}
+
+void ClarkMix::DoMix()
+{
+	if (mix)
+	{
+		mix = false;
+		mixBuffers();
+		debug("Mix");
+	}
 }
 
 // add a sample to the linked list of samples to be managed

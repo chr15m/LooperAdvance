@@ -160,17 +160,16 @@ void Sample::MixDown(s8 *mixBufA, s8 *mixBufB, u16 buffSize)
 		
 		// note, we lost a fair bit of precision doing all this
 		// but it's only in chunks of four samples, so it's not so bad.
-		buffSize = b;
-		do
+		for (b=0; b<buffSize; b++)
 		{
 			chunkR = (nextchunk += velocity) >> 8;
 			// fill up our buffers byte by byte
 			val = dataptr[chunkR] >> volume;
-			mixBufA[buffSize - b] += val >> panshift[0];
-			mixBufB[buffSize - b] += val >> panshift[1];
+			mixBufA[b] += val >> panshift[0];
+			mixBufB[b] += val >> panshift[1];
 			
 			if ((u32)chunkR >= end)
 				nextchunk = 0;
-		} while(--b);
+		}
 	}
 }

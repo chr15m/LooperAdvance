@@ -6,12 +6,17 @@ todo:
 version 2:
 - make load/save format more robust & backwards compatible for future versions (data types stored with data)
 - allow for different panning positions
+- allow for different volumes
 - interface changes:
 	- b button = browse notes
 	- start button = on/off
 	- pause button = remember/recall current loop settings
 	- rename beat and note to slice and step
 	- display current note position for this loop
+	- holding down button on select & number boxes will scroll
+	- option to 'wrap' on select/number boxes
+	- better letter selection (more intuitive?)
+	- note numbering should line up on specific note selector
 - when creating new notes, use settings of last note if less than loop length, otherwise use same note 1 loop length ago
 - when adding a new loop, jumps to that loop
 - 'clone loop' button

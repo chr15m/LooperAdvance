@@ -1,5 +1,6 @@
 // this version of clarkmix has been heavily modified for use in Looper Advance
 // (it's been translated to C++ and the core mixing routine has been re-written)
+// thanks to Mathieu Brethes for the original code
 
 // $Id$
 
@@ -112,32 +113,55 @@ void ClarkMix::switchBuffers(void)
 // mix together everything down into the buffers
 void ClarkMix::mixBuffers(void)
 {
+	SetBG(0, 0, 0);
 	u16 b;
-	s8 *sampledata;
 	structSampleList *traverse = samplelist;
-
-	// TODO: turn this into a DMA
-	for (b = 0; b < BUFFER_SIZE; b++)
-	{
-		// we need to start filling the buffer at either 0 or chunksize (depending on where the pointer is)
-		mixBufA[b] = 0;
-		mixBufB[b] = 0;
-	}
-
+	bool initBuffer = true;
+	
 	// fill the buffer with nice fellows
+	// for every sample in our list of managed samples
 	while (traverse)
 	{
-		//dprintf("Mixing sample: %s\n", traverse->sample->GetName());
-		sampledata = traverse->sample->GetChunk();
+		debugloop("Mixing sample: %s\n", traverse->sample->GetName());
 		
-		for (b = 0; b < BUFFER_SIZE; b++)
+		if (initBuffer)
 		{
-			// we need to start filling the buffer at either 0 or chunksize (depending on where the pointer is)
-			mixBufA[b] += sampledata[b];
-			mixBufB[b] += sampledata[b];
+			if (traverse->sample->IsPlaying())
+			{
+				for (b = 0; b < BUFFER_SIZE; b++)
+				{
+					// fill up our buffers byte by byte
+					mixBufA[b] = (traverse->sample->GetByte(pan_left) >> 1);
+					mixBufB[b] = (traverse->sample->GetByte(pan_right) >> 1);
+				}
+				initBuffer = false;
+			}
+		}
+		else
+		{
+			if (traverse->sample->IsPlaying())
+			{
+				for (b = 0; b < BUFFER_SIZE; b++)
+				{
+					// fill up our buffers byte by byte
+					mixBufA[b] += (traverse->sample->GetByte(pan_left) >> 1);
+					mixBufB[b] += (traverse->sample->GetByte(pan_right) >> 1);
+				}
+			}
 		}
 		traverse = traverse->next;
 	}
+	
+	// if all our samples are off, we still want to zero out the buffer
+	if (initBuffer)
+	{
+		for (b = 0; b < BUFFER_SIZE; b++)
+		{
+			mixBufA[b] = 0;
+			mixBufB[b] = 0;
+		}
+	}
+	SetBG(31, 31, 31);
 }
 
 // Interrupt process
@@ -147,24 +171,21 @@ void ClarkMix::InterruptProcess(void)
 	REG_DMA2CNT &= ~ENABLE_DMA;
 
 	switchBuffers();
+	
 	REG_DMA1SAD = (u32)curBufA;
 	REG_DMA2SAD = (u32)curBufB;
- 
+	
 	REG_DMA1CNT = ENABLE_DMA | START_ON_FIFO_EMPTY | DMA_32 | DMA_REPEAT ;
 	REG_DMA2CNT = ENABLE_DMA | START_ON_FIFO_EMPTY | DMA_32 | DMA_REPEAT ;
+	
 	mixBuffers();
+	
         REG_IF |= REG_IF;
 }
 
 // add a sample to the linked list of samples to be managed
 void ClarkMix::Manage(Sample *newsample)
 {
-	newsample->SetChunkSize(BUFFER_SIZE);
-	/*
-	dprintf("%s\n", newsample->GetName());
-	dprintf("samples: 0x%lx\n", (u32)samplelist);
-	dprintf("last: 0x%lx\n", (u32)last);
-	*/
 	if (samplelist)
 	{
 		last->next = new structSampleList();
@@ -179,11 +200,10 @@ void ClarkMix::Manage(Sample *newsample)
 		samplelist->sample = newsample;
 		last = samplelist;
 	}
-	/*
-	dprintf("samplelist: 0x%lx\n", (u32)samplelist);
-	dprintf("last: 0x%lx\n", (u32)last);
-	dprintf("\n");
-	*/
+	
+	debug("%s\n", newsample->GetName());
+	debug("samples: 0x%lx\n", (u32)samplelist);
+	debug("last: 0x%lx\n", (u32)last);
 }
 
 // forget about a sample which we were managing (drop it from the linked list)

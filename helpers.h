@@ -94,9 +94,9 @@ inline void BlankScreen(u16 screenbase=TEXT_BG)
 	DMACopy((void*)&zero, (u16*)&VideoBuffer[screenbase], 0x400, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_FIXED | DMA_DEST_INCREMENT);
 }
 
-inline void bzero(void *memstart, u32 size)
+/*inline void bzero(void *memstart, u32 size)
 {
 	u32 zero=0;
 	DMACopy((void*)&zero, (void *)memstart, size, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_FIXED | DMA_DEST_INCREMENT);	
-}
+}*/
 #endif //_HELPERS_H_

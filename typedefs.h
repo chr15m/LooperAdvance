@@ -37,4 +37,6 @@ typedef unsigned short hword;
 typedef unsigned long word;
 typedef void (*fp)(void);   //this is the definition you will find in gba.h.  It is just declaring fp to represent a pointer to a function
 
+typedef enum {pan_left = 0, pan_right = 1} panVal;
+
 #endif

@@ -14,6 +14,7 @@
 ******************************************************/
 
 #include "ClarkMix.hh"
+#include "Keys.hh"
 #include "samples/samples.hh"
 
 // IntrTable for crt0
@@ -39,17 +40,89 @@ void (*IntrTable[])() =
 
 int main()
 {
+	Keys *keys = new Keys();
 	ClarkMix *mixer = new ClarkMix();
 	Sample *mysample = new Sample((SampleData *)&samples[0]);
 	Sample *other = new Sample((SampleData *)&samples[1]);
+	s8 rotpan=0;
 	
-	mixer->Manage(mysample);
 	mixer->Manage(other);
+	mixer->Manage(mysample);
 	
-	mysample->SetFrequency((u32)BUFFER_SIZE << 8);
+	// check keys
+        while (keys->TestKey(keyA) != pressed)
+        {
+                keys->Jiffie();
+        }
+        keys->Jiffie();
+
+	dprintf("Turning off volume of mysample\n");
+	// try volume tests
+	mysample->SetVolume(0);
+	dprintf("---\n");
+	
+	// check keys
+        while (keys->TestKey(keyA) != pressed)
+        {
+                keys->Jiffie();
+        }
+        keys->Jiffie();
+
+	dprintf("Turning on volume of mysample\n");
+	dprintf("Setting Panning of samples to opposite ends\n");
+	// try volume tests
+	mysample->SetVolume(7);
+	mysample->SetPanning(3);
+	other->SetPanning(-3);
+	dprintf("---\n");
+
+	// check keys
+        while (keys->TestKey(keyA) != pressed)
+        {
+                keys->Jiffie();
+        }
+        keys->Jiffie();
+
+	dprintf("Pausing mysample\n");
+	dprintf("setting other sample loop start to %ld\n", other->GetLength()/8 * 1);
+	dprintf("setting other sample loop end to %ld\n", other->GetLength()/8 * 2);
+	// try volume tests
+	mysample->Pause();
+	other->SetLoopStart(other->GetLength()/8 * 1);
+	other->SetLoopEnd(other->GetLength()/8 * 2);
+	dprintf("---\n");
+	
+	// check keys
+        while (keys->TestKey(keyA) != pressed)
+        {
+                keys->Jiffie();
+        }
+        keys->Jiffie();
+
+	dprintf("Unpausing mysample\n");
+	dprintf("Pausing other sample\n");
+	dprintf("setting mysample velocity to half\n");
+	// try volume tests
+	mysample->Play();
+	other->Pause();
+	mysample->SetVelocity(128);
+	dprintf("---\n");
+	
+	while(1)
+	{
+		if (keys->TestKey(keyA) == pressed)
+		{
+			mysample->SetPosition(mysample->GetLength()/8 * 3);
+			rotpan++;
+			if (rotpan == 9)
+				rotpan = -8;
+			mysample->SetPanning(rotpan);
+			dprintf("Reset loop, pan: %d\n", rotpan);
+		}
+		keys->Jiffie();
+	}
+
 	
 	//mixer->playSample((u32)samples[0].data, (u32)&samples[0].data + samples[0].length, (u32)samples[0].data, (u32)samples[0].data + samples[0].length, 250, 0, 0, 0x0100);
 	//mixer->playSample((u32)samples[1].data, (u32)&samples[1].data + samples[1].length, (u32)samples[1].data, (u32)samples[1].data + samples[1].length, 250, 0, 1, 0x0100);
-
-	while(1);
 }

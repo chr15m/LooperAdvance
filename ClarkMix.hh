@@ -1,5 +1,6 @@
 // this version of clarkmix has been heavily modified for use in Looper Advance
 // (it's been translated to C++ and the core mixing routine has been re-written)
+// thanks to Mathieu Brethes for the original code
 
 // $Id$
 
@@ -39,26 +40,12 @@
 #include "typedefs.h"
 #include "directsound.h"
 #include "stdio.h"
+#include "helpers.h"
 #include "Sample.hh"
 
 #define DONT_LOOP 0xFFFFFFFF
 
 extern void (*IntrTable[])();
-
-// memory structure for a given sample.
-struct sample {
-    u32 data_begin;
-    u32 data_end;
-    u32 loop_begin;
-    u32 loop_end;
-    u8 volume_a; // internal use
-    u8 volume_b; // internal use
-    u8 volume;
-    s8 panning;
-    u8 in_loop;
-    u16 pitch;   // used for FP 8.8 calculations. 0x100 is 1.
-    u32 data_offset; // used for fixed-point 24.8 calculations.
-};
 
 class ClarkMix
 {

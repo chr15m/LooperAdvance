@@ -21,16 +21,17 @@ Sample::Sample(SampleData *usedata)
 {
 	sampledata = usedata;
 	
-	// default to four for the GBA
-	chunksize = 4;
 	// start of the sample
 	nextchunk = 0;
 	
 	// initial settings
-	volume = 255;
+	volume = 0;
 	panning = 0;
-	frequency = 256;
-	playing = false;
+	velocity = 256;
+	playing = true;
+	
+	loopStart = 0;
+	loopEnd = 0;
 }
 
 Sample::~Sample()
@@ -50,10 +51,10 @@ void Sample::Pause()
 	playing = false;
 }
 
-// set the frequency of this sample
-void Sample::SetFrequency(u16 freq)
+// set the velocity of this sample
+void Sample::SetVelocity(u16 vel)
 {
-	frequency = freq;
+	velocity = vel;
 }
 
 // set the position of this sample
@@ -62,16 +63,30 @@ void Sample::SetPosition(u32 position)
 	nextchunk = position;
 }
 
+// set the loop end position
+void Sample::SetLoopStart(u32 start)
+{
+	loopStart = start;
+}
+
+void Sample::SetLoopEnd(u32 end)
+{
+	loopEnd = end;
+}
+
 // set the panning position of this sample
 void Sample::SetPanning(s8 pan)
 {
-	panning = pan;
+	panning = pan;	
 }
 
 // set the volume of this sample
 void Sample::SetVolume(u8 vol)
 {
-	volume = vol;
+	if (vol > 7)
+		vol = 7;
+	
+	volume = 7 - vol;
 }
 
 // get the current playback position of this sample
@@ -92,29 +107,24 @@ char *Sample::GetName()
 	return sampledata->name;
 }
 
-// set the size of the array of data to be returned by GetChunk
-void Sample::SetChunkSize(u8 setsize)
+// this function serves two purposes
+// firstly it tells the mixer whether to bother continuing with this sample
+// secondly it sets up how much to shift the pan register by
+bool Sample::IsPlaying()
 {
-	chunksize = setsize;
-}
-
-// this is used by audio layer to get the next chunk of audio to be sent to the hardware
-s8 *Sample::GetChunk()
-{
-//	dprintf("Returning %d bytes.\n", chunksize);
+	panshift[0] = 0;
+	panshift[1] = 0;
 	
-	// use only 24 bits of next chunk
-	s8 *returnchunk = (s8 *)sampledata->data + (nextchunk);
+	if (panning < 0)
+	{
+		panshift[0] = - panning;
+	}
+	else if (panning > 0)
+	{
+		panshift[1] = panning;
+	}
 	
-	//nextchunk += chunksize;
-	// go forward at our frequency
-	nextchunk += 256;
-	//dprintf("chunk: %ld\n", (nextchunk >> 8));
+	debug("Pan shift: %d %d\n", panshift[0], panshift[1]);
 	
-	// NOTE: because our chunksize is only 4 on the gba it's not really an issue reading past the end of the data
-	// however if this is going to be ported to other platforms, this should be adressed with a temporary buffer
-	if ((nextchunk) > sampledata->length)
-		nextchunk = 0;
-	
-	return returnchunk;
+	return playing;
 }

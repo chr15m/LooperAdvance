@@ -67,41 +67,35 @@ public:
 
 	inline bool MixDown(bool first, s8 *mixBufA, s8 *mixBufB, u16 buffSize)
 	{
-		register u16 chunkR = (nextchunk >> 8);
-		register u32 nextchunkR = nextchunk;
-		register u32 velocityR = velocity;
-		register u16 b;
-		register u32 lengthR = sampledata->length;
-		register u32 dataptr = (u32)sampledata->data;
+		u16 chunkR = (nextchunk >> 8);
+		u32 nextchunkR = nextchunk;
+		u32 velocityR = velocity;
+		u16 b;
+		u32 lengthR = sampledata->length;
+		u32 dataptr = (u32)sampledata->data;
 		
 		if (playing)
 		{
-			if (first)
+			for (b = 0; b < buffSize; b++)
 			{
-				for (b = 0; b < buffSize; b++)
+				chunkR = (nextchunkR += velocityR) >> 8;
+				if (first)
 				{
-					chunkR = (nextchunkR += velocityR) >> 8;
 					// fill up our buffers byte by byte
 					mixBufA[b] = *((s8 *)dataptr + chunkR);
 					mixBufB[b] = *((s8 *)dataptr + chunkR);
-					if (chunkR >= lengthR - 1)
-						nextchunkR = 0;
 				}
-				first = false;
-			}
-			else
-			{
-				for (b = 0; b < buffSize; b++)
+				else
 				{
-					chunkR = (nextchunkR += velocityR) >> 8;
 					// fill up our buffers byte by byte
 					mixBufA[b] += *((s8 *)dataptr + chunkR);
 					mixBufB[b] += *((s8 *)dataptr + chunkR);
-					if (chunkR >= lengthR - 1)
-						nextchunkR = 0;
 				}
 			}
+			if (chunkR >= lengthR - 1)
+				nextchunkR = 0;
 			nextchunk = nextchunkR;
+			first = false;
 		}
 		return first;
 	}

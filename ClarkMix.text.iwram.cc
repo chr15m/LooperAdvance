@@ -76,21 +76,12 @@ ClarkMix::ClarkMix(void)
 	// set the direct sound output control register
 	REG_SOUNDCNT_H = DSA_OUTPUT_TO_LEFT | DSA_TIMER0 | DSA_FIFO_RESET | DSB_OUTPUT_TO_RIGHT | DSB_TIMER0 | DSB_FIFO_RESET ;
 	
-	sizeswitch[0] = BUFF_LARGE;
-	sizeswitch[1] = BUFF_SMALL;
-	
-	buffersize[0] = BUFF_LARGE;
-	buffersize[1] = BUFF_LARGE;
-	
-	// let's wait for the start of the vcount before going
-	//while (REG_VCOUNT < 200);
-	
 	REG_DMA1CNT = ENABLE_DMA | START_ON_FIFO_EMPTY | DMA_32 | DMA_REPEAT ;
 	REG_DMA2CNT = ENABLE_DMA | START_ON_FIFO_EMPTY | DMA_32 | DMA_REPEAT ;
 	
 	REG_TM0CNT = TIMER_ENABLE;
 	
-	REG_TM1D = 0xFFFF - (BUFF_LARGE);
+	REG_TM1D = 0xFFFF - (BUFFER_SIZE);
 	REG_TM1CNT = TIMER_ENABLE | TIMER_IRQ_ENABLE | TIMER_CASCADE;
 	
 	REG_IE = INT_TM1;
@@ -101,7 +92,7 @@ ClarkMix::ClarkMix(void)
 // swap which buffer we're using
 void ClarkMix::switchBuffers(void)
 {
-	if (bufferSwitch == 0)
+    if (bufferSwitch == 0)
 	{
 		curBufA = fifoAbuf1;
 		curBufB = fifoBbuf1;
@@ -117,15 +108,12 @@ void ClarkMix::switchBuffers(void)
 		mixBufB = fifoBbuf1;
 		bufferSwitch = 0;
 	}
-	
-	// make sure the trigger is happening in a sane range not to interrupt on-screen activity
-	//buffersize[bufferSwitch] = sizeswitch[REG_VCOUNT == BUFF_UP];
 }
 
 // mix together everything down into the buffers
 void ClarkMix::mixBuffers(void)
 {
-	SetBG(31, 0, 0);
+	SetBG(0, 0, 0);
 	u16 b;
 	structSampleList *traverse = samplelist;
 	bool initBuffer = true;
@@ -143,14 +131,13 @@ void ClarkMix::mixBuffers(void)
 	// if all our samples are off, we still want to zero out the buffer
 	if (initBuffer)
 	{
-		// First initialize buffer to 0 - 32-bit operation is faster.
 		for (b = 0 ; b < BUFFER_SIZE ; b += 4)
 		{
 			*(u32*)(mixBufA + b) = 0;
 			*(u32*)(mixBufB + b) = 0;
 		}
 	}
-	SetBG(SCREENS_BG_R, SCREENS_BG_B, SCREENS_BG_G);
+	SetBG(31, 31, 31);
 }
 
 // Interrupt process
@@ -158,9 +145,7 @@ void ClarkMix::InterruptProcess(void)
 {
  	REG_DMA1CNT &= ~ENABLE_DMA;
 	REG_DMA2CNT &= ~ENABLE_DMA;
-	
-	// REG_TM1D = 0xFFFF - buffersize[bufferSwitch];
-	
+
 	switchBuffers();
 	
 	REG_DMA1SAD = (u32)curBufA;
@@ -169,14 +154,7 @@ void ClarkMix::InterruptProcess(void)
 	REG_DMA1CNT = ENABLE_DMA | START_ON_FIFO_EMPTY | DMA_32 | DMA_REPEAT ;
 	REG_DMA2CNT = ENABLE_DMA | START_ON_FIFO_EMPTY | DMA_32 | DMA_REPEAT ;
 	
-	debug("VCount started mix: %d\n", REG_VCOUNT);
-	
 	mixBuffers();
-	
-	debug("VCount finished mix: %d\n", REG_VCOUNT);
-	debug("currentBufferA: 0x%lx\n", (u32)curBufA);
-	debug("currentBufferB: 0x%lx\n", (u32)curBufB);
-	//debug("buffersize: %d\n", buffersize[bufferSwitch]);
 	
         REG_IF |= REG_IF;
 }
@@ -229,7 +207,6 @@ void ClarkMix::Forget(Sample *which)
 			if (traverse->next == NULL)
 				last = traverse;
 		}
-		// nice linked list traversal variable name chris!!
 		traverse = traverse->next;
 	}
 }

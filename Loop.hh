@@ -31,10 +31,30 @@ private:
 	SelectBox *sbReset;
 	SelectBox *sbAddLoopButton;
 	SelectBox *sbDelLoopButton;
+	NumberBox *nbSwing;
 	
+	// notes interface
+	NumberBox *nbNotes;
+	NumberBox *nbNote;
+	NumberBox *nbNBeat;
+	NumberBox *nbNPitch;
+	NumberBox *nbNSwing;
+	SelectBox *sbNAction;
+
+	// notes labels
+	Label *lbNotes;
+	Label *lbNote;
+	Label *lbNSwing;
+	Label *lbNBeat;
+	Label *lbNAction;
+	Label *lbNPitch;
+	
+	// other labels
 	Label *lbPitch;
 	Label *lbBeats;
+	Label *lbSwing;
 	
+	// callbacks
 	TCallback<Loop> cbAddLoopButton;
 	TCallback<Loop> cbDelLoopButton;
 	
@@ -44,6 +64,15 @@ private:
 	TCallback<Loop> cbBeats;
 	TCallback<Loop> cbReset;
 	TCallback<Loop> cbSample;
+	TCallback<Loop> cbSwing;
+	
+	// note action callbacks
+	TCallback<Loop> cbNotes;
+	TCallback<Loop> cbNote;
+	TCallback<Loop> cbNBeat;
+	TCallback<Loop> cbNPitch;
+	TCallback<Loop> cbNSwing;
+	TCallback<Loop> cbNAction;
 	
 public:
 	Loop(Keys *inkeys, structLoopData *whichloop);
@@ -63,6 +92,7 @@ public:
 	void *Beats(void *number);
 	void *SampleChange(void *whichsample);
 	void *Reset(void *ignore);
+	void *Notes(void *number);
 	u32 GetSize();	
 };
 

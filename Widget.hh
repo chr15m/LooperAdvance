@@ -19,7 +19,7 @@ protected:
 	Widget *up;
 	Widget *down;	// these are the transition vectors (tell what other UI widgets are to which side)
 	u16 x,y;	// where on the screen
-	char text[16];	// hold the text to print to screen
+	char text[MAXSTRING];	// hold the text to print to screen
 
 public:
 	Widget(u16 x, u16 y, Keys *inkeys);

@@ -3,7 +3,7 @@
 EditBox::EditBox(u16 ix, u16 iy, u16 inwidth, Keys *inkeys): Widget (ix, iy, inkeys)
 {
 	u16 i;
-	text = new char[width + 1];
+	value = new char[width + 1];
 	
 	// fill with nulls
 	for (i=0; i<width + 1; i++)
@@ -18,21 +18,21 @@ EditBox::EditBox(u16 ix, u16 iy, u16 inwidth, Keys *inkeys): Widget (ix, iy, ink
 
 EditBox::~EditBox()
 {
-	delete[] text;
+	delete[] value;
 }
 
 void EditBox::SetString(char *instring)
 {
 	// copy the incoming string over our text
-	strncpy(text, instring, width);
+	strncpy(value, instring, width);
 	// make sure last char is 0
-	text[strlen(instring)] = NULL;
-	text[width] = NULL;
+	value[strlen(instring)] = NULL;
+	value[width] = NULL;
 }
 
 char *EditBox::GetString()
 {
-	return text;
+	return value;
 }
 
 Widget *EditBox::Process()
@@ -45,16 +45,16 @@ Widget *EditBox::Process()
 		// what keys was pressed ey
 		if (keys->TestKey(keyUp) == pressed)
 		{
-			if (text[which] == 0)
+			if (value[which] == 0)
 			{
-				text[which] = 96;
+				value[which] = 96;
 			}
-			text[which] += 1;
+			value[which] += 1;
 			changed = true;
 		}
 		if (keys->TestKey(keyDown) == pressed)
 		{
-			text[which] -= 1;
+			value[which] -= 1;
 			changed = true;
 		}
 		
@@ -96,7 +96,7 @@ Widget *EditBox::Process()
 	{
 		if (callback)
 		{
-			callback->Execute(text);
+			callback->Execute(value);
 		}
 	}
 	
@@ -111,24 +111,22 @@ Widget *EditBox::Process()
 }
 
 void EditBox::Draw()
-{	
-	char outxt[width+2];
-	
-	sprintf(outxt, "[%-*s]", width, text);
+{		
+	sprintf(text, "[%-*s]", width, value);
 	
 	if (selected)
 	{
 		// make the selected character toggle between _ and the letter
 		if (!(blink / 10 % 2))
-			outxt[which + 1] = '_';
+			text[which + 1] = '_';
 		
-		hprintf(x, y, outxt);
+		hprintf(x, y, text);
 		selected = false;
 		blink++;
 	}
 	else
 	{
-		cprintf(x, y, outxt);
+		cprintf(x, y, text);
 		blink = 0;
 	}
 }

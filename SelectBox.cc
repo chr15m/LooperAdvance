@@ -201,22 +201,24 @@ void SelectBox::Draw()
 		sprintf(text, "[%-*s]", width, which->text);
 	else
 		sprintf(text, "[%-*s]", width, "");
-	
-	// if the timer is started, keep counting down
-	if (timer==1)
-	{	
-		if (maxtime)
-			Choose(0);
 		
-		if (callback)
-		{
-			debug("Making callback");
-			callback->Execute(which);
-		}
-	}
-	
 	if (timer)
+	{
+		// if the timer is started, keep counting down
+		if (timer==1)
+		{	
+			if (maxtime)
+				Choose(0);
+			
+			if (callback)
+			{
+				debug("Making callback");
+				callback->Execute(which);
+			}
+		}
+
 		timer--;
+	}
 	
 	if (selected)
 	{

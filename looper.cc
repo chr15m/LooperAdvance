@@ -76,9 +76,9 @@ int main()
 	
 	while (1)
 	{
-		SetBG(10, 10, 10);
 		// this is zerosync
-		while(REG_VCOUNT);
+		SetBG(0, 0, 10);
+
 		// figure out all our latest song positions
 		globals.Tick();
 		// calculate audio stuff
@@ -91,8 +91,9 @@ int main()
 		SetBG(0, 0, 0);
 		
 		// this is vsync
+		// try and fit the drawing stuff into the off-screen sync
 		while(REG_VCOUNT != 160);
-
+		SetBG(10, 0, 0);
 		// do all the display shit in here
 		BlankScreen();
 		selected = selected->Cycle();

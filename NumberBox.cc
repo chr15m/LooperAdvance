@@ -78,12 +78,8 @@ Widget *NumberBox::Process()
 
 void NumberBox::Draw()
 {	
-	char fmtstr[16];
+	sprintf(text, "[%*d]", width, value);
 	
-	sprintf(fmtstr, "[%%%dd]", width);
-	sprintf(text, fmtstr, value);
-//	dprintf(text);
-//	dprintf("\n");
 	if (selected)
 	{
 		hprintf(x, y, text);

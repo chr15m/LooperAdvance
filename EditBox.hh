@@ -8,7 +8,7 @@
 class EditBox : public Widget
 {
 private:
-	char *text;	// an array of the characters themselves
+	char *value;	// an array of the characters themselves
 	u8 which;	// currently selected character
 	u8 width;	// how many characters wide it is
 	u8 blink;	// this counter helps us to blink

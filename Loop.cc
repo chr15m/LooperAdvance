@@ -21,7 +21,7 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	ebName = new EditBox(10, 1, 10, inkeys);
 	sbOn = new SelectBox(10, 3, 3, inkeys);
 	debug("sbOn: 0x%lx", sbOn);
-	nbPitch = new NumberBox(10, 4, 10, 1, 100000, 100, inkeys);
+	nbPitch = new NumberBox(10, 4, 6, 1, 100000, 100, inkeys);
 	sbPan = new SelectBox(10, 5, 5, inkeys);
 	nbBeats = new NumberBox(10, 6, 2, 1, 64, 8, inkeys);
 	sbReset = new SelectBox(10, 7, 5, inkeys);
@@ -29,10 +29,32 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	
 	lbPitch = new Label(2, 4, "Pitch");
 	lbBeats = new Label(2, 6, "Beats");
+	lbSwing = new Label(2, 10, "Swing");
 	
+	nbSwing = new NumberBox(10, 10, 3, 0, 999, 20, inkeys);
+	// note stuff
+	
+	// notes interface
+	nbNotes = new NumberBox(10, 12, 3, 0, 256, 4, inkeys);
+	lbNotes = new Label(2, 12, "Notes");
+	
+/*	NumberBox *nbNote;
+	NumberBox *nbNBeat;
+	NumberBox *nbNPitch;
+	NumberBox *nbNSwing;
+	SelectBox *sbNAction;
+
+	// notes labels
+	Label *lbNote;
+	Label *lbNSwing;
+	Label *lbNBeat;
+	Label *lbNAction;
+	Label *lbNPitch;
+*/
+
 	sbAddLoopButton = new SelectBox(18, 17, 8, inkeys);
 	sbDelLoopButton = new SelectBox(18, 18, 8, inkeys);
-	
+
 	AddWidget(ebName);
 	AddWidget(sbOn);
 	AddWidget(nbPitch);
@@ -42,6 +64,11 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	AddWidget(lbBeats);
 	AddWidget(sbReset);
 	AddWidget(sbSample);
+	AddWidget(lbSwing);
+	AddWidget(nbSwing);
+	AddWidget(nbNotes);
+	AddWidget(lbNotes);
+
 	AddWidget(sbAddLoopButton);
 	AddWidget(sbDelLoopButton);
 	
@@ -51,8 +78,11 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	sbPan->SetTransitions(NULL, NULL, nbPitch, nbBeats);
 	nbBeats->SetTransitions(NULL, NULL, sbPan, sbReset);
 	sbReset->SetTransitions(NULL, NULL, nbBeats, sbSample);
-	sbSample->SetTransitions(NULL, NULL, sbReset, sbAddLoopButton);
-	sbAddLoopButton->SetTransitions(NULL, NULL, sbSample, sbDelLoopButton);
+	sbSample->SetTransitions(NULL, NULL, sbReset, nbSwing);
+	nbSwing->SetTransitions(NULL, NULL, sbSample, nbNotes);
+	nbNotes->SetTransitions(NULL, NULL, nbSwing, sbAddLoopButton);
+
+	sbAddLoopButton->SetTransitions(NULL, NULL, nbNotes, sbDelLoopButton);
 	sbDelLoopButton->SetTransitions(NULL, NULL, sbAddLoopButton, NULL);
 	
 	debug("Filling sample list");
@@ -87,6 +117,9 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	cbBeats.MakeCallback(this, &Loop::Beats);
 	nbBeats->UseCallBack(&cbBeats);
 	
+	cbNotes.MakeCallback(this, &Loop::Notes);
+	nbNotes->UseCallBack(&cbNotes);
+
 	sbReset->AutoOff();
 	sbReset->NewChoice("Reset", 0);
 	sbReset->NewChoice("-----", 1);
@@ -126,8 +159,12 @@ Loop::~Loop()
 	delete nbBeats;
 	delete sbReset;
 	delete sbSample;
+	delete nbSwing;
 	delete lbBeats;
 	delete lbPitch;
+	delete lbSwing;
+	delete nbNotes;
+	delete lbNotes;
 	delete sbAddLoopButton;
 	delete sbDelLoopButton;
 }
@@ -218,10 +255,22 @@ void *Loop::Pan(void *pan)
 	return NULL;
 }
 
-// if they change the name of this loop
-void *Loop::Name(void *pan)
+// if they change the number of loops that belong to this one
+void *Loop::Notes(void *number)
 {
-	globals.SetLoopName((char *)pan);
+	// if the number of loops is less than the amount of loops we actually have
+	// then delete notes until we have the right number
+	// if it's greater, than add notes until we have the right number
+	
+	
+	
+	return NULL;
+}
+
+// if they change the name of this loop
+void *Loop::Name(void *name)
+{
+	globals.SetLoopName((char *)name);
 	return NULL;
 }
 

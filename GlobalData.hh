@@ -109,5 +109,6 @@ public:
 };
 
 extern GlobalData globals;
+extern const u32 frequency[12];
 
 #endif // GLOBALDATA

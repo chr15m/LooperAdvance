@@ -2,6 +2,8 @@
 
 #include "GlobalData.hh"
 
+const u32 frequency[12] = {44100, 46722, 49500, 52444, 55562, 58866, 62366, 66075, 70004, 74167, 78577, 52424};
+
 GlobalData::GlobalData()
 {
 	Init();

@@ -40,6 +40,19 @@ typedef __attribute__ ((packed)) struct {
 	signed char  	data[1];
 } Sample;
 
+typedef __attribute__ ((packed)) struct {
+	unsigned long 	loopLength;
+	unsigned char*	end;
+	unsigned long		c2Freq;
+	signed char		fineTune;
+	signed char		relativeNote;
+	unsigned char  	volDefault;
+	signed char		panDefault;
+	unsigned char  	loop;
+	unsigned char		hq;
+	signed char*		data;
+} SubSample;
+
 /*typedef struct {
 	unsigned long	__private0;
 	unsigned char*	__private1;

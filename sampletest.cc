@@ -35,10 +35,10 @@ int main()
 	// perhaps my understanding of c++ isn't so strong :]
 	globals.Init();
 
+	SubSample hello;
+	Sample *ptr;
 	u16 i=0;
 	Keys *keys = new Keys();
-	First *firstpage = new First(keys);
-	Page *selected = firstpage;
 	
 	// set up a nice screen mode
 	REG_DISPCNT = SCREENMODE0 | BG1_ENABLE; // 4 | ( 1 << 10 );
@@ -72,8 +72,24 @@ int main()
 	REG_WSCNT = ( 5 << 2 ) | ( 1 << 14 );	// set rom-timing
 	
 	// initialize krawall
-	kragInit( KRAG_INIT_STEREO );					// init krawall
-	
+	kragInit( KRAG_INIT_STEREO );	// init krawall
+	i=0;
+	// i = kramPlay( samples[ SAMPLE_BLOCROCK ], 10, 0 );
+
+	ptr = (Sample *)samples[SAMPLE_BLOCROCK];
+	hello.data = ptr->data;
+	hello.hq = ptr->hq;
+	hello.loop = ptr->loop;
+	hello.panDefault = ptr->panDefault;
+	hello.volDefault = ptr->volDefault;
+	hello.relativeNote = ptr->relativeNote;
+	hello.fineTune = ptr->fineTune;
+	hello.c2Freq = ptr->c2Freq;
+	hello.end = ptr->end;
+	hello.loopLength = ptr->loopLength;
+
+	i = kramPlayExt( (const Sample*)&hello, 0, i, 22050, 64, 0 );
+
 	while (1)
 	{
 		// this is zerosync
@@ -85,8 +101,11 @@ int main()
 		kramWorker();
 		// check keys
 		keys->Jiffie();
-		// automatically cascades all pages and processes them
-		firstpage->Process();
+		
+		if (keys->TestKey(keyB) == pressed)
+		{
+			debug("key b pressed");
+		}
 		
 		SetBG(0, 0, 0);
 		
@@ -96,7 +115,5 @@ int main()
 		SetBG(10, 0, 0);
 		// do all the display shit in here
 		BlankScreen();
-		selected = selected->Cycle();
-		selected->Draw();
 	}
 }

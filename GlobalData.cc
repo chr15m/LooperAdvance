@@ -285,7 +285,7 @@ void GlobalData::DelLoop()
 			deleteloop = currentloop;
 			
 			// set the current loop to be the new first loop
-			currentloop = looptrav = currentsong->loops;
+			looptrav = currentsong->loops;
 		}
 		else
 		{
@@ -307,7 +307,7 @@ void GlobalData::DelLoop()
 		debug("Removing note data.");
 		
 		// delete all the notes associated with the unused loop
-		while (deleteloop->notes)
+		while (currentloop->notes)
 		{
 			DelNote();
 		}
@@ -380,6 +380,7 @@ void GlobalData::DelNote()
 			}
 			
 			// the next note is the last one so delete it
+			debug("Deleting 0x%lx", notetrav->next);
 			delete notetrav->next;
 			
 			// set the current ref to NULL so we know we're the end of the list
@@ -388,11 +389,15 @@ void GlobalData::DelNote()
 		else
 		{
 			// tell this loop we don't currently have any notes
+			debug("Deleting 0x%lx", notetrav);
 			delete notetrav;
 			currentloop->notes = NULL;
 			currentnote = NULL;
 		}
 	}
+	debug("Currentnote: 0x%lx", currentnote);
+	debug("First: 0x%lx", currentloop->notes);
+	debug("Next: 0x%lx", currentnote->next);
 }
 
 // set the beats per minute of this song
@@ -502,12 +507,15 @@ void GlobalData::WriteString(char *instr)
 // reads a string from the SRAM
 void GlobalData::ReadString(char **instr)
 {
+	char buffer[16];
+
 	// forget whatever data this char used to be attached to
 	delete[] *instr;
 	// create a new array of characters one longer
 	*instr = new char[strlen((char *)(SRAM + offset)) + 1];
 	// read in a string
-	strncpy(*instr, (const char*)(SRAM + offset), strlen((char *)SRAM + offset));
+	bcopy((char *)(SRAM + offset), buffer, 15);
+	strncpy(*instr, buffer, strlen(buffer));
 	// make sure the last element is zero
 	*instr[strlen(*instr)] = 0;
 	offset += strlen(*instr) + 1;
@@ -517,6 +525,7 @@ void GlobalData::ReadString(char **instr)
 // writes a number into the SRAM
 void GlobalData::WriteNumber(u32 number, u8 size)
 {
+	
 	// write a bunch
 	bcopy((const char*)&number, (char *)(SRAM + offset), size);
 	offset += size;

@@ -153,6 +153,8 @@ void *First::Song(void *data)
 	}
 	Page *newloop=this;
 
+	REG_IME = 0; // disable interrupts
+
 	// remove all our old live loops
 	DelLiveLoops();
 	// change currentsong variable to point at the newly selected song
@@ -178,6 +180,9 @@ void *First::Song(void *data)
 	
 	debug("Right page = 0x%lx", right);
 	debug("New song loaded successfully");
+	
+	REG_IME = 1; // enable interrupts
+
 	return NULL;
 }
 

@@ -39,8 +39,8 @@ private:
 public:
 	Loop(Keys *inkeys);
 	virtual ~Loop();
-	void Draw();
-	void Process();
+	void DoDraw();
+	void DoProcess();
 
 	void ResetLoopPitch();
 	u32 GetSize();

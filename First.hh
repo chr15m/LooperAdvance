@@ -31,6 +31,7 @@ private:
 	TCallback<First> cbDelButton;
 	TCallback<First> cbAddLoopButton;
 	TCallback<First> cbBPM;
+	TCallback<First> cbSongName;
 
 public:
 	First(Keys *inkeys);
@@ -43,6 +44,7 @@ public:
 	
 	// if they've clicked the save button, then save
 	void *SaveButton(void *data);
+	void *ChangeSongName(void *data);
 	void *Song(void *data);
 	void *NewButton(void *data);
 	void *DelButton(void *data);

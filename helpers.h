@@ -13,6 +13,17 @@
 	dprintf("\n");	\
 })
 
+#define debugloop(format, args...) ;
+
+#ifdef DEBUGLOOPS
+#define debugloop(format, args...)	\
+({	\
+	dprintf("[%s - %s()] Line %d: ", __FILE__, __FUNCTION__, __LINE__);	\
+	dprintf(format, ## args);	\
+	dprintf("\n");	\
+})
+#endif
+
 #define cprintf(x, y, format, args...)  ({    \
 	u16 i=0;\
         char buffer[CHAR_BUFFER_SIZE];                                    \

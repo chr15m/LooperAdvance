@@ -75,12 +75,16 @@ First::First(Keys *inkeys)
 	cbBPM.MakeCallback(this, &First::BPM);
 	nbBPM->UseCallBack(&cbBPM);
 	
+	cbSongName.MakeCallback(this, &First::ChangeSongName);
+	ebSongName->UseCallBack(&cbSongName);
 	
 	UseKeys(inkeys);
 	
+	globals.LoadSongs();
 	RebuildSongList();
 	sbSong->Select();
 	selected = sbSong;
+	debug("Songdata: 0x%lx", (u32)globals.songdata);
 }
 
 // destructor
@@ -106,11 +110,19 @@ void *First::SaveButton(void *data)
 	return NULL;
 }
 
+// if they change the name of this song
+void *First::ChangeSongName(void *data)
+{
+	globals.SetName((char *)data);
+	return NULL;
+}
+
 // if they've moved the song selecta
 void *First::Song(void *data)
 {
 	debug("Song select callback");
 	// change currentsong variable to point at the newly selected song
+	
 	// remove all our old loops
 	// for every loop in this song, create it's loop
 	// set the BPM to be this song's BPM
@@ -145,24 +157,38 @@ void *First::AddLoopButton(void *data)
 {
 	debug("AddLoop button callback");
 	// add a loop to currentsong
+	globals.NewLoop();
 	// add a live loop
+	if (this->right)
+	{
+		// make our next loop have a new loop
+		this->right->left = new Loop(keys);
+		this->right = this->right->left;
+	}
+	else
+	{
+		this->right = new Loop(keys);
+	}
 	return NULL;
 }
 
 // if they change the BPM
 void *First::BPM(void *data)
 {
-	debug("BPM: %ld", *(u16 *)data);
+	debug("BPM: %d", *(u16 *)data);
 	return NULL;
 }
 
+// we don't need to do anything in here as it's all handled by callbacks
 void First::DoProcess()
 {
+	debugloop("Songdata: 0x%lx", (u32)globals.songdata);
 }
 
 // this function takes all the songs in songdata and makes a list of them
 void First::RebuildSongList()
 {
+	structSongData *selected = (structSongData *)sbSong->GetChoice();
 	structSongData *traverse = globals.songdata;
 	
 	sbSong->ClearChoices();
@@ -171,5 +197,19 @@ void First::RebuildSongList()
 	{
 		sbSong->NewChoice(traverse->name, (u32)traverse);
 		traverse = traverse->next;
+	}
+	
+	// if we haven't selected one, select the first one
+	if (!selected)
+	{
+		selected = globals.songdata;
+	}
+	
+	if (selected)
+	{
+		// with the selected song
+		sbSong->ChooseByValue((u32)selected);
+		nbBPM->SetValue(selected->bpm);
+		ebSongName->SetString(selected->name);
 	}
 }

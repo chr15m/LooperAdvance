@@ -26,7 +26,7 @@ void GlobalData::Tick()
 	counter++;
 	if (globals.currentsong)
 	{
-		setbeat = counter * currentsong->bpm/3600.0;		
+		setbeat = (u32)(counter * currentsong->bpm/3600.0);
 		if (!(counter % 60/(currentsong->bpm/60)))
 			incbeat++;
 	}
@@ -49,12 +49,14 @@ void GlobalData::NewSong()
 	{
 		currentsong->next = new structSongData;
 		currentsong = currentsong->next;
+		debug("Next song data at: 0x%lx", (u32)currentsong->next);
 	}
 	else
 	{
 		// initialise a fresh song
 		songdata = new structSongData;
 		currentsong = songdata;	
+		debug("New song data at: 0x%lx", (u32)songdata);
 	}
 	
 	currentsong->bpm = 180;
@@ -141,13 +143,57 @@ void GlobalData::SetSong(u16 whichsong)
 		counter++;
 	}
 	
-	if (songtrav) currentsong = songtrav;
+	if (songtrav)
+	{
+		currentsong = songtrav;
+		currentloop = currentsong->loops;
+		if (currentloop)
+		{
+			currentnote = currentloop->notes;
+		}
+	}
 }
 
 // change the name of the current song
-void GlobalData::SetName(char *name)
+void GlobalData::SetName(char *inname)
 {
-	
+
+/*	for( int i = 0; i < 20; ++i )
+	    {
+		char *pMem;
+		char *pants;
+		debug("pass %d", i);
+		debug("pMem: 0x%lx", (u32)pants);
+		pMem = new char[10];
+		debug("pMem: 0x%lx", (u32)pants);
+		delete[] pMem;
+		debug("pMem: 0x%lx", (u32)pants);
+	    }
+*/
+	debug("currentsong->name: 0x%lx", (u32)currentsong->name);
+	debug("currentsong->loops: 0x%lx", (u32)currentsong->loops);
+	debug("currentsong->bpm: %d", currentsong->bpm);
+	debug("currentsong->next: 0x%lx", (u32)currentsong->next);
+	if (currentsong)
+	{
+		// forget whatever data this char used to be attached to
+		delete[] currentsong->name;
+		debug("currentsong->name: 0x%lx", (u32)currentsong->name);
+		debug("currentsong->loops: 0x%lx", (u32)currentsong->loops);
+		debug("currentsong->bpm: %d", currentsong->bpm);
+		debug("currentsong->next: 0x%lx", (u32)currentsong->next);
+		// create a new array of characters one longer
+		currentsong->name = new char[strlen(inname) + 1];
+		debug("currentsong->name: 0x%lx", (u32)currentsong->name);
+		debug("currentsong->loops: 0x%lx", (u32)currentsong->loops);
+		debug("currentsong->bpm: %d", currentsong->bpm);
+		debug("currentsong->next: 0x%lx", (u32)currentsong->next);
+		// read in a string
+//		strncpy(currentsong->name, inname, strlen(inname));
+		// make sure the last element is zero
+//		currentsong->name[strlen(inname)] = '\0';
+		debug("set song name to %s", currentsong->name);
+	}
 }
 
 // add another loop to this song
@@ -180,7 +226,7 @@ void GlobalData::NewLoop()
 		currentloop->notes = NULL;
 		currentloop->next = NULL;
 		
-		debug("Loop addresses (base, current): 0x%x, 0x%x", currentsong->loops, currentloop);
+		debug("Loop addresses (base, current): 0x%lx, 0x%lx", (u32)currentsong->loops, (u32)currentloop);
 	}
 }
 
@@ -190,7 +236,7 @@ void GlobalData::DelLoop()
 	structLoopData *looptrav = currentsong->loops;
 	structLoopData *deleteloop = NULL;
 	
-	debug("Loop addresses (base, current): 0x%x, 0x%x", looptrav, currentloop);
+	debug("Loop addresses (base, current): 0x%lx, 0x%lx", (u32)looptrav, (u32)currentloop);
 	
 	// if we even have any loops
 	if (looptrav)
@@ -325,8 +371,8 @@ void GlobalData::SaveSongs()
 	structLoopData *looptrav = NULL;
 	structNoteData *notetrav = NULL;
 	offset = 0;
-	debug("Saving Song data.");
-
+	debug("Saving Song data Starting at 0x%lx", (u32)songtrav);
+	
 	// write the magic string
 	WriteNumber(magic, sizeof(u16));
 
@@ -343,6 +389,7 @@ void GlobalData::SaveSongs()
 		
 		// go through each loop in this song
 		looptrav = songtrav->loops;
+		debug("looptrav initial address: 0x%lx", (u32)looptrav);
 		while (looptrav)
 		{
 			debug("Writing loop.");
@@ -406,6 +453,7 @@ void GlobalData::WriteString(char *instr)
 	bcopy(instr, (char *)(SRAM + offset), strlen(instr));
 	bcopy((const char*)&zero, (char *)(SRAM + offset), 1);
 	offset += strlen(instr) + 1;
+	debug("Wrote: %s", instr);
 	// if (offset % 2) offset++;
 }
 
@@ -429,6 +477,7 @@ void GlobalData::WriteNumber(u32 number, u8 size)
 	// write a bunch
 	bcopy((const char*)&number, (char *)(SRAM + offset), size);
 	offset += size;
+	debug("Wrote: %ld", number);
 }
 
 // reads a number from the SRAM

@@ -2,10 +2,15 @@
 
 EditBox::EditBox(u16 ix, u16 iy, u16 inwidth, Keys *inkeys): Widget (ix, iy, inkeys)
 {
+	u16 i;
 	text = new char[width + 1];
 	
-	// null terminate the text string always (incase strncpy results in no null termination
-	text[width] = '\0';
+	// fill with nulls
+	for (i=0; i<width + 1; i++)
+	{
+		text[i] = NULL;
+	}
+	
 	which = 0;
 	width = inwidth;
 	blink = 0;	
@@ -19,6 +24,8 @@ void EditBox::SetString(char *instring)
 {
 	// copy the incoming string over our text
 	strncpy(instring, text, width);
+	// make sure last char is 0
+	instring[strlen(text)] = 0;
 }
 
 char *EditBox::GetString()
@@ -29,6 +36,7 @@ char *EditBox::GetString()
 Widget *EditBox::Process()
 {
 	Widget *newselect = NULL;
+	bool changed=false;
 	
 	if (keys->IsPressed(keyA))
 	{	
@@ -40,9 +48,14 @@ Widget *EditBox::Process()
 				text[which] = 96;
 			}
 			text[which] += 1;
+			changed = true;
 		}
 		if (keys->TestKey(keyDown) == pressed)
+		{
 			text[which] -= 1;
+			changed = true;
+		}
+		
 		if (keys->TestKey(keyLeft) == pressed)
 		{
 			which -= 1;
@@ -74,6 +87,16 @@ Widget *EditBox::Process()
 		
 		if (keys->TestKey(keyRight) == pressed)
 			newselect = right;
+	}
+	
+	// if they've changed the text box
+	if (changed)
+	{
+		if (callback)
+		{
+			callback->Execute(text);
+		}
+
 	}
 	
 	if (!newselect)

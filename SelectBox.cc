@@ -63,7 +63,7 @@ char *SelectBox::GetChoiceString()
 // add a new choice to the linked list of choices
 void SelectBox::NewChoice(char *text, u32 myval)
 {
-	debug("Address: 0x%x", last);
+	debug("Pre choice address: 0x%x", last);
 	// if we have at least one already then add another one
 	if (last != NULL)
 	{
@@ -79,7 +79,7 @@ void SelectBox::NewChoice(char *text, u32 myval)
 		first = last;
 		which = last;
 	}
-	dprintf("Address: 0x%x\n", last);
+	debug("Post choice address: 0x%x\n", last);
 	
 	// make a new character array
 	last->next = NULL;
@@ -89,7 +89,7 @@ void SelectBox::NewChoice(char *text, u32 myval)
 	last->text[width] = '\0';
 	last->value = myval;
 	
-	dprintf("%s -> %d\n\n", last->text, last->value);
+	debug("%s -> %d\n\n", last->text, last->value);
 }
 
 // clear out our linked list of select items

@@ -18,10 +18,9 @@ typedef struct structWidgetList
 };
 	
 private:
-	Keys *keys;
-
 protected:
 	Widget *selected;
+	Keys *keys;
 
 public:
 	// these are the links to the next page if they hit right and left on the shoulder buttons

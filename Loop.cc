@@ -55,7 +55,7 @@ Loop::~Loop()
 	delete nbBeats;
 }
 
-void Loop::Draw()
+void Loop::DoDraw()
 {
 	selected = selected->Process();
 
@@ -103,7 +103,7 @@ void Loop::Draw()
 	sbSample->Draw();
 }
 
-void Loop::Process()
+void Loop::DoProcess()
 {
 //	dprintf("Loop Process: %ld, sample handle = %d\n", (u32)this, handle);
 	if ((sample != 0xFF) && kramHandleValid(handle))
@@ -126,9 +126,9 @@ void Loop::ResetLoopPitch()
 {	
 	// (1000*(tracks[selected].sample->len)/(tracks[selected].sample->freq))/(tracks[selected].bpl*T*4/1000	
 	
-	dprintf("Top = %ld\n", globals.currentsong->bpm * GetSize());
-	dprintf("Bottom = %ld\n", (2646*beats));
-	dprintf("New ratio = %d\n", (globals.songdata->bpm * GetSize())/(2646*beats));
+	debug("Top = %ld\n", globals.currentsong->bpm * GetSize());
+	debug("Bottom = %ld\n", (2646*beats));
+	debug("New ratio = %d\n", (globals.songdata->bpm * GetSize())/(2646*beats));
 	pitch = (globals.songdata->bpm * GetSize()) / (2646 * beats);
 	nbPitch->SetValue(pitch);
 }

@@ -26,7 +26,7 @@ void GlobalData::Tick()
 	counter++;
 	if (globals.currentsong)
 	{
-		beat = (u32)(counter * currentsong->bpm/3600.0);
+		beat = (u32)(counter * currentsong->bpm / 3600);
 		//if (!(counter % 60/(currentsong->bpm/60)))
 		//	beat++;
 	}
@@ -136,12 +136,8 @@ void GlobalData::DelSong()
 void GlobalData::SetSong(structSongData *whichsong)
 {
 	currentsong = whichsong;
-	currentloop = currentsong->loops;
-	if (currentloop)
-	{
-		currentnote = currentloop->notes;
-	}
 	debug("Set current song: 0x%lx, '%s', %d", (u32)currentsong, currentsong->name, currentsong->bpm);
+	SetCurrentLoop(currentsong->loops);
 }
 
 // find a song by index number
@@ -182,6 +178,26 @@ void GlobalData::SetName(char *inname)
 		currentsong->name[strlen(inname)] = '\0';
 		debug("set song name to %s", currentsong->name);
 	}
+}
+
+// set the current loop to be this loop
+void GlobalData::SetCurrentLoop(structLoopData *which)
+{
+	structNoteData *traverse;
+	
+	currentnote = NULL;
+	currentloop = which;
+	if (currentloop)
+	{
+		// find the last note and make it the current one
+		traverse = currentloop->notes;
+		while (traverse)
+		{
+			currentnote = traverse;
+			traverse = traverse->next;
+		}
+	}
+	debug("Set current loop: 0x%lx, '%s', Notes=0x%lx", (u32)currentloop, currentloop->name, (u32)currentloop->notes);
 }
 
 // change the name of the current loop
@@ -305,7 +321,7 @@ void GlobalData::NewNote()
 	// if we have some loops, then append it to the end
 	if (currentloop)
 	{
-		debug("Adding a note.");
+		debug("Adding a note after 0x%lx", currentnote);
 		
 		if (currentloop->notes)
 		{
@@ -322,7 +338,7 @@ void GlobalData::NewNote()
 		// set defaults
 		currentnote->noteEnd = note_cut;
 		currentnote->offset = 0;
-		currentnote->pitch = 0;
+		currentnote->pitch = 128;
 		currentnote->swing = 0;
 		currentnote->next = NULL;
 	}
@@ -336,7 +352,7 @@ void GlobalData::DelNote()
 	// if we even have a note
 	if (notetrav)
 	{
-		debug("Deleting a note.");
+		debug("Deleting a note");
 		
 		if (notetrav->next)
 		{
@@ -344,6 +360,12 @@ void GlobalData::DelNote()
 			while (notetrav->next->next)
 			{
 				notetrav = notetrav->next;
+			}
+			
+			// if we've selected the last one, select the one before
+			if (currentnote == notetrav->next)
+			{
+				currentnote = notetrav;
 			}
 			
 			// the next note is the last one so delete it
@@ -357,6 +379,7 @@ void GlobalData::DelNote()
 			// tell this loop we don't currently have any notes
 			delete notetrav;
 			currentloop->notes = NULL;
+			currentnote = NULL;
 		}
 	}
 }
@@ -492,7 +515,7 @@ void GlobalData::ReadNumber(void *number, u8 size)
 {
 	bcopy((const char*)(SRAM + offset), (char *)number, size);
 	offset += size;
-	debug("Read: %ld", *((u16 *)number));
+	debug("Read: %d", *((u16 *)number));
 }
 
 // this checks if the current offset contains magic! (doesn't update offset at all)

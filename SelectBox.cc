@@ -32,6 +32,7 @@ void SelectBox::Choose(u16 choice)
 	if (travel)
 	{
 		which = travel;
+//		Callback(which);
 	}
 }
 
@@ -44,7 +45,10 @@ void SelectBox::ChooseByValue(u32 inval)
 	while (travel)
 	{
 		if (travel->value == inval)
+		{
 			which = travel;
+//			Callback(which);
+		}
 		travel = travel->next;
 	}
 }
@@ -209,12 +213,8 @@ void SelectBox::Draw()
 		{	
 			if (maxtime)
 				Choose(0);
-			
-			if (callback)
-			{
-				debug("Making callback");
-				callback->Execute(which);
-			}
+			// do the callback
+			Callback(which);
 		}
 
 		timer--;

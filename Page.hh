@@ -31,7 +31,7 @@ public:
 	
 	Page();
 	virtual ~Page();
-	virtual void DoDraw()=0;
+	virtual void DoSwap()=0;
 	virtual void DoProcess()=0;
 	
 	//! this sets what managers to use
@@ -50,6 +50,8 @@ public:
 		if (keys->TestKey(keyR) == pressed)
 			if (right)
 				return right;
+		
+		return NULL;
 	}
 	
 	//! this does a bunch of default stuff on the page
@@ -62,6 +64,8 @@ public:
 		
 		if (!newPage)
 			newPage = this;
+		else
+			newPage->DoSwap();
 		
 		// go through our widgets drawing them
 		while (traverse)

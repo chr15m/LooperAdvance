@@ -80,7 +80,7 @@ public:
 	Loop(Keys *inkeys, structLoopData *whichloop);
 	virtual ~Loop();
 	
-	void DoDraw();
+	void DoSwap();
 	
 	void DoProcess();
 	void *AddLoopButton(void *data);
@@ -95,6 +95,12 @@ public:
 	void *SampleChange(void *whichsample);
 	void *Reset(void *ignore);
 	void *Notes(void *number);
+	void *NoteChange(void *note);
+
+	void *NBeat(void *number);
+	void *NSwing(void *number);
+	void *NPitch(void *number);
+	void *NAction(void *which);
 
 	void AddNote();
 	void DelNote();

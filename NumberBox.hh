@@ -18,6 +18,7 @@ public:
 	
 	void SetValue(u16 newVal);
 	u16 GetValue();
+	void SetMax(u16 imax);
 	Widget *Process();
 	void Draw();
 };

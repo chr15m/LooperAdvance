@@ -40,22 +40,20 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	nbNotes = new NumberBox(10, 12, 3, 0, 256, 4, inkeys);
 	lbNotes = new Label(2, 12, "Notes");
 	
-/*	NumberBox *nbNote;
-	NumberBox *nbNBeat;
-	NumberBox *nbNPitch;
-	NumberBox *nbNSwing;
-	SelectBox *sbNAction;
-
+	nbNote = new NumberBox(10, 13, 3, 0, 0, 8, inkeys);
+	nbNBeat = new NumberBox(10, 15, 3, 0, 0, 20, inkeys);
+	nbNSwing = new NumberBox(10, 16, 3, 0, 255, 20, inkeys);
+	nbNPitch = new NumberBox(10, 17, 3, 0, 255, 12, inkeys);
+	sbNAction = new SelectBox(10, 18, 6, inkeys);
+	
 	// notes labels
-	Label *lbNote;
-	Label *lbNSwing;
-	Label *lbNBeat;
-	Label *lbNAction;
-	Label *lbNPitch;
-*/
+	lbNBeat = new Label(3, 15, "Beat");
+	lbNSwing = new Label(3, 16, "Swing");
+	lbNPitch = new Label(3, 17, "Pitch");	
+	lbNAction = new Label(3, 18, "Action");
 
-	sbAddLoopButton = new SelectBox(18, 17, 8, inkeys);
-	sbDelLoopButton = new SelectBox(18, 18, 8, inkeys);
+	sbAddLoopButton = new SelectBox(19, 17, 8, inkeys);
+	sbDelLoopButton = new SelectBox(19, 18, 8, inkeys);
 
 	AddWidget(ebName);
 	AddWidget(sbOn);
@@ -71,6 +69,18 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	AddWidget(nbNotes);
 	AddWidget(lbNotes);
 	
+	AddWidget(nbNote);
+	
+	AddWidget(lbNSwing);
+	AddWidget(lbNBeat);
+	AddWidget(lbNAction);
+	AddWidget(lbNPitch);
+
+	AddWidget(nbNBeat);
+	AddWidget(nbNSwing);
+	AddWidget(nbNPitch);
+	AddWidget(sbNAction);
+
 	AddWidget(sbAddLoopButton);
 	AddWidget(sbDelLoopButton);
 	
@@ -82,10 +92,20 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	sbReset->SetTransitions(NULL, NULL, nbBeats, sbSample);
 	sbSample->SetTransitions(NULL, NULL, sbReset, nbSwing);
 	nbSwing->SetTransitions(NULL, NULL, sbSample, nbNotes);
-	nbNotes->SetTransitions(NULL, NULL, nbSwing, sbAddLoopButton);
+	nbNotes->SetTransitions(NULL, NULL, nbSwing, nbNote);
+	nbNote->SetTransitions(NULL, NULL, nbNotes, nbNBeat);
+	nbNBeat->SetTransitions(NULL, NULL, nbNote, nbNSwing);
+	nbNSwing->SetTransitions(NULL, NULL, nbNBeat, nbNPitch);
+	nbNPitch->SetTransitions(NULL, NULL, nbNSwing, sbNAction);
+	sbNAction->SetTransitions(NULL, NULL, nbNPitch, NULL);
 
-	sbAddLoopButton->SetTransitions(NULL, NULL, nbNotes, sbDelLoopButton);
-	sbDelLoopButton->SetTransitions(NULL, NULL, sbAddLoopButton, NULL);
+	sbNAction->NewChoice("cont", 0);
+	sbNAction->NewChoice("cut", 1);
+	sbNAction->NewChoice("loop", 2);
+	sbNAction->NewChoice("bounce", 3);
+	
+//	sbAddLoopButton->SetTransitions(NULL, NULL, nbNotes, sbDelLoopButton);
+//	sbDelLoopButton->SetTransitions(NULL, NULL, sbAddLoopButton, NULL);
 	
 	debug("Filling sample list");
 	
@@ -118,9 +138,24 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 
 	cbBeats.MakeCallback(this, &Loop::Beats);
 	nbBeats->UseCallBack(&cbBeats);
-	
+
 	cbNotes.MakeCallback(this, &Loop::Notes);
 	nbNotes->UseCallBack(&cbNotes);
+
+	cbNote.MakeCallback(this, &Loop::NoteChange);
+	nbNote->UseCallBack(&cbNote);
+
+	cbNBeat.MakeCallback(this, &Loop::NBeat);
+	nbNBeat->UseCallBack(&cbNBeat);
+
+	cbNSwing.MakeCallback(this, &Loop::NSwing);
+	nbNSwing->UseCallBack(&cbNSwing);
+
+	cbNPitch.MakeCallback(this, &Loop::NPitch);
+	nbNPitch->UseCallBack(&cbNPitch);
+
+	cbNAction.MakeCallback(this, &Loop::NAction);
+	sbNAction->UseCallBack(&cbNAction);
 
 	sbReset->AutoOff();
 	sbReset->NewChoice("Reset", 0);
@@ -140,7 +175,8 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	sbOn->Select();
 	selected = sbOn;
 
-	globals.currentloop = data;
+	globals.SetCurrentLoop(data);
+	
 	UpdateWidgets();
 	SampleChange(NULL);
 	
@@ -167,6 +203,12 @@ Loop::~Loop()
 	delete lbSwing;
 	delete nbNotes;
 	delete lbNotes;
+	
+	delete lbNSwing;
+	delete lbNBeat;
+	delete lbNAction;
+	delete lbNPitch;
+	
 	delete sbAddLoopButton;
 	delete sbDelLoopButton;
 	delete[] notes;
@@ -235,6 +277,7 @@ void Loop::UpdateWidgets()
 	nbPitch->SetValue(data->pitch);
 	sbPan->ChooseByValue(data->pan);
 	nbBeats->SetValue(data->divisions);
+	nbNBeat->SetMax(data->divisions);
 	sbSample->ChooseByValue(data->sample);
 	ebName->SetString(data->name);
 	
@@ -245,6 +288,7 @@ void Loop::UpdateWidgets()
 		traverse = traverse->next;
 	}
 	nbNotes->SetValue(numnotes);
+	UpdateNotes();
 }
 
 // what to do if the pitch is changed
@@ -258,6 +302,7 @@ void *Loop::Pitch(void *number)
 void *Loop::Beats(void *number)
 {
 	data->divisions = *((u16 *)number);
+	nbNBeat->SetMax(data->divisions);
 	return NULL;
 }
 
@@ -293,6 +338,8 @@ void Loop::AddNote()
 {
 	globals.NewNote();
 	numnotes++;
+	// set the current note's default beat to be the current beat
+	globals.currentnote->offset = ((numnotes - 1) % globals.currentloop->divisions) + 1;
 	UpdateNotes();
 }
 
@@ -307,8 +354,10 @@ void Loop::DelNote()
 // update the list of notes
 void Loop::UpdateNotes()
 {
-	u16 i=0;
+	u32 i=0;
 	structNoteData *traverse = globals.currentloop->notes;
+	
+	debug("numnotes = %d", numnotes);
 	
 	if (notes)
 	{
@@ -324,7 +373,7 @@ void Loop::UpdateNotes()
 		while (traverse)
 		{
 			notes[i] = traverse;
-			debug("Element %d address: 0x%lx", i, (u32)notes[i]);
+			debug("Element %ld address: 0x%lx", i, (u32)notes[i]);
 			i++;
 			traverse = traverse->next;
 		}
@@ -333,6 +382,16 @@ void Loop::UpdateNotes()
 	{
 		debug("empty list");
 	}
+	
+	// update the beat select number box
+	if (numnotes)
+		nbNote->SetMax(numnotes - 1);
+	else
+		nbNote->SetMax(0);
+	
+	i = nbNote->GetValue();
+	// update the current note data
+	NoteChange(&i);
 }
 
 // if they change the name of this loop
@@ -365,25 +424,47 @@ u32 Loop::GetSize()
 // process the audio
 void Loop::DoProcess()
 {
+//	u32 diff = 0;
 	beat = globals.beat % nbBeats->GetValue();
 	
+	// are we playing a sample?
 	if ((sbSample->GetChoice() != 0xFF) && kramHandleValid(handle))
 	{
-		
-		if (beat != lastbeat)
+		// if we have notes, then things are handled a bit differently
+		if (notes)
 		{
-			UpdateParameters();
-			lastbeat = beat;
+			// figure out if we're at the swing point
+			// diff = globals.beat *  - counter;
+//			if (diff == notes[beat]->swing)
+//			{
+				// update the parameters
+//				UpdateParameters();
+//			}
+				
+			// if cont is not on
+				// are we past the end of this note, or before the beginning?
+					// if cut is on, then set vol to zero
+					// if loop is on, then 
+						// if bounce is on then i do'nt konw what the hell to do
+		}
+		else
+		{
+			// otherwise it's simple style parameter updates
+			if (beat != lastbeat)
+			{
+				UpdateParameters();
+				lastbeat = beat;
+			}
 		}
 	}
 	
 	debugloop("Beat: %d", beat);
 }
 
-// during the draw phase make sure we're the current loop
-void Loop::DoDraw()
+// when a swap occurs, select the correct loop
+void Loop::DoSwap()
 {
-	globals.currentloop = data;
+	globals.SetCurrentLoop(data);
 }
 
 // update the parameters of a specific loop
@@ -417,5 +498,62 @@ void *Loop::SampleChange(void *whichsample)
 	UpdateParameters();
 	debug("New Handle: %d", handle);
 
+	return NULL;
+}
+
+// update all of the currently selected note parameters
+void *Loop::NoteChange(void *note)
+{
+	u16 selected = *(u32 *)note;
+	
+	if (numnotes)
+	{
+		nbNBeat->SetValue(notes[selected]->offset);
+		nbNPitch->SetValue(notes[selected]->pitch);
+		nbNSwing->SetValue(notes[selected]->swing);
+		sbNAction->ChooseByValue(notes[selected]->noteEnd);
+	}
+	else
+	{
+		// set everything to zeros
+		nbNBeat->SetValue(0);
+		nbNPitch->SetValue(0);
+		nbNSwing->SetValue(0);
+		sbNAction->ChooseByValue(0);
+	}
+	
+	return NULL;
+}
+
+// these are what happens when the note's parameters are changed
+
+void *Loop::NBeat(void *number)
+{
+	u8 offset = (u8)*(u32 *)number;
+	notes[nbNote->GetValue()]->offset = offset;
+	debug("note %d (0x%lx) Beat = %d", nbNote->GetValue(), notes[nbNote->GetValue()], notes[nbNote->GetValue()]->offset);
+	return NULL;
+}
+
+void *Loop::NSwing(void *number)
+{
+	u8 swing = (u8)*(u32 *)number;
+	notes[nbNote->GetValue()]->swing = swing;
+	debug("note %d (0x%lx) swing = %d", nbNote->GetValue(), notes[nbNote->GetValue()], notes[nbNote->GetValue()]->swing);
+	return NULL;
+}
+
+void *Loop::NPitch(void *number)
+{
+	u8 pitch = (u8)*(u32 *)number;
+	notes[nbNote->GetValue()]->pitch = pitch;
+	debug("note %d (0x%lx) pitch = %d", nbNote->GetValue(), notes[nbNote->GetValue()], notes[nbNote->GetValue()]->pitch);
+	return NULL;
+}
+
+void *Loop::NAction(void *which)
+{
+	notes[nbNote->GetValue()]->noteEnd = (noteType)((structSelectList *)which)->value;
+	debug("note %d (0x%lx) action = %d", nbNote->GetValue(), notes[nbNote->GetValue()], notes[nbNote->GetValue()]->noteEnd);
 	return NULL;
 }

@@ -31,6 +31,15 @@ public:
 	void UseCallBack(cCallback *pCBFunc);
 	virtual void Draw()=NULL;
 	virtual Widget *Process()=NULL;
+
+	inline void *Callback(void *data)
+	{
+		if (callback)
+		{
+			debug("Making callback");
+			return callback->Execute(data);
+		}
+	}
 };
 
 #endif

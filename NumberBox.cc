@@ -12,6 +12,17 @@ NumberBox::NumberBox(u16 ix, u16 iy, u16 iwidth, u16 imin, u16 imax, u16 ibigste
 void NumberBox::SetValue(u16 newVal)
 {
 	value = newVal;
+//	Callback(&value);
+}
+
+void NumberBox::SetMax(u16 imax)
+{
+	if (value > imax)
+	{
+		value = imax;
+//		Callback(&value);
+	}
+	max = imax;
 }
 
 u16 NumberBox::GetValue()
@@ -46,8 +57,7 @@ Widget *NumberBox::Process()
 		{
 			value = tmpval;
 			
-			if (callback)
-				callback->Execute(&value);
+			Callback(&value);
 		}
 	}
 	else
@@ -61,7 +71,7 @@ Widget *NumberBox::Process()
 		
 		if (keys->TestKey(keyLeft) == pressed)
 			newselect = left;
-
+		
 		if (keys->TestKey(keyRight) == pressed)
 			newselect = right;
 	}

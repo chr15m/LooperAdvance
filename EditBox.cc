@@ -28,6 +28,7 @@ void EditBox::SetString(char *instring)
 	// make sure last char is 0
 	value[strlen(instring)] = NULL;
 	value[width] = NULL;
+//	Callback(value);
 }
 
 char *EditBox::GetString()
@@ -94,10 +95,7 @@ Widget *EditBox::Process()
 	// if they've changed the text box
 	if (changed)
 	{
-		if (callback)
-		{
-			callback->Execute(value);
-		}
+		Callback(value);
 	}
 	
 	if (!newselect)

@@ -180,8 +180,8 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 
 	globals.SetCurrentLoop(data);
 	
-	UpdateWidgets();
 	SampleChange(NULL);
+	UpdateWidgets();
 	
 	debug("Done setting up");
 }
@@ -431,7 +431,7 @@ void *Loop::Name(void *name)
 // if the reset button is pressed
 void *Loop::Reset(void *ignore)
 {
-	// (1000*(tracks[selected].sample->len)/(tracks[selected].sample->freq))/(tracks[selected].bpl*T*4/1000	
+	// (1000 * (tracks[selected].sample->len) / (tracks[selected].sample->freq) ) / (tracks[selected].bpl * T * 4 / 1000	
 	u16 beats = nbBeats->GetValue();
 	
 	debug("Top = %ld", globals.currentsong->bpm * GetSize());

@@ -192,6 +192,8 @@ void *First::NewButton(void *data)
 	globals.NewSong();
 	// rebuild the choices
 	RebuildSongList();
+	// change to the current song
+	Song(NULL);
 	
 	return NULL;
 }
@@ -209,6 +211,9 @@ void *First::DelButton(void *data)
 	globals.DelSong();
 	// rebuild choices
 	RebuildSongList();
+	// change to the current song
+	Song(NULL);
+	
 	return NULL;
 }
 
@@ -306,9 +311,6 @@ void First::RebuildSongList()
 		debug("Setting Name='%s' BPM='%d'", globals.currentsong->name, globals.currentsong->bpm);
 		// with the selected song
 		sbSong->ChooseByValue((u32)globals.currentsong);
-		Song(NULL);
-//		nbBPM->SetValue(globals.currentsong->bpm);
-//		ebSongName->SetString(globals.currentsong->name);
 	}
 }
 

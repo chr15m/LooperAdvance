@@ -140,7 +140,11 @@ else:
 		image = pygame.image.load(filename)
 		
 		# is this image size divisible by 8?
-		width, height = image.get_width(), image.get_height()
+		width, height = image.get_width() + 16, image.get_height()
+		
+		# we need to do this to make the off-screen surfaces on the GBA
+		#image = pygame.Surface((width, height), 0, imageOrig)
+		#image.blit(imageOrig, (0, 0))
 		
 		if (width % 8) or (height % 8):
 			print filename + " size is not divisible by 8 (eg 240x160)"
@@ -152,21 +156,23 @@ else:
 			palette.append(bgtupple)
 			
 			if (not nocompress.has_key(filename)):
-				map = Map(width/8, height/8)
+				map = Map(width / 8, height / 8)
 			else:
 				# make a new set of tiles
 				tiles = []
 			
-			# loop through the tiles in our image
-			for mapy in range(height/8):
-				for mapx in range(width/8):
+			for mapy in xrange(0, height / 8):
+				for mapx in xrange(0, width / 8):
 					# make a new tile
 					newtile = Tile()
 					# loop through the pixels in each tile
-					for y in xrange(0,8):
-						for x in xrange(0,8):
+					for y in xrange(0, 8):
+						for x in xrange(0, 8):
 							# for every pixel we encounter, let's add it to our tile
-							(r, g, b, a) = image.get_at((mapx * 8 + x, mapy * 8 + y))
+							try:
+								(r, g, b, a) = image.get_at((mapx * 8 + x, mapy * 8 + y))
+							except:
+								(r, g, b, a) = (0, 0, 0, 0)
 							
 							thispixel = 0
 							palval = (b>>3) * 1024 + (g>>3) * 32 + (r>>3)
@@ -192,11 +198,14 @@ else:
 							if (newtile.GetMd5() == alltiles[tileref].GetMd5()):
 								# we have found a match
 								map.SetTileRef(mapx, mapy, tileref)
+								print "setting a map ref = " + str(tileref)
 								addtile = 0
 						
 						if (addtile):
 							alltiles.append(newtile)
 							map.SetTileRef(mapx, mapy, len(alltiles) - 1)
+							print "setting a map ref = " + str(len(alltiles) - 1)
+						
 					else:
 						# add our tile to our set of tiles
 						tiles.append(newtile)
@@ -232,7 +241,7 @@ else:
 	
 	print "Writing the palette to the file"
 	
-	hfile.write("#define " + string.upper(outputname) + "_PALETTE_SIZE " + str(paletteLength))
+	hfile.write("#define " + string.upper(outputname) + "_PALETTE_SIZE " + str(paletteLength) + "\n")
 	hfile.write("extern const u16 " + outputname + "_palette[" + string.upper(outputname) + "_PALETTE_SIZE];\n")
 	cfile.write("const u16 " + outputname + "_palette[" + string.upper(outputname) + "_PALETTE_SIZE] = {\n")
 	
@@ -253,7 +262,7 @@ else:
 		
 		mapLength = mapobject.GetWidth() * mapobject.GetHeight()
 		
-		hfile.write("#define " + string.upper(map) + "_MAP_SIZE " + str(mapLength))
+		hfile.write("#define " + string.upper(map) + "_MAP_SIZE " + str(mapLength) + "\n")
 		hfile.write("extern const u16 " + map + "_map[" + string.upper(map) + "_MAP_SIZE];\n")
 		cfile.write("const u16 " + map + "_map[" + string.upper(map) + "_MAP_SIZE] = {\n")
 		
@@ -273,9 +282,9 @@ else:
 		
 		tilesLength = len(tilesets[tileset]) * 32
 		
-		hfile.write("#define " + string.upper(tileset) + "_MAP_SIZE " + str(tilesLength))
-		hfile.write("extern const u16 " + tileset + "_tiles[" + string.upper(tileset) + "_MAP_SIZE];\n")
-		cfile.write("const u16 " + tileset + "_tiles[" + string.upper(tileset) + "_MAP_SIZE] = {\n")
+		hfile.write("#define " + string.upper(tileset) + "_TILES_SIZE " + str(tilesLength) + "\n")
+		hfile.write("extern const u16 " + tileset + "_tiles[" + string.upper(tileset) + "_TILES_SIZE];\n")
+		cfile.write("const u16 " + tileset + "_tiles[" + string.upper(tileset) + "_TILES_SIZE] = {\n")
 		
 		# look at every tile in the tileset
 		for tile in tilesets[tileset]:

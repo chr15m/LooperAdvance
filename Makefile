@@ -18,6 +18,12 @@ ifndef TARGET
 	TARGET = looper
 endif
 
+# default theme is 'basic'
+ifndef THEME
+	THEME = basic
+endif
+
+
 GNUDEBUG = -g -ggdb
 
 PLATFORM= arm-thumb-elf-
@@ -41,7 +47,7 @@ INCLUDE	= -I$(shell pwd)
 
 # what to build if we're building the whole program
 ifeq ($(TARGET),looper)
-	GAMEOBJECTS = Keys.o Page.o First.o Loop.o Widget.o Label.o EditBox.o SelectBox.o NumberBox.o GlobalData.o charset.o samples/samples.o
+	GAMEOBJECTS = Keys.o Page.o First.o Loop.o Widget.o Label.o EditBox.o SelectBox.o NumberBox.o GlobalData.o charset.o samples/samples.o splash.o
 endif
 
 ifeq ($(TARGET),audiotest)
@@ -107,8 +113,14 @@ $(TARGET).elf: $(RESOURCES) $(TARGET).cc $(TARGET).o $(CRT) $(GAMEOBJECTS) $(SCR
 samples/samples.hh samples/samples.cc: samples/Makefile
 	make -C samples/
 
-# clean
+# screens data
+splash.hh splash.cc: screens/$(THEME)/*.png
+	./createscreendata.py -bffffff screens/$(THEME)/splash.png
 
+screens.hh screens.cc: screens/$(THEME)/*.png
+	./createscreendata.py -oscreens -nscreens/$(THEME)/font.png -nscreens/$(THEME)/altfont.png screens/$(THEME)/loop.png screens/$(THEME)/first.png
+
+# clean
 clean:
 	rm -f *.elf *.gba *~ *.log *.bak *.o
 	rm -f `find -name \*.o -print -or -name \*~ -print`  
@@ -118,7 +130,7 @@ clean:
 run: $(TARGET).gba
 	@$(EMULATOR) $(TARGET).gba
 
-#build dependencies
+# build dependencies
 #dep: depend
 #.hdepend: depend
 #.sdepend: depend

@@ -104,7 +104,8 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	UseKeys(inkeys);
 	sbOn->Select();
 	selected = sbOn;
-	
+
+	globals.currentloop = data;
 	UpdateWidgets();
 	SampleChange(NULL);
 	

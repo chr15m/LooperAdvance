@@ -29,7 +29,10 @@ class AudioLayer
 {
 private:
 	// a pointer to a linked list of all the samples we're currently playing
-	Sample *samples;
+	structSampleList *samples;
+	// last one in the linked list
+	structSampleList *last;
+
 	// details about our mixer bank
 	s16 *mixbank;
 	u16 banksize;
@@ -40,6 +43,7 @@ public:
 
 	void Interrupt();
 	void Manage(Sample *newsample);
+	void Forget(Sample *which);
 };
 
 namespace Audio

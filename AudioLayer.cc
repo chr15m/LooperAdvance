@@ -40,7 +40,7 @@ AudioLayer::AudioLayer(u16 mixlength)
 	mixbank = new s16[mixlength];
 	banksize = mixlength;
 
-	samples = NULL;
+	samples = last = NULL;
 	
 	// turn on all the sounds etc
 	REG_SOUNDCNT_H = DSA_OUTPUT_RATIO_100 | DSA_FIFO_RESET | DSA_OUTPUT_TO_BOTH | DSA_TIMER0; 	//DirectSound A + fifo reset + max volume to L and R
@@ -66,7 +66,50 @@ AudioLayer::~AudioLayer()
 void AudioLayer::Manage(Sample *newsample)
 {
 	newsample->SetChunkSize(banksize);
-	samples = newsample;
+	
+	if (samples)
+	{
+		last->next = new structSampleList();
+		last->next->next = NULL;
+		last->next->sample = newsample;
+		last = last->next;
+	}
+	else
+	{
+		samples = new structSampleList();
+		samples->next = NULL;
+		samples->sample = newsample;
+		last = samples;
+	}
+
+}
+
+void AudioLayer::Forget(Sample *which)
+{
+	structSampleList *traverse = samples;
+	structSampleList *tmpptr = NULL;
+	
+	while (traverse)
+	{
+		tmpptr = NULL;
+		// if it's our first one, delete the head
+		if (traverse->sample == which)
+		{
+			samples = traverse->next;
+			delete traverse;
+		}
+		// if it's the next on in line, pop it out
+		else if (traverse->next->sample == which)
+		{
+			tmpptr = traverse->next->next;
+			delete traverse->next;
+			traverse->next = tmpptr;
+			// if we've deleted the last one, make sure we reset last
+			if (traverse->next == NULL)
+				last = traverse;
+		}
+		traverse = traverse->next;
+	}
 }
 
 void AudioLayer::Interrupt()
@@ -101,7 +144,7 @@ void AudioLayer::Interrupt()
 	
 	//chunkdata = samples->GetChunk();
 	
-	REG_DMA1SAD = (u32)samples->GetChunk();
+	REG_DMA1SAD = (u32)samples->sample->GetChunk();
 	REG_DMA1DAD = (u32)&REG_SGFIFOA;
 	REG_DM1CNT_L = 4;
 	REG_DM1CNT_H = DMA32NOW | DMA_ENABLE;

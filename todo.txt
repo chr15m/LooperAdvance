@@ -4,12 +4,6 @@
 Looper Advance Live (1.0):
 --------------------------
 
-- interface changes:
-	+ rename beat and note to slice and step (Jordan)
-	+ display current note position for this loop (Jordan)
-	+ B is a delete button in the editbox
-	+ option to 'wrap' on select/number boxes (Evans)
-
 * RELEASE *
 
 - interface changes:
@@ -19,8 +13,11 @@ Looper Advance Live (1.0):
 	- note numbering should line up on specific note selector (Jordan)
 	- letter selection not so buggy (specific set of characters)
 	- allow for different volumes (Evans)
-	- selecting a pitch - a keyboard appears
-	
+	- allow for different pans
+	- selecting a pitch - a keyboard appears (Crispin)
+
+- implement nanoloop/lsdj/midi sync code
+
 - original gb synth pages
 	- square wave 1
 	- square wave 2
@@ -33,11 +30,9 @@ Looper Advance Live (1.0):
 
 - drum constructor synth page
 
-- implement nanoloop sync code
-
 - sample note one-shot
 
-- ability to turn on an off multiple notes at the same time
+- ability to turn on an off multiple notes at the same time (Peter Swimm)
 
 Done:
 -----
@@ -65,4 +60,9 @@ Done:
 			+ write mixing routine
 			+ write panning/volume code and per-sample mixers
 			+ think about a callback system for effects
++ interface changes:
+	+ rename beat and note to slice and step (Jordan)
+	+ display current note position for this loop (Jordan)
+	+ B is a delete button in the editbox
+	+ option to 'wrap' on select/number boxes (Evans)
 

@@ -613,10 +613,10 @@ void *Loop::SampleChange(void *whichsample)
 	if (whichsample)
 	{
 		data->sample = ((structSelectList *)whichsample)->value;
+		sample->SetData((SampleData *)&samples[data->sample]);
 		Reset(NULL);
 	}
 	
-	sample->SetData((SampleData *)&samples[data->sample]);
 	UpdateParameters();
 	
 	return NULL;

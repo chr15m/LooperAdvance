@@ -60,6 +60,9 @@ samplenames.cc modules.h samples.h instruments.h samples.s instruments.s: sample
 	../krawall/converter/converter.linux samples.xm
 	./samplenames.py
 
+krawall.lib: ../krawall/gcclib/krawall-32k-60-medium-sf.lib
+	ln -s ../krawall/gcclib/krawall-32k-60-medium-sf.lib krawall.lib
+
 samples.xm: ../samples.xm
 	ln -s ../samples.xm
 

@@ -89,65 +89,60 @@ ClarkMix::ClarkMix(void)
 } 
 
 // swap which buffer we're using
-void ClarkMix::switchBuffers(void) {
-    if (bufferSwitch == 0) {
-        curBufA = fifoAbuf1;
-        curBufB = fifoBbuf1;
-        mixBufA = fifoAbuf0;
-        mixBufB = fifoBbuf0;
-        bufferSwitch = 1;
-    } else {
-        curBufA = fifoAbuf0;
-        curBufB = fifoBbuf0;
-        mixBufA = fifoAbuf1;
-        mixBufB = fifoBbuf1;
-        bufferSwitch = 0;
-    }
+void ClarkMix::switchBuffers(void)
+{
+    if (bufferSwitch == 0)
+	{
+		curBufA = fifoAbuf1;
+		curBufB = fifoBbuf1;
+		mixBufA = fifoAbuf0;
+		mixBufB = fifoBbuf0;
+		bufferSwitch = 1;
+	} 
+	else
+	{
+		curBufA = fifoAbuf0;
+		curBufB = fifoBbuf0;
+		mixBufA = fifoAbuf1;
+		mixBufB = fifoBbuf1;
+		bufferSwitch = 0;
+	}
 }
 
-void ClarkMix::mixBuffers(void) {
-	u16 i;
-	u8 sampMixed;
-	u8  curvolumea, curvolumeb, curinloop;
-	u32 curdatabegin, curdataoffset;
-	u32 currentptr;
-	u32 curdataend, curloopend;
-	u16 curpitch;
-    
-	// First initialize buffer to 0 - 32-bit operation is faster.
-	for (i = 0 ; i < BUFFER_SIZE ; i+=4) {
-		*(u32*)(mixBufA + i) = 0;
-		*(u32*)(mixBufB + i) = 0;
+// mix together everything down into the buffers
+void ClarkMix::mixBuffers(void)
+{
+	u16 b;
+	s8 *sampledata;
+	structSampleList *traverse = samplelist;
+
+	// TODO: turn this into a DMA
+	for (b = 0; b < BUFFER_SIZE; b++)
+	{
+		// we need to start filling the buffer at either 0 or chunksize (depending on where the pointer is)
+		mixBufA[b] = 0;
+		mixBufB[b] = 0;
 	}
 
-	for (sampMixed = 0 ; sampMixed < SAMPLES_MIX ; sampMixed ++) {
-		// save values in local variables - seems to be faster
-		curdatabegin = toMix[sampMixed].data_begin;
-		curvolumea = toMix[sampMixed].volume_a;
-		curvolumeb = toMix[sampMixed].volume_b;
-		curdataend = toMix[sampMixed].data_end;
-		curloopend = toMix[sampMixed].loop_end;
-		curinloop = toMix[sampMixed].in_loop;
-		curdataoffset = toMix[sampMixed].data_offset;
-		curpitch = toMix[sampMixed].pitch;
-
-		// FIFO A & B mixing...
-		for (i = 0 ; i < BUFFER_SIZE ; i++) {
-			currentptr = (curdatabegin + (curdataoffset >> 8));
-			if ((currentptr >= curloopend) && curinloop) curdataoffset = toMix[sampMixed].loop_begin - curdatabegin;
-			if (currentptr >= curdataend) break ;
-			*(mixBufA + i) += (*(s8 *)currentptr * curvolumea) >> 8;
-			*(mixBufB + i) += (*(s8 *)currentptr * curvolumeb) >> 8;
-			curdataoffset += curpitch;			
+	// fill the buffer with nice fellows
+	while (traverse)
+	{
+		//dprintf("Mixing sample: %s\n", traverse->sample->GetName());
+		sampledata = traverse->sample->GetChunk();
+		
+		for (b = 0; b < BUFFER_SIZE; b++)
+		{
+			// we need to start filling the buffer at either 0 or chunksize (depending on where the pointer is)
+			mixBufA[b] += sampledata[b];
+			mixBufB[b] += sampledata[b];
 		}
-
-		// update the mix pointer.
-		toMix[sampMixed].data_offset = curdataoffset;
+		traverse = traverse->next;
 	}
-
 }
 
-void ClarkMix::InterruptProcess(void) {	
+// Interrupt process
+void ClarkMix::InterruptProcess(void)
+{
  	REG_DMA1CNT &= ~ENABLE_DMA;
 	REG_DMA2CNT &= ~ENABLE_DMA;
 
@@ -159,40 +154,6 @@ void ClarkMix::InterruptProcess(void) {
 	REG_DMA2CNT = ENABLE_DMA | START_ON_FIFO_EMPTY | DMA_32 | DMA_REPEAT ;
 	mixBuffers();
         REG_IF |= REG_IF;
-}
-
-void ClarkMix::playSample(u32 data_begin, u32 data_end, u32 loop_begin, u32 loop_end, u8 volume, s8 panning, u8 bank, u16 pitch) {
-    toMix[bank].data_begin = data_begin;
-    toMix[bank].data_end = data_end;
-    toMix[bank].volume_a = ((128 - panning) * volume) >> 8;
-    toMix[bank].volume_b = ((128 + panning) * volume) >> 8;
-    toMix[bank].volume = volume;
-    toMix[bank].panning = panning;
-    toMix[bank].loop_begin = loop_begin;
-    toMix[bank].loop_end = loop_end;
-    toMix[bank].in_loop = 1;
-    toMix[bank].data_offset = 0;
-    toMix[bank].pitch = pitch;
-}
-
-void ClarkMix::stopSample(u8 bank) {
-	toMix[bank].in_loop = 0;
-}
-
-void ClarkMix::setVolume(u8 volume, u8 bank) {
-	toMix[bank].volume_a = ((128 - toMix[bank].panning) * volume) >> 8 ;
-	toMix[bank].volume_b = ((128 + toMix[bank].panning) * volume) >> 8;
-	toMix[bank].volume = volume;
-}
-
-void ClarkMix::setPanning(s8 panning, u8 bank) {
-	toMix[bank].volume_a = ((128 - panning) * toMix[bank].volume) >> 8 ;
-	toMix[bank].volume_b = ((128 + panning) * toMix[bank].volume) >> 8;
-	toMix[bank].panning = panning;
-}
-
-void ClarkMix::setPitch(u16 pitch, u8 bank) {
-	toMix[bank].pitch = pitch;
 }
 
 // add a sample to the linked list of samples to be managed

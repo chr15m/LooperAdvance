@@ -40,9 +40,16 @@ void (*IntrTable[])() =
 int main()
 {
 	ClarkMix *mixer = new ClarkMix();
+	Sample *mysample = new Sample((SampleData *)&samples[0]);
+	Sample *other = new Sample((SampleData *)&samples[1]);
 	
-	mixer->playSample((u32)samples[0].data, (u32)&samples[0].data + samples[0].length, (u32)samples[0].data, (u32)samples[0].data + samples[0].length, 250, 0, 0, 0x0100);
-	mixer->playSample((u32)samples[1].data, (u32)&samples[1].data + samples[1].length, (u32)samples[1].data, (u32)samples[1].data + samples[1].length, 250, 0, 1, 0x0100);
+	mixer->Manage(mysample);
+	mixer->Manage(other);
+	
+	mysample->SetFrequency((u32)BUFFER_SIZE << 8);
+	
+	//mixer->playSample((u32)samples[0].data, (u32)&samples[0].data + samples[0].length, (u32)samples[0].data, (u32)samples[0].data + samples[0].length, 250, 0, 0, 0x0100);
+	//mixer->playSample((u32)samples[1].data, (u32)&samples[1].data + samples[1].length, (u32)samples[1].data, (u32)samples[1].data + samples[1].length, 250, 0, 1, 0x0100);
 
 	while(1);
 }

@@ -104,16 +104,16 @@ s8 *Sample::GetChunk()
 //	dprintf("Returning %d bytes.\n", chunksize);
 	
 	// use only 24 bits of next chunk
-	s8 *returnchunk = (s8 *)sampledata->data + (nextchunk >> 8);
+	s8 *returnchunk = (s8 *)sampledata->data + (nextchunk);
 	
 	//nextchunk += chunksize;
 	// go forward at our frequency
-	nextchunk += frequency;
+	nextchunk += 256;
 	//dprintf("chunk: %ld\n", (nextchunk >> 8));
 	
 	// NOTE: because our chunksize is only 4 on the gba it's not really an issue reading past the end of the data
 	// however if this is going to be ported to other platforms, this should be adressed with a temporary buffer
-	if ((nextchunk >> 8) > sampledata->length)
+	if ((nextchunk) > sampledata->length)
 		nextchunk = 0;
 	
 	return returnchunk;

@@ -30,7 +30,7 @@
 #define __CLARKMIX_HH__
 
 // 1/25 sec buffer.
-#define BUFFER_SIZE 640
+#define BUFFER_SIZE 256
 // 16khz play back freq
 #define PLAYER_FREQ 0xFBFF
 #define SAMPLES_MIX  4
@@ -73,8 +73,6 @@ private:
 	s8* mixBufA;
 	s8* mixBufB;
 	
-	struct sample toMix[SAMPLES_MIX];
-	
 	u16 bufferSwitch;
 	
         // a pointer to a linked list of all the samples we're currently playing
@@ -93,21 +91,6 @@ public:
 	void Forget(Sample* which);
 
 	void InterruptProcess(void);
-
-	/* Play a sample */
-	void playSample(u32 data_begin, u32 data_end, u32 loop_begin, u32 loop_end, u8 volume, s8 panning, u8 bank, u16 pitch);
-	void stopSample(u8 bank);
-	
-	/* Volume goes from 0 (nil) to 255 (full volume) */
-	void setVolume(u8 volume, u8 bank);
-	
-	/* Panning goes from -128 (full left) to 127 (full right) */
-	void setPanning(s8 panning, u8 bank);
-	
-	/* Pitch goes from 0x0001 (very slow) to 0xFFFF (very fast).
-	 * Effective values can be found in clarkfreqs.h
-	 */
-	void setPitch(u16 pitch, u8 bank);
 };
 
 namespace Audio

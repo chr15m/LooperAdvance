@@ -47,7 +47,7 @@ INCLUDE	= -I$(shell pwd)
 
 # what to build if we're building the whole program
 ifeq ($(TARGET),looper)
-	GAMEOBJECTS = Keys.o Page.o First.o Loop.o Widget.o Label.o EditBox.o SelectBox.o NumberBox.o GlobalData.o charset.o samples/samples.o splash.o
+	GAMEOBJECTS = Keys.o Page.o First.o Loop.o Widget.o Label.o EditBox.o SelectBox.o NumberBox.o GlobalData.o charset.o samples/samples.o splash.o screens.o
 endif
 
 ifeq ($(TARGET),audiotest)
@@ -110,15 +110,17 @@ $(TARGET).elf: $(RESOURCES) $(TARGET).cc $(TARGET).o $(CRT) $(GAMEOBJECTS) $(SCR
 	$(LD) $(LFLAGS) crt0.o $(TARGET).o $(GAMEOBJECTS) $(SCREENOBJECTS) -o $(TARGET).elf $(LIBS)
 
 # audio stuff
+samples/samples.o: samples/samples.hh samples/samples.cc
+
 samples/samples.hh samples/samples.cc: samples/Makefile
 	make -C samples/
 
 # screens data
 splash.hh splash.cc: screens/$(THEME)/*.png
-	./createscreendata.py -bffffff screens/$(THEME)/splash.png
+	./createscreendata.py -b`cat screens/$(THEME)/transparent` screens/$(THEME)/splash.png
 
 screens.hh screens.cc: screens/$(THEME)/*.png
-	./createscreendata.py -oscreens -nscreens/$(THEME)/font.png -nscreens/$(THEME)/altfont.png screens/$(THEME)/loop.png screens/$(THEME)/first.png
+	./createscreendata.py -b`cat screens/$(THEME)/transparent` -oscreens -nscreens/$(THEME)/font.png -nscreens/$(THEME)/altfont.png screens/$(THEME)/loop.png screens/$(THEME)/first.png
 
 # clean
 clean:

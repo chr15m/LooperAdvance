@@ -21,6 +21,7 @@
 #include "Widgets.hh"
 #include "samples/samples.hh"
 #include "krawall_fake.h"
+#include "screens.hh"
 
 #ifndef _LOOP_HH_
 #define _LOOP_HH_
@@ -33,10 +34,12 @@ private:
 	u16 beat;
 	u16 numnotes;
 	ptrNoteData *notes;
+	char beatNumberText[4];
 	
 	structLoopData *data;
 	
 	EditBox *ebName;
+	Label *lbBeatNumber;
 	NumberBox *nbPitch;
 	SelectBox *sbPan;
 	NumberBox *nbBeats;
@@ -56,7 +59,9 @@ private:
 	SelectBox *sbNAction;
 	
 	// notes labels
+	Label *lbSample;
 	Label *lbNotes;
+	Label *lbStep;
 	Label *lbNote;
 	Label *lbNSwing;
 	Label *lbNBeat;

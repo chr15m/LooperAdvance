@@ -50,6 +50,11 @@ char *EditBox::GetString()
 	return value;
 }
 
+void EditBox::SetPosition(u8 position)
+{
+	which = position;
+}
+
 Widget *EditBox::Process()
 {
 	Widget *newselect = NULL;

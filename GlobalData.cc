@@ -583,7 +583,7 @@ void GlobalData::LoadSongs()
 	debug("Loading songs.");
 
 	// black = starting
-	SetBG(0, 0, 0);
+	//SetBG(0, 0, 0);
 	
 	ReadNumber(&checkmagic, sizeof(u16));
 	
@@ -594,7 +594,7 @@ void GlobalData::LoadSongs()
 		while (!CheckMagic())
 		{
 			// red = song
-			SetBG(10, 0, 0);
+			//SetBG(10, 0, 0);
 			
 			// start a new song
 			debug("Creating a new song struct.");
@@ -614,7 +614,7 @@ void GlobalData::LoadSongs()
 			while (!CheckMagic())
 			{
 				// green = loop
-				SetBG(0, 10, 0);
+				//SetBG(0, 10, 0);
 				
 				// create a new loop
 				debug("Creating a new loop struct.");
@@ -636,7 +636,7 @@ void GlobalData::LoadSongs()
 				while (!CheckMagic())
 				{
 					// blue = note
-					SetBG(0, 0, 10);
+					//SetBG(0, 0, 10);
 					
 					// create a new note
 					debug("Creating a new note struct.");

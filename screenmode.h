@@ -64,4 +64,14 @@
 //////////////////////Macros/////////////////////
 #define SetMode(mode) REG_DISPCNT = (mode) 
 
+
+// memory locations
+#define BG0	0x7000
+#define BG1	0x7400
+#define BG2	0x7800
+#define BG3	0x7C00
+
+#define TEXT_BG	BG1
+
+#define FONT_TILES_BASE 0x3000
 #endif

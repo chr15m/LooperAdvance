@@ -1,0 +1,13 @@
+In each dir:
+
+* transparent - a text file with the hex code for the transparent colour
+
+* font.png - the font to be used
+* altfont.png - the font with colours inverted or changed for highlight
+
+* splash.png - splash screen
+
+* first.png - first screen background
+* loop.png - the loop screen background
+
+some good fonts: aqui, terminal bold, space marine, origami mommy 9, clean, courier 10 pitch

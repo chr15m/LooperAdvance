@@ -15,7 +15,7 @@
 #******************************************************/
 
 #layout = "abcdefghijklmnopqrstuvwxyz0123456789,./<>?;':\"[]\{}|!@#$%^&*()_+-="
-layout = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ 1234567890!@#$%^&*()-=_+[]{}\|;':\",.<>/?`~"
+layout = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ   1234567890!@#$%^&*()-=_+[]{}\|;':\",.<>/?`~"
 
 print str(len(layout)) + " letters"
 letters = []

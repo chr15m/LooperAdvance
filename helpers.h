@@ -19,6 +19,9 @@
 #ifndef _HELPERS_H_
 #define _HELPERS_H_
 
+#include "screens.hh"
+#include "screenmode.h"
+
 #define CHAR_BUFFER_SIZE 255
 
 #define debug(format, args...)	\
@@ -45,7 +48,7 @@
         snprintf( buffer, CHAR_BUFFER_SIZE, format , ## args); \
         while(buffer[i] != '\0')\
 	{\
-	VideoBuffer[0x7C00 + x + y * 32 + i] = font::charoffset[buffer[i]];\
+	VideoBuffer[TEXT_BG + x + y * 32 + i] = font::charoffset[buffer[i]] + (FONT_TILES_BASE>>5);\
 	i++;\
 	}\
 })
@@ -56,13 +59,13 @@
         snprintf( buffer, CHAR_BUFFER_SIZE, format , ## args); \
         while(buffer[i] != '\0')\
 	{\
-	VideoBuffer[0x7C00 + x + y * 32 + i] = font::charoffset[buffer[i]] + 101;\
+	VideoBuffer[TEXT_BG + x + y * 32 + i] = font::charoffset[buffer[i]] + 104 + (FONT_TILES_BASE>>5);\
 	i++;\
 	}\
 })
 
 #define hchar(x, y, char)  ({    \
-	VideoBuffer[0x7C00 + x + y * 32] = font::charoffset[char] + 101;\
+	VideoBuffer[TEXT_BG + x + y * 32] = font::charoffset[char] + 104 + (FONT_TILES_BASE>>5);\
 })
 
 
@@ -84,10 +87,16 @@ inline void SetBG(u16 r, u16 g, u16 b)
 		(*(u16*)(BGPaletteMem + 6)=(RGB(r,g,b)));
 }
 
-inline void BlankScreen()
+inline void BlankScreen(u16 screenbase=TEXT_BG)
 {
-	u32 zero=52;
-	DMACopy((void*)&zero, (u16*)&VideoBuffer[0x7C00], 0x400, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_FIXED | DMA_DEST_INCREMENT);
+	u32 zero = 0;
+	
+	DMACopy((void*)&zero, (u16*)&VideoBuffer[screenbase], 0x400, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_FIXED | DMA_DEST_INCREMENT);
 }
 
+inline void bzero(void *memstart, u32 size)
+{
+	u32 zero=0;
+	DMACopy((void*)&zero, (void *)memstart, size, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_FIXED | DMA_DEST_INCREMENT);	
+}
 #endif //_HELPERS_H_

@@ -25,7 +25,7 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	UseKeys(inkeys);
 	
 	data = whichloop;
-
+	
 	lastbeat = 0;
 	handle = 0;
 	numnotes = 0;
@@ -33,42 +33,49 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	
 	// set up the GUI
 	debug("Setting up GUI");
+
+	// initialize our number
+	sprintf(beatNumberText, "%3d", beat);
 	
 	ebName = new EditBox(10, 1, 10, inkeys);
-	sbOn = new SelectBox(10, 3, 3, inkeys);
+	lbBeatNumber = new Label(26, 1, beatNumberText);
+	sbOn = new SelectBox(10, 2, 3, inkeys);
 	debug("sbOn: 0x%lx", (u32)sbOn);
 	nbPitch = new NumberBox(10, 4, 6, 1, 100000, 100, inkeys);
 	sbPan = new SelectBox(10, 5, 5, inkeys);
 	nbBeats = new NumberBox(10, 6, 2, 1, 64, 8, inkeys);
 	sbReset = new SelectBox(10, 7, 5, inkeys);
-	sbSample = new SelectBox(10, 9, 10, inkeys);
+	sbSample = new SelectBox(10, 8, 10, inkeys);
 	
 	lbPitch = new Label(2, 4, "Pitch");
-	lbBeats = new Label(2, 6, "Beats");
+	lbBeats = new Label(2, 6, "Slices");
+	lbSample = new Label(2, 8, "Sample");
 	lbSwing = new Label(2, 11, "Swing");
 	
 	nbSwing = new NumberBox(10, 11, 3, 0, 999, 20, inkeys);
 	
 	// notes interface
 	nbNotes = new NumberBox(10, 12, 3, 0, 256, 4, inkeys);
-	lbNotes = new Label(2, 12, "Notes");
+	lbNotes = new Label(2, 12, "Steps");
+	lbStep = new Label(2, 13, "Step");
 	
 	nbNote = new NumberBox(10, 13, 3, 0, 0, 8, inkeys);
 	nbNBeat = new NumberBox(10, 15, 3, 0, 0, 20, inkeys);
 	nbNSwing = new NumberBox(10, 16, 3, 0, 255, 20, inkeys);
 	nbNPitch = new NumberBox(10, 17, 3, 0, 255, 12, inkeys);
-	sbNAction = new SelectBox(10, 18, 6, inkeys);
+	sbNAction = new SelectBox(9, 18, 6, inkeys);
 	
 	// notes labels
-	lbNBeat = new Label(3, 15, "Beat");
-	lbNSwing = new Label(3, 16, "Swing");
-	lbNPitch = new Label(3, 17, "Pitch");	
-	lbNAction = new Label(3, 18, "Action");
+	lbNBeat = new Label(2, 15, "Slice");
+	lbNSwing = new Label(2, 16, "Swing");
+	lbNPitch = new Label(2, 17, "Note");	
+	lbNAction = new Label(2, 18, "Action");
 
 	sbAddLoopButton = new SelectBox(19, 17, 8, inkeys);
 	sbDelLoopButton = new SelectBox(19, 18, 8, inkeys);
 
 	AddWidget(ebName);
+	AddWidget(lbBeatNumber);
 	AddWidget(sbOn);
 	AddWidget(nbPitch);
 	AddWidget(lbPitch);
@@ -81,7 +88,9 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	AddWidget(nbSwing);
 	AddWidget(nbNotes);
 	AddWidget(lbNotes);
+	AddWidget(lbSample);
 	
+	AddWidget(lbStep);
 	AddWidget(nbNote);
 	
 	AddWidget(lbNSwing);
@@ -539,12 +548,18 @@ void Loop::DoProcess()
 		}
 	}
 	
+	// output our beat. Yeh!
+	sprintf(beatNumberText, "%3d", beat % 256);
+	
 	debugloop("Beat: %d", beat);
 }
 
-// when a swap occurs, select the correct loop
+// when a page swap occurs
 void Loop::DoSwap()
 {
+	// update our background
+	DMACopy((void*)loop_map, (u16*)&VideoBuffer[BG2], LOOP_MAP_SIZE, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT);
+	// select the right loop
 	globals.SetCurrentLoop(data);
 }
 

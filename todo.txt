@@ -8,32 +8,28 @@ Looper Advance Live (1.0):
 	+ create Sample class which points to ROM sample
 		- panning and volume chunks calculated
 	+ create AudioLayer class which manages samples
-		- make sure sample order is correct
+		+ make sure sample order is correct
 		+ get dma working
 		+ try implementing as dma fifo based instead of timer callback
-			- write mixing routine
+			+ write mixing routine
 			- write panning/volume code and per-sample mixers
 			- think about a callback system for effects
 
-- fix the bug where every song above the current is deleted on 'new'
-
-- build system for different background themes
-	- python script to turn images into data files
-	- make a nice theme
+- interface changes:
+	+ rename beat and note to slice and step (Jordan)
+	+ display current note position for this loop (Jordan)
+	+ B is a delete button in the editbox
 
 * RELEASE *
 
 - interface changes:
 	- b button = browse notes (Jordan)
 	- start button = on/off (Jordan)
-	- rename beat and note to slice and step (Jordan)
 	- holding down button on select & number boxes will scroll (Evans)
 	- option to 'wrap' on select/number boxes (Evans)
 	- note numbering should line up on specific note selector (Jordan)
 	- letter selection not so buggy (specific set of characters)
-	- display current note position for this loop (Jordan)
 	- allow for different volumes (Evans)
-	+ B is a delete button in the editbox
 	- selecting a pitch - a keyboard appears
 	
 - original gb synth pages
@@ -42,11 +38,11 @@ Looper Advance Live (1.0):
 	- noise wave
 	- programmable wave
 
-- drum constructor synth page
-
 - creating new notes changes
 	- use settings of last note if less than loop length
 	- use same note 1 loop length ago
+
+- drum constructor synth page
 
 - implement nanoloop sync code
 
@@ -57,8 +53,17 @@ Looper Advance Live (1.0):
 Done:
 -----
 
+1.0
 + make a releasable sample bank
 + add splash screens
 + make tutorial (and screenshots)
 + add header to all files
 + upload source and binary to website
+
+1.1
++ fix the bug where every song above the current is deleted on 'new'
++ build system for different background themes
+	+ python script to turn images into data files
+	+ make a nice theme
+	+ get it working with looper's current build system
+

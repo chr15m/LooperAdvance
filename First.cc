@@ -31,8 +31,8 @@ First::First(Keys *inkeys)
 	lbBPM = new Label(26, 1, "BPM");
 	nbBPM = new NumberBox(21, 1, 3, 1, 600, 10, inkeys);
 	
-	sbAddLoopButton = new SelectBox(18, 17, 8, inkeys);
-	sbDelLoopButton = new SelectBox(18, 18, 8, inkeys);
+	sbAddLoopButton = new SelectBox(19, 17, 8, inkeys);
+	sbDelLoopButton = new SelectBox(19, 18, 8, inkeys);
 	
 	AddWidget(lbSong);
 	AddWidget(sbSong);
@@ -125,6 +125,12 @@ First::~First()
 	delete sbDelLoopButton;
 }
 
+// if we've just swapped to this page
+void First::DoSwap()
+{
+	DMACopy((void*)first_map, (u16*)&VideoBuffer[BG2], FIRST_MAP_SIZE, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT);
+}
+
 // if they've clicked the save button, then save
 void *First::SaveButton(void *data)
 {
@@ -183,6 +189,7 @@ void *First::Song(void *data)
 	// set this song's data
 	nbBPM->SetValue(newsong->bpm);
 	ebSongName->SetString(newsong->name);
+	ebSongName->SetPosition(0);
 	
 	// reset the counters each time we change songs
 	globals.Reset();

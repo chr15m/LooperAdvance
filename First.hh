@@ -21,6 +21,7 @@
 #include "Loop.hh"
 #include "Widgets.hh"
 #include "GlobalData.hh"
+#include "screens.hh"
 
 class First : public Page
 {
@@ -50,8 +51,9 @@ private:
 public:
 	First(Keys *inkeys);
 	virtual ~First();
-	inline void DoSwap() {};
+
 	inline void DoProcess() {};
+	void DoSwap();
 		
 	// build the choice list of song names
 	void RebuildSongList();

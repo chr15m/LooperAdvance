@@ -127,8 +127,9 @@ else:
 				print arg + " does not exist"
 	
 	# figure out what our background colour is
-	r, g, b = int(bgcolor[0:2], 16), int(bgcolor[2:4], 16), int(bgcolor[4:], 16)
-	bgtupple = (b>>3) * 1024 + (g>>3) * 32 + (r>>3)
+	bg_r, bg_g, bg_b = int(bgcolor[0:2], 16), int(bgcolor[2:4], 16), int(bgcolor[4:], 16)
+	print "Set background color to (%d,%d,%d)" % (bg_r>>3, bg_g>>3, bg_b>>3)
+	bgtupple = (bg_b>>3) * 1024 + (bg_g>>3) * 32 + (bg_r>>3)
 	
 	for filename in files:
 		print "Processing " + filename
@@ -140,7 +141,12 @@ else:
 		image = pygame.image.load(filename)
 		
 		# is this image size divisible by 8?
-		width, height = image.get_width() + 16, image.get_height()
+		if (not nocompress.has_key(filename)):
+			# compressed ones have to have 2 tile screen bleed on their maps
+			width, height = image.get_width() + 16, image.get_height()
+		else:
+			# uncompressed ones need to have a normal width
+			width, height = image.get_width(), image.get_height()
 		
 		# we need to do this to make the off-screen surfaces on the GBA
 		#image = pygame.Surface((width, height), 0, imageOrig)
@@ -198,14 +204,11 @@ else:
 							if (newtile.GetMd5() == alltiles[tileref].GetMd5()):
 								# we have found a match
 								map.SetTileRef(mapx, mapy, tileref)
-								print "setting a map ref = " + str(tileref)
 								addtile = 0
 						
 						if (addtile):
 							alltiles.append(newtile)
 							map.SetTileRef(mapx, mapy, len(alltiles) - 1)
-							print "setting a map ref = " + str(len(alltiles) - 1)
-						
 					else:
 						# add our tile to our set of tiles
 						tiles.append(newtile)
@@ -244,6 +247,11 @@ else:
 	hfile.write("#define " + string.upper(outputname) + "_PALETTE_SIZE " + str(paletteLength) + "\n")
 	hfile.write("extern const u16 " + outputname + "_palette[" + string.upper(outputname) + "_PALETTE_SIZE];\n")
 	cfile.write("const u16 " + outputname + "_palette[" + string.upper(outputname) + "_PALETTE_SIZE] = {\n")
+	
+	# output the invisible palette color
+	hfile.write("#define " + string.upper(outputname) + "_BG_R " + str(bg_r>>3) + "\n");
+	hfile.write("#define " + string.upper(outputname) + "_BG_G " + str(bg_g>>3) + "\n");
+	hfile.write("#define " + string.upper(outputname) + "_BG_B " + str(bg_b>>3) + "\n");
 	
 	for palref in xrange(0, paletteLength):
 		cfile.write("0x%04x, " % palette[palref])

@@ -32,6 +32,7 @@ public:
 	
 	void SetString(char *instring);
 	char *GetString();
+	void SetPosition(u8 position);
 	Widget *Process();
 	void Draw();
 };

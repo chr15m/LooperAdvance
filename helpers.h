@@ -84,7 +84,7 @@ inline u16 RGB(u16 r, u16 g, u16 b)
 
 inline void SetBG(u16 r, u16 g, u16 b)
 {
-		(*(u16*)(BGPaletteMem + 6)=(RGB(r,g,b)));
+	(*(u16*)(BGPaletteMem)=(RGB(r,g,b)));
 }
 
 inline void BlankScreen(u16 screenbase=TEXT_BG)

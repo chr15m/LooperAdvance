@@ -3,7 +3,6 @@
 // Represents a single loop-page
 
 #include "First.hh"
-#include "songdata.hh"
 
 First::First(Keys *inkeys)
 {

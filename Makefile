@@ -8,7 +8,8 @@ SRCS	= $(shell ls *.c)
 CXXSRCS = $(shell ls *.cc)
 ASM	= $(shell ls *.s)
 OBJS	= $(SRCS:.c=.o) $(CXXSRCS:.cc=.o) $(ASM:.s=.o) 
-GAMEOBJECTS = Keys.o Page.o First.o Loop.o Widget.o Label.o EditBox.o SelectBox.o NumberBox.o instruments.o samples.o krawall.lib charset.o samplenames.o
+GAMEOBJECTS = Keys.o Page.o First.o Loop.o Widget.o Label.o EditBox.o SelectBox.o NumberBox.o GlobalData.o instruments.o samples.o krawall.lib charset.o samplenames.o
+AUDIOOBJECTS = modules.h samples.h instruments.h samples.s instruments.s
 
 ifdef RELEASE
 	#release build
@@ -28,21 +29,19 @@ export LANGUAGE=en
 
 include Makefile.inc
 
-# default stuff
-
 %.text.iwram.o : %.text.iwram.c
 	$(CC) $(CFLAGS) -marm -c $< -o $@
 
-%.o : %.c samples.h 
+%.o : %.c samplenames.hh
 	$(CC) $(CFLAGS) -mthumb -c $< -o $@
 
-%.o : %.s samples.h
+%.o : %.s samplenames.hh
 	$(AS) $< -o $@
 
 %.text.iwram.o : %.text.iwram.cc
 	$(CXX) $(CFLAGS) $(CXXFLAGS) -marm -c $< -o $@
 	
-%.o : %.cc samples.h
+%.o : %.cc samplenames.hh
 	$(CXX) $(CFLAGS) $(CXXFLAGS) -mthumb -c $< -o $@
 
 all: $(TARGET).gba
@@ -55,25 +54,29 @@ $(TARGET).gba: $(TARGET).elf
 $(TARGET).elf: $(RESOURCES) $(TARGET).cc $(TARGET).o $(GAMEOBJECTS) $(CRT) $(LDSCRIPT) Makefile
 	$(LD) $(LFLAGS) crt0.o $(TARGET).o $(GAMEOBJECTS) -o $(TARGET).elf $(LIBS)
 
-# audio stuff
-
-modules.h samples.h instruments.h samples.s instruments.s: samples.xm
-	../krawall/converter/converter.linux samples.xm
-
-samplenames.cc: samples.h
-	./samplenames.py
-
+# links to lib
 krawall.lib: ../krawall/gcclib/krawall-32k-60-medium-sf.lib
 	ln -s ../krawall/gcclib/krawall-32k-60-medium-sf.lib krawall.lib
 
 samples.xm: ../samples.xm
 	ln -s ../samples.xm
 
+# audio stuff
+
+$(AUDIOOBJECTS): samples.xm
+	../krawall/converter/converter.linux samples.xm
+
+samplenames.cc samplenames.hh: samples.h
+	./samplenames.py
+	
 clean:
 	rm -f *.elf *.gba *~ *.log *.bak *.o
 	rm -f `find -name \*.o -print -or -name \*~ -print`  
 	rm -f .depend .hdepend .sdepend
-	@touch `find`
+	# audio stuff:
+	rm -f $(AUDIOOBJECTS)
+	rm -r samplenames.hh samplenames.cc
+	# @touch `find`
 
 #build dependencies
 dep: depend

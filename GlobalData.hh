@@ -63,6 +63,15 @@ public:
 	struct structNote *currentnote;
 	
 	GlobalData();
+	void NewSong();
+	void DelSong();
+	void SetSong(u16 whichsong);
+	void SetName(char *name);
+	void AddLoop();
+	void DelLoop();
+	void SetBPM(u16 bpm);
+	void SaveSongs();
+	void LoadSongs();
 };
 
 extern GlobalData globals;

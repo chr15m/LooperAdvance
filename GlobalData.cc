@@ -75,7 +75,7 @@ void GlobalData::SetBPM(u16 bpm)
 // save all songs from memory into the writeable ROM
 void GlobalData::SaveSongs()
 {
-	// this is going to walk the save ram, pulling out and reconstructing the data
+/*	// this is going to walk the save ram, pulling out and reconstructing the data
 	u16 offset = 0;
 		
 	#define NEXTBYTE 	*(u8 *)(SRAM + offset)
@@ -96,6 +96,7 @@ void GlobalData::SaveSongs()
 		
 		oldsong = 0;
 	}
+*/
 }
 
 // load all songs from ROM into memory

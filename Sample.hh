@@ -65,69 +65,10 @@ public:
 	
 	bool IsPlaying();
 
-	inline bool MixDown(bool first, s8 *mixBufA, s8 *mixBufB, u16 buffSize)
-	{
-		u16 chunkR = (nextchunk >> 8);
-		u32 nextchunkR = nextchunk;
-		u32 velocityR = velocity;
-		u16 b;
-		u32 lengthR = sampledata->length;
-		u32 dataptr = (u32)sampledata->data;
-		
-		if (playing)
-		{
-			for (b = 0; b < buffSize; b++)
-			{
-				chunkR = (nextchunkR += velocityR) >> 8;
-				if (first)
-				{
-					// fill up our buffers byte by byte
-					mixBufA[b] = *((s8 *)dataptr + chunkR);
-					mixBufB[b] = *((s8 *)dataptr + chunkR);
-				}
-				else
-				{
-					// fill up our buffers byte by byte
-					mixBufA[b] += *((s8 *)dataptr + chunkR);
-					mixBufB[b] += *((s8 *)dataptr + chunkR);
-				}
-			}
-			if (chunkR >= lengthR - 1)
-				nextchunkR = 0;
-			nextchunk = nextchunkR;
-			first = false;
-		}
-		return first;
-	}
+	void MixDown(s8 *mixBufA, s8 *mixBufB, u16 buffSize) __attribute__ ((section (".iwram")));
 	
 	//inline s8 GetByte(panVal pan) __attribute__ ((section (".iwram")));
-	inline s8 GetByte(panVal pan)
-	{
-		s8 returnchunk = 0;
-		//u32 hop = (nextchunk >> 8);
-		
-		if (playing)
-		{
-			// we're going to have to set this anyway (else)
-			nextchunk += velocity;
-			
-			/*if ((loopEnd) && (hop >= loopEnd || hop < loopStart))
-			{
-				nextchunk = loopStart << 8;
-			}
-			else if (hop >= sampledata->length - 1)
-			*/
-			//if (hop >= sampledata->length - 1)
-			//{
-			//	nextchunk = 0;
-			//}
-			
-			// calculate the mixed value to return
-			//returnchunk = *((s8 *)sampledata->data + (nextchunk >> 8));
-		}
-		
-		return returnchunk;
-	}
+	s8 GetByte(panVal pan) __attribute__ ((section (".iwram")));
 };
 
 typedef struct structSampleList

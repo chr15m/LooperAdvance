@@ -46,7 +46,7 @@ INCLUDE	= -I$(shell pwd)
 
 # what to build if we're building the whole program
 ifeq ($(TARGET),looper)
-	GAMEOBJECTS = Keys.o Page.o First.o Loop.o Widget.o Label.o EditBox.o SelectBox.o NumberBox.o GlobalData.o Sample.text.iwram.o ClarkMix.text.iwram.o charset.o samples/samples.o splash.o screens.o
+	GAMEOBJECTS = Keys.o Page.o First.o Loop.o Widget.o Label.o EditBox.o SelectBox.o NumberBox.o GlobalData.o Sample.arm.o ClarkMix.arm.o charset.o samples/samples.o splash.o screens.o
 endif
 
 ifeq ($(TARGET),audiotest)
@@ -95,6 +95,9 @@ export LANGUAGE=en
 
 %.o : %.s
 	$(AS) $< -o $@
+
+%.arm.o : %.arm.cc
+	$(CC) $(CFLAGS) -marm -c $< -o $@
 
 %.text.iwram.o : %.text.iwram.cc
 	$(CXX) $(CFLAGS) $(CXXFLAGS) -marm -c $< -o $@

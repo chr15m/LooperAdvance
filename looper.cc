@@ -36,7 +36,8 @@ int main()
 	First *firstpage = new First(keys);
 	Page *selected = firstpage;
 	Page *traverse;
-		
+
+	globals.Init();
 	firstpage->right = NULL;
 	
 	// set up a nice screen mode

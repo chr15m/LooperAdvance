@@ -35,6 +35,7 @@ public:
 	bool IsEmpty();
 	char *GetChoiceString();
 	void AutoOff(u16 time = 10);
+	u16 GetFrame();
 	Widget *Process();
 	void Draw();
 };

@@ -4,12 +4,19 @@
 
 GlobalData::GlobalData()
 {
+	Init();
+}
+
+// initialise everything
+void GlobalData::Init()
+{
 	// initialize our globals
 	counter = 0;
 	songdata = NULL;
 	currentsong = NULL;
 	offset = 0;
 	magic = 0xABCD;
+	dprintf("Magic: 0x%x\n\n", magic);	
 }
 
 // create a new blank song
@@ -80,104 +87,94 @@ void GlobalData::SaveSongs()
 	structSongData *songtrav = songdata;
 	structLoopData *looptrav = NULL;
 	structNoteData *notetrav = NULL;
+	offset = 0;
 	
 	// write the magic string
-	bcopy((const char*)&magic, (char *)(SRAM + offset), sizeof(u16));
-	offset += sizeof(u16);
+	WriteNumber(magic, sizeof(u16));
 	
 	// go through each song
 	while (songtrav)
 	{
 		// write song name
-		
+		WriteString(songtrav->name);
 		// write bpm
+		WriteNumber(songtrav->bpm, sizeof(u16));
 		
 		// go through each loop in this song
 		looptrav = songtrav->loops;
-		if (looptrav)
+		while (looptrav)
 		{
-			while (looptrav)
+			// write the loop name
+			WriteString(looptrav->name);
+			// write the sample number
+			WriteNumber(looptrav->sample, sizeof(u16));
+			// write the panning direction
+			WriteNumber(looptrav->pan, sizeof(bool));
+			// write the pitch
+			WriteNumber(looptrav->pitch, sizeof(u16));
+			// write the number of divisions
+			WriteNumber(looptrav->divisions, sizeof(u16));
+
+			// go through each note
+			notetrav = looptrav->notes;
+			if (notetrav)
 			{
-				// write the loop name
-				// write the sample number
-				// write the panning direction
-				// write the pitch
-				// write the number of divisions
-				// go through each note
-				notetrav = looptrav->notes;
-				if (notetrav)
+				while (notetrav)
 				{
-					while (notetrav)
-					{
-						// write the note end action;
-						// write the beat offset
-						// write the pitch
-						// write the swing
-						
-						// write the magic string for end-of-notes
-						bcopy((const char*)&magic, (char *)(SRAM + offset), sizeof(u16));
-						offset += sizeof(u16);
-						
-						// next note
-						notetrav = notetrav->next;
-					}
+					// write the note end action;
+					WriteNumber(notetrav->noteEnd, sizeof(u8));
+					// write the beat offset
+					WriteNumber(notetrav->offset, sizeof(u8));
+					// write the pitch
+					WriteNumber(notetrav->pitch, sizeof(u8));
+					// write the swing
+					WriteNumber(notetrav->swing, sizeof(u8));
+					
+					// next note
+					notetrav = notetrav->next;
 				}
-				else
-				{
-					// write the magic string for end-of-notes
-					bcopy((const char*)&magic, (char *)(SRAM + offset), sizeof(u16));
-					offset += sizeof(u16);
-				}
-				
-				// write the magic string for end-of-loops
-				bcopy((const char*)&magic, (char *)(SRAM + offset), sizeof(u16));
-				offset += sizeof(u16);
-				
-				// next loop
-				looptrav = looptrav->next;
 			}
+			// write the magic string for end-of-notes
+			WriteNumber(magic, sizeof(u16));
+			
+			// next loop
+			looptrav = looptrav->next;
 		}
-		else
-		{
-			// write the magic string for end-of-loops
-			bcopy((const char*)&magic, (char *)(SRAM + offset), sizeof(u16));
-			offset += sizeof(u16);
-		}
-		
-		// write the magic string for end-of-song
-		bcopy((const char*)&magic, (char *)(SRAM + offset), sizeof(u16));
-		offset += sizeof(u16);		
-		
+		// write the magic string for end-of-loops
+		WriteNumber(magic, sizeof(u16));
+				
 		// next song
 		songtrav = songtrav->next;
 	}
-	
+
 	// write the magic string again for end-of-songs
-	bcopy((const char*)&magic, (char *)(SRAM + offset), sizeof(u16));	
-	
+	WriteNumber(magic, sizeof(u16));
+
 	// reset the offset
 	offset = 0;
 }
 
 // writes a string into the SRAM
-void GlobalData::WriteString(char *str)
+void GlobalData::WriteString(char *instr)
 {
 	// write our letters to disk
-	bcopy(str, (char *)(SRAM + offset), sizeof(str));
-	offset += sizeof(str);
+	bcopy(instr, (char *)(SRAM + offset), strlen(instr));
+	offset += sizeof(instr);
 	if (offset % 2) offset++;
 }
 
 // reads a string from the SRAM
-void GlobalData::ReadString(char **str)
+void GlobalData::ReadString(char **instr)
 {
 	// forget whatever data this char used to be attached to
-	delete *str;
+	delete *instr;
 	// create a new array of characters one longer
-	*str = new char[strlen((char *)(SRAM + offset)) + 1];
+	*instr = new char[strlen((char *)(SRAM + offset)) + 1];
 	// read in a string
-	strncpy(*str, (const char*)(SRAM + offset), strlen((char *)SRAM + offset));
-	offset += sizeof(strlen(*str)) + 1;
+	strncpy(*instr, (const char*)(SRAM + offset), strlen((char *)SRAM + offset));
+	// make sure the last element is zero
+	*instr[strlen(*instr)] = 0;
+	offset += sizeof(strlen(*instr)) + 1;
 	if (offset % 2) offset++;
 }
 

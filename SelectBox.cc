@@ -208,3 +208,8 @@ void SelectBox::Draw()
 		cprintf(x, y, text);
 	}
 }
+
+u16 SelectBox::GetFrame()
+{
+	return timer;
+}

@@ -28,13 +28,13 @@ First::First(Keys *inkeys)
 	sbSaveButton->AutoOff();
 	
 	sbNewButton->NewChoice("New", 0);
-	sbNewButton->NewChoice("---", 0);
+	sbNewButton->NewChoice("---", 1);
 	
 	sbDelButton->NewChoice("Delete", 0);
-	sbDelButton->NewChoice("------", 0);
+	sbDelButton->NewChoice("------", 1);
 	
 	sbSaveButton->NewChoice("Write Changes", 0);
-	sbSaveButton->NewChoice("-------------", 0);
+	sbSaveButton->NewChoice("-------------", 1);
 	
 	UseKeys(inkeys);
 	
@@ -65,21 +65,26 @@ void First::Draw()
 void First::Process()
 {
 	u16 i;
-	Loop *ptrLoop;
-	structSongData *dataptr;
 	
 	dprintf("First Process: %ld\n", (u32)this);
+	
+	// if they've clicked the save button, then save
+	if (sbSaveButton->GetChoice() == 1 && sbSaveButton->GetFrame() == 1)
+	{
+		dprintf("Saving\n");
+		globals.SaveSongs();
+	}
 	
 	// if they've chosen a new song, load it
 	if (oldsong != sbSong->GetChoice())
 	{
-		//dataptr = (structSongData *)&(songs::data[sbSong->GetChoice()]);
-		ptrLoop = (Loop *)right;
-		while(ptrLoop)
-		{
-			ptrLoop->SetParameters(dataptr->loops[i].sample, dataptr->loops[i].pan, dataptr->loops[i].pitch, dataptr->loops[i].divisions);
-			ptrLoop = (Loop *)ptrLoop->right;
-		}
-		oldsong = sbSong->GetChoice();
+		// dataptr = (structSongData *)&(songs::data[sbSong->GetChoice()]);
+//		ptrLoop = (Loop *)right;
+//		while(ptrLoop)
+//		{
+//			ptrLoop->SetParameters(dataptr->loops[i].sample, dataptr->loops[i].pan, dataptr->loops[i].pitch, dataptr->loops[i].divisions);
+//			ptrLoop = (Loop *)ptrLoop->right;
+//		}
+//		oldsong = sbSong->GetChoice();
 	}
 }

@@ -34,7 +34,7 @@ typedef struct structLoopData
 	char *name;		// name for our loop (user can modify this)
 	u16 sample;		// which sample we're using
 	bool pan;		// which way to pan it
-	u32 pitch;		// base pitch to play it at (1000 = normal pitch for the sample)
+	u16 pitch;		// base pitch to play it at (1000 = normal pitch for the sample)
 	u16 divisions;		// how many divisions to divide the loop up into
 	structNoteData *notes;	// linked list of notes to play
 	structLoopData *next;	// next loop in the list of loops for this song
@@ -64,7 +64,8 @@ public:
 	struct structSongData *currentsong;
 	
 	GlobalData();
-
+	void Init();
+	
 	void NewSong();
 	void DelSong();
 	void SetSong(u16 whichsong);

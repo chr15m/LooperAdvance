@@ -19,6 +19,7 @@ First::First(Keys *inkeys)
 	nbBPM = new NumberBox(7, 10, 3, 1, 600, 10, inkeys);
 	
 	sbAddLoopButton = new SelectBox(18, 17, 8, inkeys);
+	sbDelLoopButton = new SelectBox(18, 18, 8, inkeys);
 	
 	AddWidget(lbSong);
 	AddWidget(sbSong);
@@ -30,6 +31,7 @@ First::First(Keys *inkeys)
 	AddWidget(lbBPM);
 	AddWidget(nbBPM);
 	AddWidget(sbAddLoopButton);
+	AddWidget(sbDelLoopButton);
 	
 	sbSong->SetTransitions(NULL, NULL, NULL, sbNewButton);
 	sbNewButton->SetTransitions(NULL, sbDelButton, sbSong, sbSaveButton);
@@ -37,12 +39,14 @@ First::First(Keys *inkeys)
 	sbSaveButton->SetTransitions(NULL, NULL, sbNewButton, ebSongName);
 	ebSongName->SetTransitions(NULL, NULL, sbSaveButton, nbBPM);
 	nbBPM->SetTransitions(NULL, sbAddLoopButton, ebSongName, sbAddLoopButton);
-	sbAddLoopButton->SetTransitions(nbBPM, NULL, nbBPM, NULL);
-		
+	sbAddLoopButton->SetTransitions(nbBPM, NULL, nbBPM, sbDelLoopButton);
+	sbDelLoopButton->SetTransitions(nbBPM, NULL, sbAddLoopButton, NULL);
+	
 	sbNewButton->AutoOff();
 	sbDelButton->AutoOff();
 	sbSaveButton->AutoOff();
 	sbAddLoopButton->AutoOff();
+	sbDelLoopButton->AutoOff();
 	
 	sbNewButton->NewChoice("New", 0);
 	sbNewButton->NewChoice("---", 1);
@@ -54,7 +58,10 @@ First::First(Keys *inkeys)
 	sbSaveButton->NewChoice("-------------", 1);
 
 	sbAddLoopButton->NewChoice("Add Loop", 0);
-	sbAddLoopButton->NewChoice("-------------", 1);
+	sbAddLoopButton->NewChoice("--------", 1);
+
+	sbDelLoopButton->NewChoice("Del Loop", 0);
+	sbDelLoopButton->NewChoice("--------", 1);
 
 	// set up our callback functions for each UI element
 	cbSaveButton.MakeCallback(this, &First::SaveButton);
@@ -71,6 +78,9 @@ First::First(Keys *inkeys)
 
 	cbAddLoopButton.MakeCallback(this, &First::AddLoopButton);
 	sbAddLoopButton->UseCallBack(&cbAddLoopButton);
+
+	cbDelLoopButton.MakeCallback(this, &First::DelLoopButton);
+	sbDelLoopButton->UseCallBack(&cbDelLoopButton);
 
 	cbBPM.MakeCallback(this, &First::BPM);
 	nbBPM->UseCallBack(&cbBPM);
@@ -101,6 +111,7 @@ First::~First()
 	delete lbBPM;
 	delete nbBPM;
 	delete sbAddLoopButton;
+	delete sbDelLoopButton;
 }
 
 // if they've clicked the save button, then save
@@ -166,6 +177,7 @@ void *First::DelButton(void *data)
 // if they press the loop-add button
 void *First::AddLoopButton(void *data)
 {
+	Page *old;
 	debug("AddLoop button callback");
 	// add a loop to currentsong
 	globals.NewLoop();
@@ -174,8 +186,11 @@ void *First::AddLoopButton(void *data)
 	{
 		debug("Inserting a new loop");
 		// make our next loop have a new loop
-//		right->left = new Loop(keys);
-//		right = right->left;
+		old = right;
+		right->left = new Loop(keys);
+		right = right->left;
+		right->left = this;
+		right->right = old;
 	}
 	else
 	{
@@ -183,7 +198,26 @@ void *First::AddLoopButton(void *data)
 		right = new Loop(keys);
 		right->left = this;
 	}
+	
+	return NULL;
+}
 
+// if they press the del-loop button
+void *First::DelLoopButton(void *data)
+{
+	Page *old;
+	debug("DelLoop button callback");
+	// delete the current loop in currentsong
+	globals.DelLoop();
+	// delete the liveloop associated with it
+	if (right)
+	{
+		old = right->right;
+		delete right;
+		right = old;
+		right->left = this;
+	}
+	
 	return NULL;
 }
 

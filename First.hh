@@ -23,6 +23,7 @@ private:
 	Label *lbBPM;
 	NumberBox *nbBPM;
 	SelectBox *sbAddLoopButton;
+	SelectBox *sbDelLoopButton;
 	
 	// callbacks
 	TCallback<First> cbSaveButton;
@@ -30,6 +31,7 @@ private:
 	TCallback<First> cbNewButton;
 	TCallback<First> cbDelButton;
 	TCallback<First> cbAddLoopButton;
+	TCallback<First> cbDelLoopButton;
 	TCallback<First> cbBPM;
 	TCallback<First> cbSongName;
 
@@ -49,5 +51,6 @@ public:
 	void *NewButton(void *data);
 	void *DelButton(void *data);
 	void *AddLoopButton(void *data);
+	void *DelLoopButton(void *data);
 	void *BPM(void *data);
 };

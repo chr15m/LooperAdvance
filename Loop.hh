@@ -23,24 +23,32 @@ private:
 	u32 beats;
 	u32 lastbeat;
 	u32 beat;
-
 	u16 handle;
-
 	u32 size;
 
 	NumberBox *nbPitch;
-	NumberBox *nbPan;
+	SelectBox *sbPan;
 	NumberBox *nbBeats;
-	NumberBox *nbOn;
+	SelectBox *sbOn;
 	SelectBox *sbSample;
-	NumberBox *nbReset;
+	SelectBox *sbReset;
+	SelectBox *sbAddLoopButton;
+	SelectBox *sbDelLoopButton;
+	
+	Label *lbPitch;
+	Label *lbBeats;
+
+	TCallback<Loop> cbAddLoopButton;
+	TCallback<Loop> cbDelLoopButton;
 
 public:
 	Loop(Keys *inkeys);
 	virtual ~Loop();
 	inline void DoDraw() { debug("Draw"); };
-	inline void DoProcess() { debug("Draw"); };
+	inline void DoProcess() { debug("Process"); };
 
+	void *AddLoopButton(void *data);
+	void *DelLoopButton(void *data);
 /*	void ResetLoopPitch();
 	u32 GetSize();
 	void SetParameters(u16 newsample, bool newpan, u32 newpitch, u16 newbeats);

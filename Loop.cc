@@ -23,68 +23,142 @@ Loop::Loop(Keys *inkeys)
 	// set up the GUI
 	debug("Setting up GUI");
 	
-	nbOn = new NumberBox(10, 3, 1, 0, 1, 1, inkeys);
+	sbOn = new SelectBox(10, 3, 3, inkeys);
 	nbPitch = new NumberBox(10, 4, 10, 1, 100000, 20, inkeys);
-	nbPan = new NumberBox(10, 5, 1, 0, 1, 1, inkeys);
+	sbPan = new SelectBox(10, 5, 5, inkeys);
 	nbBeats = new NumberBox(10, 6, 2, 1, 64, 8, inkeys);
-	nbReset = new NumberBox(10, 7, 1, 0, 1, 1, inkeys);
-	sbSample = new SelectBox(10, 9, 1, inkeys);
-
-	AddWidget(nbOn);
+	sbReset = new SelectBox(10, 7, 5, inkeys);
+	sbSample = new SelectBox(10, 9, 18, inkeys);
+	
+	lbPitch = new Label(2, 4, "Pitch");
+	lbBeats = new Label(2, 6, "Beats");
+	
+	sbAddLoopButton = new SelectBox(18, 17, 8, inkeys);
+	sbDelLoopButton = new SelectBox(18, 18, 8, inkeys);
+	
+	AddWidget(sbOn);
 	AddWidget(nbPitch);
-	AddWidget(nbPan);
+	AddWidget(lbPitch);
+	AddWidget(sbPan);
 	AddWidget(nbBeats);
-	AddWidget(nbReset);
+	AddWidget(lbBeats);
+	AddWidget(sbReset);
 	AddWidget(sbSample);
-
-	nbOn->SetTransitions(NULL, NULL, NULL, nbPitch);
-	nbPitch->SetTransitions(NULL, NULL, nbOn, nbPan);
-	nbPan->SetTransitions(NULL, NULL, nbPitch, nbBeats);
-	nbBeats->SetTransitions(NULL, NULL, nbPan, nbReset);
-	nbReset->SetTransitions(NULL, NULL, nbBeats, sbSample);
-	sbSample->SetTransitions(NULL, NULL, nbReset, NULL);
-
+	AddWidget(sbAddLoopButton);
+	AddWidget(sbDelLoopButton);
+	
+	sbOn->SetTransitions(NULL, NULL, NULL, nbPitch);
+	nbPitch->SetTransitions(NULL, NULL, sbOn, sbPan);
+	sbPan->SetTransitions(NULL, NULL, nbPitch, nbBeats);
+	nbBeats->SetTransitions(NULL, NULL, sbPan, sbReset);
+	sbReset->SetTransitions(NULL, NULL, nbBeats, sbSample);
+	sbSample->SetTransitions(NULL, NULL, sbReset, sbAddLoopButton);
+	sbAddLoopButton->SetTransitions(NULL, NULL, sbSample, sbDelLoopButton);
+	sbDelLoopButton->SetTransitions(NULL, NULL, sbAddLoopButton, NULL);
+	
 	debug("Filling sample list");
-
+	
 	// what samples are available?
 	for (i=0; i<NUMSAMPLES; i++)
 	{
 		sbSample->NewChoice((char *)samplenames[i], i);
-		dprintf((char *)samplenames[i]);
-		dprintf("\n");
+		debug("Sample: %s", (char *)samplenames[i]);
 	}
 	
-	debug("Done");
+	sbAddLoopButton->AutoOff();
+	sbAddLoopButton->NewChoice("Add Loop", 0);
+	sbAddLoopButton->NewChoice("-------------", 1);	
+	cbAddLoopButton.MakeCallback(this, &Loop::AddLoopButton);
+	sbAddLoopButton->UseCallBack(&cbAddLoopButton);
 
+	sbDelLoopButton->AutoOff();
+	sbDelLoopButton->NewChoice("Del Loop", 0);
+	sbDelLoopButton->NewChoice("-------------", 1);	
+	cbDelLoopButton.MakeCallback(this, &Loop::DelLoopButton);
+	sbDelLoopButton->UseCallBack(&cbDelLoopButton);
+	
+	sbReset->AutoOff();
+	sbReset->NewChoice("Reset", 0);
+	sbReset->NewChoice("-----", 1);
+	
+	sbOn->NewChoice("Off", 0);
+	sbOn->NewChoice("On", 1);
+	
+	sbPan->NewChoice("Left", 0);
+	sbPan->NewChoice("Right", 1);
+	
 	UseKeys(inkeys);
-	nbOn->Select();
-	selected = nbOn;
+	sbOn->Select();
+	selected = sbOn;
+	
+	debug("Done setting up");
 }
 
 Loop::~Loop()
 {
-	delete nbOn;
+	delete sbOn;
 	delete nbPitch;
-	delete nbPan;
+	delete sbPan;
 	delete nbBeats;
-	delete nbReset;
+	delete sbReset;
 	delete sbSample;
+	delete lbBeats;
+	delete lbPitch;
+	delete sbAddLoopButton;
+	delete sbDelLoopButton;
+}
+
+// if they press the loop-add button
+void *Loop::AddLoopButton(void *data)
+{
+	Page *old;
+	debug("AddLoop button callback");
+	// add a loop to currentsong
+	globals.NewLoop();
+	// add a live loop
+	if (right)
+	{
+		debug("Inserting a new loop");
+		// make our next loop have a new loop
+		old = right;
+		right->left = new Loop(keys);
+		right = right->left;
+		right->left = this;
+		right->right = old;
+	}
+	else
+	{
+		debug("Appending a new loop");
+		right = new Loop(keys);
+		right->left = this;
+	}
+	
+	return NULL;
+}
+
+// if they press the del-loop button
+void *Loop::DelLoopButton(void *data)
+{
+	Page *old;
+	debug("DelLoop button callback");
+	// delete the current loop in currentsong
+	globals.DelLoop();
+	// delete the liveloop associated with it
+	if (right)
+	{
+		old = right->right;
+		delete right;
+		right = old;
+		right->left = this;
+	}
+	
+	return NULL;
 }
 
 /*
 void Loop::DoDraw()
 {
-	selected = selected->Process();
 
-	if (selected == nbOn)
-		vol = ((NumberBox *)nbOn)->GetValue();
-	if (selected == nbBeats)
-		beats = ((NumberBox *)nbBeats)->GetValue();
-	if (selected == nbPitch)
-		pitch = ((NumberBox *)nbPitch)->GetValue();
-	if (selected == nbPan)
-		pan = ((NumberBox *)nbPan)->GetValue();
-	
 	if ((selected == nbReset) && (((NumberBox *)nbReset)->GetValue() == 1))
 	{
 		ResetLoopPitch();

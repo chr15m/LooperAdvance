@@ -126,6 +126,7 @@ void *First::SaveButton(void *data)
 // if they change the name of this song
 void *First::ChangeSongName(void *data)
 {
+	debug("Updating song name (callback)");
 	globals.SetName((char *)data);
 	RebuildSongList();
 	return NULL;
@@ -134,8 +135,11 @@ void *First::ChangeSongName(void *data)
 // if they've moved the song selecta
 void *First::Song(void *data)
 {
+	debug("Song select callback");
+	
 	structLoopData *loop=NULL;
 	structSongData *newsong;
+	
 	if (data)
 	{
 		// if we were called in callback
@@ -148,17 +152,17 @@ void *First::Song(void *data)
 	}
 	Page *newloop=this;
 
-	debug("Song select callback");
 	// remove all our old live loops
 	DelLiveLoops();
 	// change currentsong variable to point at the newly selected song
 	globals.SetSong(newsong);
-	
+
 	// for every loop in this song, create it's loop
 	loop = newsong->loops;
 	while (loop)
 	{
 		newloop->right = new Loop(keys, loop);
+		debug("Creating new liveloop: 0x%lx", (u32)newloop->right);
 		newloop->right->left = newloop;
 		newloop = newloop->right;
 		loop = loop->next;
@@ -171,6 +175,8 @@ void *First::Song(void *data)
 	// reset the counters each time we change songs
 	globals.Reset();
 	
+	debug("Right page = 0x%lx", right);
+	debug("New song loaded successfully");
 	return NULL;
 }
 
@@ -237,6 +243,8 @@ void *First::AddLoopButton(void *data)
 // delete all current liveloops
 void First::DelLiveLoops()
 {
+	debug("Deleting all liveloops");
+
 	Page *traverse = right;
 	Page *tmp;
 	
@@ -246,6 +254,9 @@ void First::DelLiveLoops()
 		delete traverse;
 		traverse = tmp->right;
 	}
+	
+	// make sure we don't still think we've got stuff to the right
+	right = NULL;
 }
 
 // if they press the del-loop button
@@ -280,6 +291,7 @@ void *First::BPM(void *data)
 // this function takes all the songs in songdata and makes a list of them
 void First::RebuildSongList()
 {
+	debug("Rebuilding song list");
 	structSongData *traverse = globals.songdata;
 	sbSong->ClearChoices();
 	

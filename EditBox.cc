@@ -8,7 +8,7 @@ EditBox::EditBox(u16 ix, u16 iy, u16 inwidth, Keys *inkeys): Widget (ix, iy, ink
 	// fill with nulls
 	for (i=0; i<width + 1; i++)
 	{
-		text[i] = NULL;
+		value[i] = NULL;
 	}
 	
 	which = 0;
@@ -109,7 +109,7 @@ Widget *EditBox::Process()
 }
 
 void EditBox::Draw()
-{		
+{
 	sprintf(text, "[%-*s]", width, value);
 	
 	if (selected)

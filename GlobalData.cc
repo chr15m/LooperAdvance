@@ -185,7 +185,7 @@ void GlobalData::SetCurrentLoop(structLoopData *which)
 {
 	structNoteData *traverse;
 	
-	debug("New Loop: %d", which);
+	debug("Setting new currentloop: 0x%lx", (u32)which);
 	currentnote = NULL;
 	currentloop = which;
 	if (currentloop)
@@ -308,6 +308,8 @@ void GlobalData::DelLoop()
 		// set currentloop to be the loop we're on now
 		currentloop = looptrav;
 		
+		debug("Set currentloop to 0x%lx", (u32)currentloop);
+		
 		// delete the name array
 		delete[] deleteloop->name;
 
@@ -322,7 +324,7 @@ void GlobalData::NewNote()
 	// if we have some loops, then append it to the end
 	if (currentloop)
 	{
-		debug("Adding a note after 0x%lx", currentnote);
+		debug("Adding a note after 0x%lx", (u32)currentnote);
 		
 		if (currentloop->notes)
 		{

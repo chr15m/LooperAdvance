@@ -462,8 +462,8 @@ void Loop::DoProcess()
 		{
 			beat = globals.beat % numnotes;
 			
-			debug("diff: %ld", diff);
-			if (diff == notes[beat]->swing + 1)
+			debugloop("diff: %ld", diff);
+			if (diff == notes[beat]->swing)
 			{
 				debug("Swing detected: %ld", diff);
 				// update the parameters
@@ -499,7 +499,7 @@ void Loop::DoProcess()
 			
 			debug("Diff: %ld", diff);
 			
-			if (diff == (u32)(nbSwing->GetValue() * (beat | 1) + 1))
+			if (diff == (u32)(nbSwing->GetValue() * (beat | 1)))
 			{
 				UpdateParameters();
 				lastbeat = globals.beat;

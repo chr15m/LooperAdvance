@@ -19,6 +19,8 @@ private:
 	u32 lastbeat;
 	u16 handle;
 	u16 beat;
+	u16 numnotes;
+	ptrNoteData *notes;
 	
 	structLoopData *data;
 	
@@ -77,7 +79,7 @@ private:
 public:
 	Loop(Keys *inkeys, structLoopData *whichloop);
 	virtual ~Loop();
-
+	
 	void DoDraw();
 	
 	void DoProcess();
@@ -93,7 +95,11 @@ public:
 	void *SampleChange(void *whichsample);
 	void *Reset(void *ignore);
 	void *Notes(void *number);
-	u32 GetSize();	
+
+	void AddNote();
+	void DelNote();
+	void UpdateNotes();
+	u32 GetSize();
 };
 
 #endif

@@ -29,6 +29,9 @@ typedef struct structNoteData
 	structNoteData *next;	// next note in the linked list of notes
 } structNoteData;
 
+// pointer to a note (so we can declare an array of pointers in Loop.cc)
+typedef structNoteData *ptrNoteData;
+
 typedef struct structLoopData
 {
 	char *name;		// name for our loop (user can modify this)

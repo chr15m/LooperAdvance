@@ -14,13 +14,15 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 
 	lastbeat = 0;
 	handle = 0;
+	numnotes = 0;
+	notes = NULL;
 	
 	// set up the GUI
 	debug("Setting up GUI");
 	
 	ebName = new EditBox(10, 1, 10, inkeys);
 	sbOn = new SelectBox(10, 3, 3, inkeys);
-	debug("sbOn: 0x%lx", sbOn);
+	debug("sbOn: 0x%lx", (u32)sbOn);
 	nbPitch = new NumberBox(10, 4, 6, 1, 100000, 100, inkeys);
 	sbPan = new SelectBox(10, 5, 5, inkeys);
 	nbBeats = new NumberBox(10, 6, 2, 1, 64, 8, inkeys);
@@ -68,7 +70,7 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	AddWidget(nbSwing);
 	AddWidget(nbNotes);
 	AddWidget(lbNotes);
-
+	
 	AddWidget(sbAddLoopButton);
 	AddWidget(sbDelLoopButton);
 	
@@ -167,6 +169,7 @@ Loop::~Loop()
 	delete lbNotes;
 	delete sbAddLoopButton;
 	delete sbDelLoopButton;
+	delete[] notes;
 }
 
 // if they press the loop-add button
@@ -227,11 +230,21 @@ structLoopData *Loop::GetAddress()
 // this resets all our widgets to their correct values
 void Loop::UpdateWidgets()
 {
+	structNoteData *traverse = data->notes;
+	
 	nbPitch->SetValue(data->pitch);
 	sbPan->ChooseByValue(data->pan);
 	nbBeats->SetValue(data->divisions);
 	sbSample->ChooseByValue(data->sample);
 	ebName->SetString(data->name);
+	
+	// count the number of notes
+	while (traverse)
+	{
+		numnotes++;
+		traverse = traverse->next;
+	}
+	nbNotes->SetValue(numnotes);
 }
 
 // what to do if the pitch is changed
@@ -258,13 +271,68 @@ void *Loop::Pan(void *pan)
 // if they change the number of loops that belong to this one
 void *Loop::Notes(void *number)
 {
+	u16 num = *(u32 *)number;
+	
 	// if the number of loops is less than the amount of loops we actually have
 	// then delete notes until we have the right number
+	while (num < numnotes)
+	{
+		DelNote();
+	}
 	// if it's greater, than add notes until we have the right number
-	
-	
+	while (num > numnotes)
+	{
+		AddNote();
+	}
 	
 	return NULL;
+}
+
+// add a note
+void Loop::AddNote()
+{
+	globals.NewNote();
+	numnotes++;
+	UpdateNotes();
+}
+
+// delete a note
+void Loop::DelNote()
+{	
+	globals.DelNote();
+	numnotes--;
+	UpdateNotes();
+}
+
+// update the list of notes
+void Loop::UpdateNotes()
+{
+	u16 i=0;
+	structNoteData *traverse = globals.currentloop->notes;
+	
+	if (notes)
+	{
+		debug("freeing notes array");
+		delete[] notes;
+		notes = NULL;
+	}
+	
+	if (numnotes)
+	{
+		notes = new ptrNoteData[numnotes];
+		debug("Base note array address: 0x%lx", (u32)notes);
+		while (traverse)
+		{
+			notes[i] = traverse;
+			debug("Element %d address: 0x%lx", i, (u32)notes[i]);
+			i++;
+			traverse = traverse->next;
+		}
+	}
+	else
+	{
+		debug("empty list");
+	}
 }
 
 // if they change the name of this loop

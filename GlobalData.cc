@@ -355,6 +355,7 @@ void GlobalData::DelNote()
 		else
 		{
 			// tell this loop we don't currently have any notes
+			delete notetrav;
 			currentloop->notes = NULL;
 		}
 	}

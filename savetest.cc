@@ -60,8 +60,12 @@ int main()
 	
 	dprintf("Loading and saving\n");
 	
-//	globals.LoadSongs();
-	globals.NewSong();
+	globals.LoadSongs();
+//	globals.NewSong();
+//	globals.NewLoop();
+//	globals.NewNote();
+	globals.DelSong();	
+	globals.DelSong();	
 	globals.SaveSongs();
 	
 	while (1);

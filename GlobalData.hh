@@ -60,6 +60,8 @@ public:
 	u32 counter;
 	u32 offset;
 	u16 magic;
+	u8 zero;
+	u8 full;
 	struct structSongData *songdata;
 	struct structSongData *currentsong;
 	struct structLoopData *currentloop;
@@ -86,6 +88,7 @@ public:
 	void WriteNumber(u32 number, u8 size);
 	void ReadString(char **str);
 	void ReadNumber(void *number, u8 size);
+	bool CheckMagic();
 };
 
 extern GlobalData globals;

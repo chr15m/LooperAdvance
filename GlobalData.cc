@@ -16,12 +16,16 @@ void GlobalData::Init()
 	currentsong = NULL;
 	offset = 0;
 	magic = 0xABCD;
+	zero = 0x00;
+	full = 0xFF;
 }
 
 // create a new blank song
 void GlobalData::NewSong()
 {
 	// if we have other songs in memory already, then create a new blank one on the end
+	debug("Adding a song");
+	
 	if (songdata)
 	{
 		currentsong->next = new structSongData;
@@ -44,7 +48,66 @@ void GlobalData::NewSong()
 // delete the current song
 void GlobalData::DelSong()
 {
+	structSongData *songtrav = songdata;
+	structSongData *deletesong = NULL;
 	
+	// if we even have any songs (which we should always have becuase there's at least a blank song)
+	if (songtrav)
+	{
+		debug("Deleting a song.");
+
+		// if the first loop is the selected loop
+		if (songtrav == currentsong)
+		{
+			debug("[First song]");
+			
+			// set the current song's loops to point to the next one (NULL is ok)
+			songdata = songtrav->next;
+			
+			// remember what we want to delete
+			deletesong = currentsong;
+			
+			// set the current song to be the new first song
+			currentsong = songdata;
+		}
+		else
+		{
+			debug("[Finding song]");
+			
+			// find the current song
+			while (songtrav->next != currentsong)
+			{
+				songtrav = songtrav->next;
+			}
+			
+			// remember what we want to delete
+			deletesong = songtrav->next;
+			
+			// unlink the song to be deleted
+			songtrav->next = songtrav->next->next;
+			
+			// set currentsong to be the loop we're on now
+			currentsong = songtrav;
+		}
+		
+		// delete all the loops associated with the deleted song
+		while (deletesong->loops)
+		{
+			DelLoop();
+		}
+		
+		// delete the name array associated
+		delete[] deletesong->name;
+		
+		// delete the song itself
+		delete deletesong;
+	}
+	
+	// if we've run out of songs (our current song is null) then make sure we have one blank song
+	if (!songdata)
+	{
+		NewSong();
+	}
 }
 
 // choose a different song
@@ -63,6 +126,8 @@ void GlobalData::SetName(char *name)
 void GlobalData::NewLoop()
 {
 	// if we have some loops, then append it to the end
+	debug("Adding a loop.");
+	
 	if (currentsong->loops)
 	{
 		currentloop->next = new structLoopData;
@@ -86,16 +151,71 @@ void GlobalData::NewLoop()
 	currentloop->next = NULL;
 }
 
-// delete a loop from this song
+// delete a loop from somewhere in this song
 void GlobalData::DelLoop()
 {
+	structLoopData *looptrav = currentsong->loops;
+	structLoopData *deleteloop = NULL;
 	
+	// if we even have any loops
+	if (looptrav)
+	{
+		debug("Deleting a loop.");
+		
+		// if the first loop is the selected loop
+		if (looptrav == currentloop)
+		{
+			debug("[First loop]");
+			
+			// set the current song's loops to point to the next one (NULL is ok)
+			currentsong->loops = looptrav->next;
+			
+			// remember what we want to delete
+			deleteloop = currentloop;
+			
+			// set the current loop to be the new first loop
+			currentloop = currentsong->loops;
+		}
+		else
+		{
+			debug("[Finding loop]");
+			
+			// find the current loop
+			while (looptrav->next != currentloop)
+			{
+				looptrav = looptrav->next;
+			}
+			
+			// remember what we want to delete
+			deleteloop = looptrav->next;
+			
+			// unlink the loop to be deleted
+			looptrav->next = looptrav->next->next;
+			
+			// set currentloop to be the loop we're on now
+			currentloop = looptrav;
+		}
+		
+		// delete all the notes associated with the unused loop
+		while (deleteloop->notes)
+		{
+			DelNote();
+		}
+
+		// delete the name array
+		delete[] deleteloop->name;
+
+		// delete the loop itself
+		delete deleteloop;
+	}
 }
 
 // add another note to this loop
 void GlobalData::NewNote()
 {
 	// if we have some loops, then append it to the end
+	debug("Adding a note.");
+	
 	if (currentloop->notes)
 	{
 		currentnote->next = new structNoteData;
@@ -124,29 +244,16 @@ void GlobalData::DelNote()
 	// if we even have a note
 	if (notetrav)
 	{
-/*		// if we only have one note
-		if (notetrav == currentnote)
+		debug("Deleting a note.");
+		
+		// find the last note
+		while (notetrav->next)
 		{
-			// will set to null if there's no other note
-			currentloop->notes = currentnote->next;
-			delete currentnote;
-			currentnote = NULL;
+			notetrav = notetrav->next;
 		}
-		else
-		{
-			if (notetrav->next = currentnote)
-				
-			while ((notetrav->next != NULL) && (notetrav->next))
-			{
-				notetrav = notetrav->next;
-			}
-			
-			if (notetrav->next)
-			{
-				
-			}
-		}
-*/
+		
+		// we're on the last note now, delete it
+		delete notetrav;
 	}
 }
 
@@ -240,11 +347,9 @@ void GlobalData::SaveSongs()
 void GlobalData::WriteString(char *instr)
 {
 	// write our letters to disk
-	bcopy(instr, (char *)(SRAM + offset), strlen(instr) + 1);
-	debug("String length: %d", strlen(instr) + 1);
-	offset += sizeof(strlen(instr) + 1);
-	bcopy((const char*)0xFF, (char *)(SRAM + offset), 1);
-	offset += 2;
+	bcopy(instr, (char *)(SRAM + offset), strlen(instr));
+	bcopy((const char*)&zero, (char *)(SRAM + offset), 1);
+	offset += strlen(instr) + 1;
 	// if (offset % 2) offset++;
 }
 
@@ -259,8 +364,7 @@ void GlobalData::ReadString(char **instr)
 	strncpy(*instr, (const char*)(SRAM + offset), strlen((char *)SRAM + offset));
 	// make sure the last element is zero
 	*instr[strlen(*instr)] = 0;
-	offset += sizeof(strlen(*instr)) + 1;
-	if (offset % 2) offset++;
+	offset += strlen(*instr) + 1;
 }
 
 // writes a number into the SRAM
@@ -278,6 +382,22 @@ void GlobalData::ReadNumber(void *number, u8 size)
 	offset += size;
 }
 
+// this checks if the current offset contains magic! (doesn't update offset at all)
+bool GlobalData::CheckMagic()
+{
+	u16 checkmagic=0;
+	bcopy((const char*)(SRAM + offset), (char *)&checkmagic, sizeof(u16));
+	if (checkmagic == magic)
+	{
+		offset += sizeof(magic);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 // load all songs from ROM into memory
 void GlobalData::LoadSongs()
 {
@@ -293,7 +413,7 @@ void GlobalData::LoadSongs()
 	if (checkmagic == magic)
 	{
 		// until we find the end of the songs
-		while (*(u16 *)(SRAM + offset) != magic)
+		while (!CheckMagic())
 		{
 			// start a new song
 			debug("Creating a new song struct.");
@@ -310,9 +430,8 @@ void GlobalData::LoadSongs()
 			debug("Song Speed: %d", currentsong->bpm);
 			
 			// until we find the end of the loops
-			while (*(u16 *)(SRAM + offset) != magic)
+			while (!CheckMagic())
 			{
-				debug("Raw: %x", *(u16 *)(SRAM + offset + 1));
 				// create a new loop
 				debug("Creating a new loop struct.");
 				NewLoop();
@@ -330,9 +449,10 @@ void GlobalData::LoadSongs()
 				// write the number of divisions
 				ReadNumber(&currentloop->divisions, sizeof(u16));
 				
-				while (*(u16 *)(SRAM + offset) != magic)
+				while (!CheckMagic())
 				{
 					debug("Raw: %x", *(u16 *)(SRAM + offset));
+					
 					// create a new note
 					debug("Creating a new note struct.");
 					NewNote();

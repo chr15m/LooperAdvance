@@ -160,26 +160,23 @@ bool Sample::IsPlaying()
 
 void Sample::MixDown(s8 *mixBufA, s8 *mixBufB, u16 buffSize)
 {
-       u16 chunkR = (nextchunk >> 8);
-       u32 nextchunkR = nextchunk;
-       u32 velocityR = velocity;
-       u16 b;
-       u32 lengthR = sampledata->length;
-       u32 dataptr = (u32)sampledata->data;
-       
-       if (playing)
-       {
-	       for (b = 0; b < buffSize; b++)
-	       {
-		       chunkR = (nextchunkR += velocityR) >> 8;
-		       // fill up our buffers byte by byte
-		       mixBufA[b] += *((s8 *)dataptr + chunkR);
-		       mixBufB[b] += *((s8 *)dataptr + chunkR);
-		       if (chunkR >= lengthR - 1)
-			       nextchunkR = 0;
-	       }
-	       nextchunk = nextchunkR;
-       }
+	if (playing)
+	{
+		u32 chunkR = (nextchunk >> 8);
+		u16 b;
+		u32 dataptr = (u32)sampledata->data;
+		u32 end = sampledata->length - 1;
+		
+		for (b = 0; b < buffSize; b++)
+		{
+			chunkR = (nextchunk += velocity) >> 8;
+			// fill up our buffers byte by byte
+			mixBufA[b] += *((s8 *)dataptr + chunkR);
+			mixBufB[b] += *((s8 *)dataptr + chunkR);
+			if (chunkR >= end)
+				nextchunk = 0;
+		}
+	}
 }
 
 s8 Sample::GetByte(panVal pan)

@@ -116,7 +116,13 @@ void ClarkMix::mixBuffers(void)
 	SetBG(31, 0, 0);
 	u16 b;
 	structSampleList *traverse = samplelist;
-	bool initBuffer = true;
+	
+	// if all our samples are off, we still want to zero out the buffer
+	for (b = 0; b < BUFFER_SIZE; b++)
+	{
+		mixBufA[b] = 0;
+		mixBufB[b] = 0;
+	}
 	
 	// fill the buffer with nice fellows
 	// for every sample in our list of managed samples
@@ -124,43 +130,10 @@ void ClarkMix::mixBuffers(void)
 	{
 		debugloop("Mixing sample: %s\n", traverse->sample->GetName());
 		
-		if (initBuffer)
-		{
-			if (traverse->sample->IsPlaying())
-			{
-				for (b = 0; b < BUFFER_SIZE; b++)
-				{
-					// fill up our buffers byte by byte
-					mixBufA[b] = (traverse->sample->GetByte(pan_left) >> 1);
-					mixBufB[b] = (traverse->sample->GetByte(pan_right) >> 1);
-				}
-				initBuffer = false;
-			}
-		}
-		else
-		{
-			if (traverse->sample->IsPlaying())
-			{
-				for (b = 0; b < BUFFER_SIZE; b++)
-				{
-					// fill up our buffers byte by byte
-					mixBufA[b] += (traverse->sample->GetByte(pan_left) >> 1);
-					mixBufB[b] += (traverse->sample->GetByte(pan_right) >> 1);
-				}
-			}
-		}
+		traverse->sample->MixDown(mixBufA, mixBufB, BUFFER_SIZE);
 		traverse = traverse->next;
 	}
 	
-	// if all our samples are off, we still want to zero out the buffer
-	if (initBuffer)
-	{
-		for (b = 0; b < BUFFER_SIZE; b++)
-		{
-			mixBufA[b] = 0;
-			mixBufB[b] = 0;
-		}
-	}
 	SetBG(SCREENS_BG_R, SCREENS_BG_B, SCREENS_BG_G);
 }
 

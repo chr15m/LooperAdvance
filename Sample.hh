@@ -63,12 +63,7 @@ public:
 	u32 GetLength() __attribute__ ((section (".iwram")));
 	char *GetName() __attribute__ ((section (".iwram")));
 	
-	bool IsPlaying();
-
 	void MixDown(s8 *mixBufA, s8 *mixBufB, u16 buffSize) __attribute__ ((section (".iwram")));
-	
-	//inline s8 GetByte(panVal pan) __attribute__ ((section (".iwram")));
-	s8 GetByte(panVal pan) __attribute__ ((section (".iwram")));
 };
 
 typedef struct structSampleList

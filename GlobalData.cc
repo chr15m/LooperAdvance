@@ -267,7 +267,7 @@ void GlobalData::NewLoop()
 		currentloop->name[0] = '\0';
 		currentloop->sample = 0;
 		currentloop->pan = false;
-		currentloop->pitch = 1000;
+		currentloop->pitch = 256;
 		currentloop->divisions = 1;
 		currentloop->notes = NULL;
 		currentloop->next = holder;

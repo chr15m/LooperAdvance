@@ -58,15 +58,15 @@ ifeq ($(TARGET),audiobuffertest)
 endif
 
 ifeq ($(TARGET),sampletest)
-	GAMEOBJECTS = samples/samples.o Sample.o
+	GAMEOBJECTS = samples/samples.o Sample.arm.o
 endif
 
 ifeq ($(TARGET),audiolayertest)
-	GAMEOBJECTS = samples/samples.o Sample.o AudioLayer.o
+	GAMEOBJECTS = samples/samples.o Sample.arm.o AudioLayer.o
 endif
 
 ifeq ($(TARGET),clarkinoutest)
-	GAMEOBJECTS = samples/samples.o Sample.o ClarkMix.o Keys.o
+	GAMEOBJECTS = samples/samples.o Sample.arm.o ClarkMix.arm.o Keys.o
 endif
 
 ifdef RELEASE
@@ -121,7 +121,7 @@ samples/samples.hh samples/samples.cc: samples/Makefile
 
 # screens data
 splash.hh splash.cc: screens/$(THEME)/*.png
-	./createscreendata.py -b`cat screens/$(THEME)/transparent` screens/$(THEME)/splash.png
+	./createscreendata.py -bFFFFFF screens/$(THEME)/splash.png
 
 screens.hh screens.cc: screens/$(THEME)/*.png
 	./createscreendata.py -b`cat screens/$(THEME)/transparent` -oscreens -nscreens/$(THEME)/font.png -nscreens/$(THEME)/altfont.png screens/$(THEME)/loop.png screens/$(THEME)/first.png

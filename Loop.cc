@@ -41,7 +41,7 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop, ClarkMix *imixer)
 	lbBeatNumber = new Label(26, 1, beatNumberText);
 	sbOn = new SelectBox(10, 2, 3, inkeys);
 	debug("sbOn: 0x%lx", (u32)sbOn);
-	nbPitch = new NumberBox(10, 4, 6, 1, 100000, 100, inkeys);
+	nbPitch = new NumberBox(10, 4, 6, 1, 100000, 32, inkeys);
 	sbPan = new SelectBox(10, 5, 5, inkeys);
 	nbBeats = new NumberBox(10, 6, 2, 1, 64, 8, inkeys, true);
 	sbReset = new SelectBox(10, 7, 5, inkeys);
@@ -461,19 +461,11 @@ void *Loop::Name(void *name)
 // if the reset button is pressed
 void *Loop::Reset(void *ignore)
 {
-	// (1000 * (tracks[selected].sample->len) / (tracks[selected].sample->freq) ) / (tracks[selected].bpl * T * 4 / 1000	
-	u32 p1 = globals.currentsong->bpm * sample->GetLength();
-	u32 p2 = 2646 * nbBeats->GetValue();
-	u16 result = 0;
+	// (1000 * (tracks[selected].sample->len) / (tracks[selected].sample->freq) ) / (tracks[selected].bpl * T * 4 / 1000
+	// (256 * (tracks[selected].sample->len) / (tracks[selected].sample->freq) ) / (tracks[selected].bpl * T * 4 / 256)
+	u32 result = ((sample->GetLength() / nbBeats->GetValue()) * 256 * 60) / globals.currentsong->bpm;
 	
-	debug("Bpm: %d", globals.currentsong->bpm);
-	debug("Size: %ld", sample->GetLength());
-	debug("Top: %ld", p1);
-	debug("Bottom: %ld", p2);
-
-	result = p1/p2;
-
-	debug("New ratio: %d", result);
+	debug("New pitch: %d", result);
 	
 	nbPitch->SetValue(result);
 	Pitch(&result);

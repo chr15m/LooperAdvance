@@ -42,7 +42,7 @@ Sample::~Sample()
 // tell this sample which actual data to use
 void Sample::SetData(SampleData *usedata)
 {
-	debug("Set Sampel Data to 0x%lx\n", (u32)usedata);
+	debug("Set Sample Data to 0x%lx\n", (u32)usedata);
 	sampledata = usedata;
 	loopStart = 0;
 	loopEnd = 0;
@@ -105,15 +105,19 @@ void Sample::SetPanning(s8 pan)
 {
 	debug("Set pan to: %d\n", pan);
 	panning = pan;	
+	if (panning > 8)
+		panning = 8;
+	if (panning < -8)
+		panning = -8;
 }
 
 // set the volume of this sample
 void Sample::SetVolume(u8 vol)
 {
-	if (vol > 7)
-		vol = 7;
+	if (vol > 8)
+		vol = 8;
 	
-	volume = 7 - vol;
+	volume = 8 - vol;
 	debug("Set volume to %d\n", volume);
 }
 
@@ -135,74 +139,37 @@ char *Sample::GetName()
 	return sampledata->name;
 }
 
-// this function serves two purposes
-// firstly it tells the mixer whether to bother continuing with this sample
-// secondly it sets up how much to shift the pan register by
-bool Sample::IsPlaying()
-{
-	if (playing)
-	{
-		panshift[0] = 0;
-		panshift[1] = 0;
-		
-		if (panning < 0)
-		{
-			panshift[0] = - panning;
-		}
-		else if (panning > 0)
-		{
-			panshift[1] = panning;
-		}
-	}
-	
-	return playing;
-}
-
 void Sample::MixDown(s8 *mixBufA, s8 *mixBufB, u16 buffSize)
 {
 	if (playing)
 	{
-		u32 chunkR = (nextchunk >> 8);
+		u32 chunkR = 0;
 		u16 b;
-		u32 dataptr = (u32)sampledata->data;
-		u32 end = sampledata->length - 1;
+		s8 *dataptr = (s8 *)sampledata->data;
+		// we want to make sure we don't overstep by 4 if playing a sample of length not divisible by four
+		u32 end = sampledata->length - 5;
 		
+		// figure out our pan shifting
+		panshift[0] = 0;
+		panshift[1] = 0;
+		if (panning < 0)
+			panshift[0] = - panning;
+		else if (panning > 0)
+			panshift[1] = panning;
+		
+		// note, we lost a fair bit of precision doing all this
+		// but it's only in chunks of four samples, so it's not so bad.
 		for (b = 0; b < buffSize; b++)
 		{
-			chunkR = (nextchunk += velocity) >> 8;
+			nextchunk += velocity;
+			
+			chunkR = nextchunk >> 8;
 			// fill up our buffers byte by byte
-			mixBufA[b] += *((s8 *)dataptr + chunkR);
-			mixBufB[b] += *((s8 *)dataptr + chunkR);
-			if (chunkR >= end)
+			mixBufA[b] += dataptr[chunkR] >> panshift[0] >> volume;
+			mixBufB[b] += dataptr[chunkR] >> panshift[1] >> volume;
+			
+			if ((u32)chunkR >= end)
 				nextchunk = 0;
 		}
 	}
-}
-
-s8 Sample::GetByte(panVal pan)
-{
-       s8 returnchunk = 0;
-       //u32 hop = (nextchunk >> 8);
-       
-       if (playing)
-       {
-	       // we're going to have to set this anyway (else)
-	       nextchunk += velocity;
-	       
-	       /*if ((loopEnd) && (hop >= loopEnd || hop < loopStart))
-	       {
-		       nextchunk = loopStart << 8;
-	       }
-	       else if (hop >= sampledata->length - 1)
-	       */
-	       //if (hop >= sampledata->length - 1)
-	       //{
-	       //      nextchunk = 0;
-	       //}
-	       
-	       // calculate the mixed value to return
-	       //returnchunk = *((s8 *)sampledata->data + (nextchunk >> 8));
-       }
-       
-       return returnchunk;
 }

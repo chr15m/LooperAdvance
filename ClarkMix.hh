@@ -36,12 +36,6 @@
 // 548 - VCOUNT goes up fast (one or two every count)
 
 #define BUFFER_SIZE 128
-/*#define BUFFER_SIZE 548
-#define BUFF_UP 160
-#define BUFF_DOWN 161
-#define BUFF_SMALL 547
-#define BUFF_LARGE 548
-*/
 
 // 16khz play back freq
 #define PLAYER_FREQ 0xFBFF
@@ -68,8 +62,6 @@ private:
 	s8* mixBufA;
 	s8* mixBufB;
 	
-	/*u16 buffersize[2];
-	u16 sizeswitch[2];*/
 	u16 bufferSwitch;
 	
 	// a pointer to a linked list of all the samples we're currently playing

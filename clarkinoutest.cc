@@ -68,12 +68,12 @@ int main()
         }
         keys->Jiffie();
 
-	dprintf("Turning on volume of mysample\n");
+	dprintf("Turning on volume of mysample to half\n");
 	dprintf("Setting Panning of samples to opposite ends\n");
 	// try volume tests
-	mysample->SetVolume(7);
-	mysample->SetPanning(3);
-	other->SetPanning(-3);
+	mysample->SetVolume(6);
+	mysample->SetPanning(8);
+	other->SetPanning(-8);
 	dprintf("---\n");
 
 	// check keys
@@ -113,8 +113,8 @@ int main()
 		if (keys->TestKey(keyA) == pressed)
 		{
 			debug("Length: %ld\n", mysample->GetLength());
-			debug("Pos: %ld\n", mysample->GetLength()/8 * (rotpan + 8));
-			mysample->SetPosition(mysample->GetLength()/8 * (rotpan + 8));
+			debug("Pos: %ld\n", mysample->GetLength()/16 * (rotpan + 8));
+			mysample->SetPosition(mysample->GetLength()/16 * (rotpan + 8));
 			rotpan++;
 			if (rotpan == 9)
 				rotpan = -8;

@@ -113,15 +113,16 @@ void ClarkMix::switchBuffers(void)
 // mix together everything down into the buffers
 void ClarkMix::mixBuffers(void)
 {
-	SetBG(31, 0, 0);
+	//SetBG(31, 0, 0);
 	u16 b;
 	structSampleList *traverse = samplelist;
 	
+	// for some reason DMA copy doesn't work in here
 	// if all our samples are off, we still want to zero out the buffer
-	for (b = 0; b < BUFFER_SIZE; b++)
+	for (b = 0; b < (BUFFER_SIZE>>2); b++)
 	{
-		mixBufA[b] = 0;
-		mixBufB[b] = 0;
+		*((u32 *)mixBufA + b) = 0;
+		*((u32 *)mixBufB + b) = 0;
 	}
 	
 	// fill the buffer with nice fellows
@@ -134,7 +135,7 @@ void ClarkMix::mixBuffers(void)
 		traverse = traverse->next;
 	}
 	
-	SetBG(SCREENS_BG_R, SCREENS_BG_B, SCREENS_BG_G);
+	//SetBG(SCREENS_BG_R, SCREENS_BG_B, SCREENS_BG_G);
 }
 
 // Interrupt process

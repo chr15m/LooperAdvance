@@ -85,6 +85,9 @@ int main()
 	// initialise video memory
 	bzero((char *)VideoBuffer, 0x8000);
 	
+	// make it white for the splash
+	SetBG(SPLASH_BG_R, SPLASH_BG_B, SPLASH_BG_G);
+	
 	// load the splash screen
 	DMACopy((void*)splash_tiles, (u16*)VideoBuffer, SPLASH_TILES_SIZE, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT);
 	DMACopy((void*)splash_palette, (u16*)BGPaletteMem, SPLASH_PALETTE_SIZE, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT);

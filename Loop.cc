@@ -432,12 +432,16 @@ void *Loop::Name(void *name)
 void *Loop::Reset(void *ignore)
 {
 	// (1000 * (tracks[selected].sample->len) / (tracks[selected].sample->freq) ) / (tracks[selected].bpl * T * 4 / 1000	
-	u16 beats = nbBeats->GetValue();
+	u32 p1 = globals.currentsong->bpm * GetSize();
+	u32 p2 = 2646 * nbBeats->GetValue();
 	
-	debug("Top = %ld", globals.currentsong->bpm * GetSize());
-	debug("Bottom = %d", (2646 * beats));
-	debug("New ratio = %ld", (globals.songdata->bpm * GetSize())/(2646 * beats));
-	nbPitch->SetValue((globals.songdata->bpm * GetSize()) / (2646 * beats));
+	debug("Bpm: %ld", globals.currentsong->bpm);
+	debug("Size: %ld", GetSize());
+	debug("Top: %ld", p1);
+	debug("Bottom: %d", p2);
+	debug("New ratio: %ld", p1/p2);
+
+	nbPitch->SetValue(p1/p2);
 	return NULL;
 }
 

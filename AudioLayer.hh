@@ -22,6 +22,10 @@
 #include "typedefs.h"
 #include "emudp.h"
 #include "Sample.hh"
+#include "samples/samples.hh"
+
+#define BUFFERSIZE	256
+#define OVERRUN		0
 
 extern void (*IntrTable[])();
 
@@ -29,18 +33,22 @@ class AudioLayer
 {
 private:
 	// a pointer to a linked list of all the samples we're currently playing
-	structSampleList *samples;
+	structSampleList *samplelist;
 	// last one in the linked list
 	structSampleList *last;
-
-	// details about our mixer bank
-	s16 *mixbank;
-	u16 banksize;
+	
+	// chunks are always going to be half of buffersize
+	u16 chunksize;
+	
+	u8 Buffer_L[BUFFERSIZE];
+	u8 Buffer_R[BUFFERSIZE];
+	
+	bool resetDMA;
 
 public:
-	AudioLayer(u16 mixlength);
+	AudioLayer();
 	~AudioLayer();
-
+	
 	void Interrupt();
 	void Manage(Sample *newsample);
 	void Forget(Sample *which);

@@ -20,54 +20,84 @@
 void Audio::AudioCallBack()
 {
 	// turn off the timer callback so it doesn't override itself
-	REG_IE &= ~INT_TM0;
 	
-	if (Audio::AudioLayerPtr)
-		((AudioLayer *)Audio::AudioLayerPtr)->Interrupt();
-	
-	// turn the interrupt back on and clear interrupt flags
-	REG_IF &= ~INT_TM0;
-	REG_IE |= INT_TM0;
+	//if (Audio::AudioLayerPtr)
+	//	((AudioLayer *)Audio::AudioLayerPtr)->Interrupt();
 }
 
 AudioLayer *Audio::AudioLayerPtr=NULL;
 
-AudioLayer::AudioLayer(u16 mixlength)
-{
-	Audio::AudioLayerPtr = this;
-	IntrTable[3] = &Audio::AudioCallBack;
-	
-	mixbank = new s16[mixlength];
-	banksize = mixlength;
+AudioLayer::AudioLayer()
+{	
+	/* ********************** */
+	/* real thing starts here */
+	/* ********************** */
 
-	samples = last = NULL;
+
+	//Audio::AudioLayerPtr = this;
+	//IntrTable[4] = &Audio::AudioCallBack;
 	
-	// turn on all the sounds etc
-	REG_SOUNDCNT_H = DSA_OUTPUT_RATIO_100 | DSA_FIFO_RESET | DSA_OUTPUT_TO_BOTH | DSA_TIMER0; 	//DirectSound A + fifo reset + max volume to L and R
+	samplelist = last = NULL;
+	
+	chunksize = BUFFERSIZE / 2;
+
+	//play a sample at 16Khz using interrupt mode
+	//DirectSound A + fifo reset + max volume to L and R
 	REG_SOUNDCNT_X = SND_ENABLED; 	//turn sound chip on
+	REG_SOUNDCNT_H = DSA_FIFO_RESET | DSB_FIFO_RESET | DSA_OUTPUT_TO_LEFT | DSB_OUTPUT_TO_RIGHT | DSA_TIMER0 | DSB_TIMER0;
 	
-	REG_IE = INT_TM0; 	//enable timer 0 irq
-	REG_IME = 1; 	//enable interrupts
+	// the DMA source address is the buffer
+	REG_DMA1SAD = (u32)Buffer_L;
+	REG_DMA1DAD = (u32)&REG_SGFIFOA;
 	
-	//REG_TM0D = 0xffff;
-	// TODO: figure out the correct frequency of playback for 22050
-	// REG_TM0D = 0xf400;
-	REG_TM0D = 0xfd50;
+	REG_DMA2SAD = (u32)Buffer_R;
+	REG_DMA2DAD = (u32)&REG_SGFIFOB;
+
+	//REG_DMA1CNT = ENABLE_DMA | START_ON_FIFO_EMPTY | DMA_32 | DMA_REPEAT | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT;
+	//REG_DMA2CNT = ENABLE_DMA | START_ON_FIFO_EMPTY | DMA_32 | DMA_REPEAT | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT;
+
+	REG_DMA1CNT = ENABLE_DMA | START_ON_FIFO_EMPTY | DMA_32 | DMA_REPEAT | DMA_SOURCE_INCREMENT | DEST_REG_SAME;
+	REG_DMA2CNT = ENABLE_DMA | START_ON_FIFO_EMPTY | DMA_32 | DMA_REPEAT | DMA_SOURCE_INCREMENT | DEST_REG_SAME;
+
+	dprintf("REG_DMA1CNT = 0x%lx\n", REG_DMA1CNT);
 	
-	//REG_TM0CNT = 0x00C3;	//enable timer at CPU freq/1024 +irq =16384Khz sample rate
-	REG_TM0CNT = TIMER_IRQ_ENABLE | TIMER_ENABLE | TIMER_FREQ_SYSTEM;
+	//REG_DM1CNT_L = BUFFERSIZE;
+	//REG_DM2CNT_L = BUFFERSIZE;
+
+	REG_DMA1SAD = (u32)&Click[0];
+
+	// set up our timers
+	// set up timer 1 to advance each time timer 0 triggers
+	// REG_TM1D = 0xff7f; 	// 0xffff - the number of samples to play
+	// our buffer is 128 bytes long and we want to trigger twice every buffer for refills of 64 bytes
+	//REG_TM1D = 0xffff - chunksize;
+	//REG_TM1CNT = TIMER_ENABLE | TIMER_IRQ_ENABLE | TIMER_CASCADE; 	// enable timer1 + irq and cascade from timer 0
+	
+	//REG_IE |= INT_TM1; 	//enable irq for timer 1
+	//REG_IME = 1; 	//master enable interrupts
+	
+	// Formula for playback frequency is: 0xFFFF - round(cpuFreq / playbackFreq)
+	// timer count=65536-round(2^24/16000)=0xFBE8
+	// echo "print hex(0xffff - pow(2, 24) / 22050)" | python
+	REG_TM0D = 0xfd07; 		// 22050 KHz playback
+	REG_TM0CNT = TIMER_ENABLE; 	// enable the timer to let the sound run
+*/
 }
 
 AudioLayer::~AudioLayer()
 {
-	delete[] mixbank;
+	
 }
 
 void AudioLayer::Manage(Sample *newsample)
 {
-	newsample->SetChunkSize(banksize);
-	
-	if (samples)
+	newsample->SetChunkSize(chunksize);
+	/*
+	dprintf("%s\n", newsample->GetName());
+	dprintf("samples: 0x%lx\n", (u32)samplelist);
+	dprintf("last: 0x%lx\n", (u32)last);
+	*/
+	if (samplelist)
 	{
 		last->next = new structSampleList();
 		last->next->next = NULL;
@@ -76,17 +106,21 @@ void AudioLayer::Manage(Sample *newsample)
 	}
 	else
 	{
-		samples = new structSampleList();
-		samples->next = NULL;
-		samples->sample = newsample;
-		last = samples;
+		samplelist = new structSampleList();
+		samplelist->next = NULL;
+		samplelist->sample = newsample;
+		last = samplelist;
 	}
-
+	/*
+	dprintf("samplelist: 0x%lx\n", (u32)samplelist);
+	dprintf("last: 0x%lx\n", (u32)last);
+	dprintf("\n");
+	*/
 }
 
 void AudioLayer::Forget(Sample *which)
 {
-	structSampleList *traverse = samples;
+	structSampleList *traverse = samplelist;
 	structSampleList *tmpptr = NULL;
 	
 	while (traverse)
@@ -95,7 +129,7 @@ void AudioLayer::Forget(Sample *which)
 		// if it's our first one, delete the head
 		if (traverse->sample == which)
 		{
-			samples = traverse->next;
+			samplelist = traverse->next;
 			delete traverse;
 		}
 		// if it's the next on in line, pop it out
@@ -114,63 +148,65 @@ void AudioLayer::Forget(Sample *which)
 
 void AudioLayer::Interrupt()
 {
-//	Sample *next = samples;
-//	s8 *chunkdata = 0;
-//	u16 i = 0;
-	
-	// initialise our mixbank to zeroes
-//	for (i=0; i<banksize; i++);
-//	{
-//		mixbank[i] = 0;
-//	}
-	
-	//Audio::counter++;
-	//if (Audio::i==1)
-	//	dprintf("%d\n", Audio::counter);
-	
-	//while (next)
-	//{
-		// get the next four bytes of data from this sample
-		//chunkdata = next->GetChunk();
-//		for (i=0; i<banksize; i++);
-//		{
-//			mixbank[i] += chunkdata[i];
-//		}
-		
-//		if (mixbank[i] > 255)
-//			mixbank[i] = mixbank[i] >> 1;
-		
-	//	REG_SGFIFOA = mixbank[0] + (mixbank[1] << 8) + (mixbank[2] << 16) + (mixbank[3] << 24);
-	
-	//chunkdata = samples->GetChunk();
-	
-	REG_DMA1SAD = (u32)samples->sample->GetChunk();
-	REG_DMA1DAD = (u32)&REG_SGFIFOA;
-	REG_DM1CNT_L = 4;
-	REG_DM1CNT_H = DMA32NOW | DMA_ENABLE;
-	
-//	for (i = 0; i < banksize; i++)
-//	{
-//		mixbank[i] = chunkdata[i];
-		//dprintf("%d ", mixbank[i]);
-		//dprintf("%d ", i);
-//		if (mixbank[i] > 255) mixbank[i] = 255;
-//	}
-	
-	//REG_SGFIFOA = chunkdata[0] + (chunkdata[1] << 8) + (chunkdata[2] << 16) + (chunkdata[3] << 24);
-	//REG_SGFIFOA = mixbank[0] + (mixbank[1] << 8) + (mixbank[2] << 16) + (mixbank[3] << 24);
-	
-		// jump to the next sample in the queue
-		//next = next->next;
-	//	next = NULL;
-		
-	//	dprintf("a\n");
-	//}
+/*	u16 b;
+	s8 *sampledata;
+	structSampleList *traverse = samplelist;
 
-	//dprintf("done\n");
+	//dprintf("started\n");
 	
-	//clear the interrupt(s)
-	//REG_IF |= REG_IF;
+	// fill the buffer with nice fellows
+	while (traverse)
+	{
+		//dprintf("0x%lx\n", (u32)traverse);
+		//dprintf("sample: %s\n", traverse->sample->GetName());
+		sampledata = traverse->sample->GetChunk();
+		//dprintf("Filling at: %ld\n", resetDMA * chunksize);
+		for (b = 0; b < chunksize; b++)
+		{
+			// we need to start filling the buffer at either 0 or chunksize (depending on where the pointer is)
+			Buffer_L[resetDMA * chunksize + b] = sampledata[b];
+			Buffer_R[resetDMA * chunksize + b] = sampledata[b];
+		}
+		traverse = traverse->next;
+	}
 	
-	//dprintf("\n");
+	// do we need to start the dma transfer from the beginning again?
+	if (resetDMA)
+	{
+		//stop DMA
+		//REG_DMA1CNT = 0;
+		//REG_DMA2CNT = 0;
+		
+		// start both DMAs again
+		//REG_DMA1CNT = ENABLE_DMA | START_ON_FIFO_EMPTY | DMA_32 | DMA_REPEAT | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT;
+		//REG_DMA2CNT = ENABLE_DMA | START_ON_FIFO_EMPTY | DMA_32 | DMA_REPEAT | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT;
+		
+		// stop the sound from playing by disabling the timer
+		//REG_TM0CNT &= ~TIMER_ENABLE;
+		
+		//REG_DMA1CNT &= ~ENABLE_DMA;
+		//REG_DMA2CNT &= ~ENABLE_DMA;
+		
+		//REG_DMA1CNT |= ENABLE_DMA;
+		//REG_DMA2CNT |= ENABLE_DMA;
+		
+		// enable the timer to let the sound run
+		//REG_TM0CNT = TIMER_ENABLE;
+		
+		//REG_DMA1SAD = (u32)Buffer_L;
+		//REG_DMA1DAD = (u32)&REG_SGFIFOA;
+		
+		//REG_DMA2SAD = (u32)Buffer_R;
+		//REG_DMA2DAD = (u32)&REG_SGFIFOB;
+		
+		resetDMA = false;
+		//dprintf("reset dma\n");
+	}
+	else
+	{
+		resetDMA = true;
+		//dprintf("didn't reset dma\n");
+	}
+
+	//dprintf("\n");*/
 }

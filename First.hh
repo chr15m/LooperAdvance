@@ -43,6 +43,8 @@ public:
 		
 	// build the choice list of song names
 	void RebuildSongList();
+	// delete all live loops (but not loop data)
+	void DelLiveLoops();
 	
 	// if they've clicked the save button, then save
 	void *SaveButton(void *data);

@@ -185,6 +185,7 @@ void GlobalData::SetCurrentLoop(structLoopData *which)
 {
 	structNoteData *traverse;
 	
+	debug("New Loop: %d", which);
 	currentnote = NULL;
 	currentloop = which;
 	if (currentloop)
@@ -196,8 +197,8 @@ void GlobalData::SetCurrentLoop(structLoopData *which)
 			currentnote = traverse;
 			traverse = traverse->next;
 		}
+		debug("Set current loop: 0x%lx, '%s', Notes=0x%lx", (u32)currentloop, currentloop->name, (u32)currentloop->notes);
 	}
-	debug("Set current loop: 0x%lx, '%s', Notes=0x%lx", (u32)currentloop, currentloop->name, (u32)currentloop->notes);
 }
 
 // change the name of the current loop
@@ -336,7 +337,7 @@ void GlobalData::NewNote()
 		}
 		
 		// set defaults
-		currentnote->noteEnd = note_cut;
+		currentnote->noteEnd = note_continue;
 		currentnote->offset = 0;
 		currentnote->pitch = 128;
 		currentnote->swing = 0;

@@ -95,6 +95,7 @@ public:
 	void *Pitch(void *number);
 	void *Pan(void *number);
 	void *Beats(void *number);
+	void *Swing(void *number);
 	void *SampleChange(void *whichsample);
 	void *Reset(void *ignore);
 	void *Notes(void *number);

@@ -149,13 +149,10 @@ void *First::Song(void *data)
 	Page *newloop=this;
 
 	debug("Song select callback");
+	// remove all our old live loops
+	DelLiveLoops();
 	// change currentsong variable to point at the newly selected song
 	globals.SetSong(newsong);
-	// remove all our old loops
-	while (right)
-	{
-		DelLoopButton(NULL);
-	}
 	
 	// for every loop in this song, create it's loop
 	loop = newsong->loops;
@@ -183,6 +180,8 @@ void *First::Song(void *data)
 void *First::NewButton(void *data)
 {
 	debug("New button callback");
+	// delete all the live loops
+	DelLiveLoops();
 	// create a new song in the songdata
 	globals.NewSong();
 	// rebuild the choices
@@ -233,6 +232,20 @@ void *First::AddLoopButton(void *data)
 	}
 	
 	return NULL;
+}
+
+// delete all current liveloops
+void First::DelLiveLoops()
+{
+	Page *traverse = right;
+	Page *tmp;
+	
+	while (traverse)
+	{
+		tmp = traverse;
+		delete traverse;
+		traverse = tmp->right;
+	}
 }
 
 // if they press the del-loop button

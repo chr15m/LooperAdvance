@@ -1,0 +1,12 @@
+todo:
+- add nifty background to pages
+- make load/save format more robust & backwards compatible for future versions
+- implement time stretching
+- add font (when fenris has done it)
+
+done:
++ make a releasable sample bank
++ add splash screens
++ make tutorial (and screenshots)
++ add header to all files
++ upload source and binary to website

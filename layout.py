@@ -1,4 +1,18 @@
 #!/usr/bin/env python
+#/*****************************************************
+#
+#	looper advance
+#	(c) chris mccormick, 2004
+#	
+#	licensed under the terms of the GPL
+#	see the file gpl.txt for details
+#	
+#	chris@mccormick.cx
+#	http://looper.mccormick.cx/
+#	
+#	$Id$
+#
+#******************************************************/
 
 #layout = "abcdefghijklmnopqrstuvwxyz0123456789,./<>?;':\"[]\{}|!@#$%^&*()_+-="
 layout = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ 1234567890!@#$%^&*()-=_+[]{}\|;':\",.<>/?`~"

@@ -51,8 +51,13 @@ all: $(TARGET).gba
 $(TARGET).gba: $(TARGET).elf
 	$(OBJCOPY) -O binary $(TARGET).elf $(TARGET).gba
 
-$(TARGET).elf: $(RESOURCES) $(TARGET).cc $(TARGET).o $(GAMEOBJECTS) $(CRT) $(LDSCRIPT) Makefile
-	$(LD) $(LFLAGS) crt0.o $(TARGET).o $(GAMEOBJECTS) -o $(TARGET).elf $(LIBS)
+$(TARGET).elf: $(RESOURCES) $(TARGET).cc $(TARGET).o $(CRT) $(LDSCRIPT) Makefile
+	$(LD) $(LFLAGS) crt0.o $(TARGET).o -o $(TARGET).elf $(LIBS)
+
+# specific target looper needs gameobjects
+
+looper.elf: $(RESOURCES) looper.cc looper.o $(GAMEOBJECTS) $(CRT) $(LDSCRIPT) Makefile
+	$(LD) $(LFLAGS) crt0.o looper.o $(GAMEOBJECTS) -o $(TARGET).elf $(LIBS)
 
 # links to lib
 krawall.lib: ../krawall/gcclib/krawall-32k-60-medium-sf.lib

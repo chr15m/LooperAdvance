@@ -38,8 +38,9 @@ First::First(Keys *inkeys)
 	
 	UseKeys(inkeys);
 	
+	sbSong->ClearChoices();
 	sbSong->Select();
-	selected = sbSong;	
+	selected = sbSong;
 }
 
 First::~First()
@@ -49,11 +50,6 @@ First::~First()
 	delete sbNewButton;
 	delete sbDelButton;
 	delete sbSaveButton;
-}
-
-void First::Load()
-{
-	sbSong->ClearChoices();
 }
 
 void First::Draw()
@@ -81,7 +77,7 @@ void First::Process()
 		ptrLoop = (Loop *)right;
 		while(ptrLoop)
 		{
-			ptrLoop->SetParameters(dataptr->loop[i].sample, dataptr->loop[i].pan, dataptr->loop[i].pitch, dataptr->loop[i].divisions);
+			ptrLoop->SetParameters(dataptr->loops[i].sample, dataptr->loops[i].pan, dataptr->loops[i].pitch, dataptr->loops[i].divisions);
 			ptrLoop = (Loop *)ptrLoop->right;
 		}
 		oldsong = sbSong->GetChoice();

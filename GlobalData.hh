@@ -20,13 +20,14 @@ typedef struct structSampleData
 } structSampleData;
 
 // this holds a single note
-typedef struct structNote
+typedef struct structNoteData
 {
 	noteType noteEnd;	// what to do at the end of the note
 	u8 offset;		// which beat in the loop to offset to
 	u8 pitch;		// what pitch to play this segment at (this is note-relative to base pitch)
-	structNote *next;	// next note in the linked list of notes
-} structNote;
+	u8 swing;		// fraction of 255 to swing this note by
+	structNoteData *next;	// next note in the linked list of notes
+} structNoteData;
 
 typedef struct structLoopData
 {
@@ -35,15 +36,15 @@ typedef struct structLoopData
 	bool pan;		// which way to pan it
 	u32 pitch;		// base pitch to play it at (1000 = normal pitch for the sample)
 	u16 divisions;		// how many divisions to divide the loop up into
-	structNote *notes;	// linked list of notes to play
+	structNoteData *notes;	// linked list of notes to play
 	structLoopData *next;	// next loop in the list of loops for this song
 } structLoopData;
 
 typedef struct structSongData
 {
-	u16 bpm;		// tempo to play this song at
 	char *name;		// name of this song (user modifiable)
-	structLoopData *loop;	// linked list of loops in this song
+	u16 bpm;		// tempo to play this song at
+	structLoopData *loops;	// linked list of loops in this song
 	structSongData *next;	// next song in the linked list of all songs
 } structSongData;
 
@@ -57,12 +58,13 @@ private:
 	
 public:
 	u32 counter;
+	u32 offset;
+	u16 magic;
 	struct structSongData *songdata;
 	struct structSongData *currentsong;
-	struct structLoopData *currentloop;
-	struct structNote *currentnote;
 	
 	GlobalData();
+
 	void NewSong();
 	void DelSong();
 	void SetSong(u16 whichsong);
@@ -72,6 +74,11 @@ public:
 	void SetBPM(u16 bpm);
 	void SaveSongs();
 	void LoadSongs();
+	
+	void WriteString(char *str);
+	void WriteNumber(u32 number, u8 size);
+	void ReadString(char **str);
+	void ReadNumber(void *number, u8 size);
 };
 
 extern GlobalData globals;

@@ -29,7 +29,4 @@ public:
 	virtual ~First();
 	void Draw();
 	void Process();
-	
-	// this loads the save bank into ram
-	void Load();
 };

@@ -1,5 +1,6 @@
 #include "gba.h"
 #include "stdio.h"
+#include "string.h"
 #include "typedefs.h"
 #include "emudp.h"
 #include "screenmode.h"

@@ -17,11 +17,27 @@
 
 #include "AudioLayer.hh"
 
+void Audio::AudioCallBack()
+{
+	// turn off the timer callback so it doesn't override itself
+	REG_IE &= ~INT_TM0;
+	
+	if (Audio::AudioLayerPtr)
+		((AudioLayer *)Audio::AudioLayerPtr)->Interrupt();
+	
+	// turn the interrupt back on and clear interrupt flags
+	REG_IF &= ~INT_TM0;
+	REG_IE |= INT_TM0;
+}
+
+AudioLayer *Audio::AudioLayerPtr=NULL;
+
 AudioLayer::AudioLayer(u16 mixlength)
 {
-	s16 newmixbank[mixlength];
+	Audio::AudioLayerPtr = this;
+	IntrTable[3] = &Audio::AudioCallBack;
 	
-	mixbank = newmixbank;
+	mixbank = new s16[mixlength];
 	banksize = mixlength;
 
 	samples = NULL;
@@ -35,10 +51,11 @@ AudioLayer::AudioLayer(u16 mixlength)
 	
 	// REG_TM0D = 0xffff;
 	// TODO: figure out the correct frequency of playback for 22050
-	REG_TM0D = 0xf400;
+	// REG_TM0D = 0xf400;
+	REG_TM0D = 0xffff;
 	
 	//REG_TM0CNT = 0x00C3;	//enable timer at CPU freq/1024 +irq =16384Khz sample rate
-	REG_TM0CNT = TIMER_IRQ_ENABLE | TIMER_ENABLE | TIMER_FREQ_SYSTEM;
+	REG_TM0CNT = TIMER_IRQ_ENABLE | TIMER_ENABLE | TIMER_FREQ_1024;
 }
 
 AudioLayer::~AudioLayer()
@@ -49,73 +66,63 @@ AudioLayer::~AudioLayer()
 void AudioLayer::Manage(Sample *newsample)
 {
 	newsample->SetChunkSize(banksize);
+	samples = newsample;
 }
 
-void AudioLayer::AudioInterrupt()
+void AudioLayer::Interrupt()
 {
-	Sample *next = samples;
+//	Sample *next = samples;
 	s8 *chunkdata = 0;
-	
-	//u32 *data = (u32 *)samples[0].data;
-	//u8 *data = (u8 *)samples[0].data;
-	
-	//if(!(iNextSample & 3))
-	// REG_SGFIFOA = (data[iNextSample]); // + (data[iNextSample + 1] >> 16) + (data[iNextSample + 2] >> 8) + (data[iNextSample + 3]);
-	
-	//REG_SGFIFOA = data[iNextSample] + (data[iNextSample + 1] << 8) + (data[iNextSample + 2] << 16) + (data[iNextSample + 3] << 24);
-	//REG_SGFIFOA = (data[iNextSample] << 16) + (data[iNextSample + 1] << 24) + (data[iNextSample + 2]) + (data[iNextSample + 3] << 8);
-	//REG_SGFIFOA = (data[iNextSample] << 24) + (data[iNextSample + 1] << 16) + (data[iNextSample + 2] << 8) + data[iNextSample + 3];
-	//REG_SGFIFOA = (data[iNextSample] << 8) + (data[iNextSample + 1]) + (data[iNextSample + 2] << 24) + (data[iNextSample + 3] << 16);
-
-	//REG_SGFIFOA = data[iNextSample + 3] + (data[iNextSample + 2] << 8) + (data[iNextSample + 1] << 16) + (data[iNextSample] << 24);
-	//REG_SGFIFOA = (data[iNextSample + 3] << 16) + (data[iNextSample + 2] << 24) + (data[iNextSample + 1]) + (data[iNextSample] << 8);
-	//REG_SGFIFOA = (data[iNextSample + 3] << 24) + (data[iNextSample + 2] << 16) + (data[iNextSample + 1] << 8) + data[iNextSample];
-	//REG_SGFIFOA = (data[iNextSample + 3] << 8) + (data[iNextSample + 2]) + (data[iNextSample + 1] << 24) + (data[iNextSample] << 16);
-	
-	//REG_SGFIFOA = data[iNextSample];
-	
-	// bad
-	// REG_SGFIFOA = (data[iNextSample] >> 24) + (data[iNextSample + 1] >> 16) + (data[iNextSample + 2] >> 8) + data[iNextSample + 3];
-	// REG_SGFIFOA = data[iNextSample] + (data[iNextSample + 1] >> 8) + (data[iNextSample + 2] >> 16) + (data[iNextSample + 3] >> 24);
-	
-	//REG_DMA1SAD = (u32)&data[iNextSample];
-	//REG_DMA1DAD = (u32)&REG_SGFIFOA;
-	//REG_DMA1CNT = 1 | DMA_ENABLE | DMA_TIMING_IMMEDIATE | DMA_32;
-	
-	// iNextSample += 4;
-
-	// we're bitshifting the value of the u32 iNextSample because we want to multiply it by four (four bytes at a time)
-	//if(iNextSample > samples[0].length)
-	//{
-		//sample finished!
-		//REG_TM0CNT=0; //disable timer 0
-	//	iNextSample = 0;
-	//	dprintf("Loop at %ld\n", samples[0].length);
-	//}
-	
-	u16 i;
+	u16 i = 0;
 	
 	// initialise our mixbank to zeroes
-	for (i=0; i<banksize; i++);
+//	for (i=0; i<banksize; i++);
+//	{
+//		mixbank[i] = 0;
+//	}
+	
+	//Audio::counter++;
+	//if (Audio::i==1)
+	//	dprintf("%d\n", Audio::counter);
+	
+	//while (next)
+	//{
+		// get the next four bytes of data from this sample
+		//chunkdata = next->GetChunk();
+//		for (i=0; i<banksize; i++);
+//		{
+//			mixbank[i] += chunkdata[i];
+//		}
+		
+//		if (mixbank[i] > 255)
+//			mixbank[i] = mixbank[i] >> 1;
+		
+	//	REG_SGFIFOA = mixbank[0] + (mixbank[1] << 8) + (mixbank[2] << 16) + (mixbank[3] << 24);
+	
+	chunkdata = samples->GetChunk();
+	
+	for (i = 0; i < banksize; i++)
 	{
-		mixbank[i] = 0;
+		mixbank[i] = chunkdata[i];
+		//dprintf("%d ", mixbank[i]);
+		//dprintf("%d ", i);
+		if (mixbank[i] > 255) mixbank[i] = 255;
 	}
 	
-	while (next)
-	{
-		// get the next four bytes of data from this sample
-		chunkdata = next->GetChunk();
-		for (i=0; i<banksize; i++);
-		{
-			mixbank[i] += chunkdata[i];
-		}
-		
-		REG_SGFIFOA = mixbank[0] + (mixbank[1] << 8) + (mixbank[2] << 16) + (mixbank[3] << 24);
-		
+	//REG_SGFIFOA = chunkdata[0] + (chunkdata[1] << 8) + (chunkdata[2] << 16) + (chunkdata[3] << 24);
+	REG_SGFIFOA = mixbank[0] + (mixbank[1] << 8) + (mixbank[2] << 16) + (mixbank[3] << 24);
+	
 		// jump to the next sample in the queue
 		//next = next->next;
-	}
+	//	next = NULL;
+		
+	//	dprintf("a\n");
+	//}
+
+	//dprintf("done\n");
 	
 	//clear the interrupt(s)
-	REG_IF |= REG_IF;
+	//REG_IF |= REG_IF;
+	
+	//dprintf("\n");
 }

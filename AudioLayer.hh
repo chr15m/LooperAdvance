@@ -23,6 +23,8 @@
 #include "emudp.h"
 #include "Sample.hh"
 
+extern void (*IntrTable[])();
+
 class AudioLayer
 {
 private:
@@ -32,13 +34,18 @@ private:
 	s16 *mixbank;
 	u16 banksize;
 
-	void AudioInterrupt();
-
 public:
 	AudioLayer(u16 mixlength);
 	~AudioLayer();
 
+	void Interrupt();
 	void Manage(Sample *newsample);
 };
+
+namespace Audio
+{
+	extern void AudioCallBack();
+	extern AudioLayer *AudioLayerPtr;
+}
 
 #endif

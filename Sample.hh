@@ -29,7 +29,7 @@ private:
 	u16 chunksize;
 	// what sample data we're using
 	SampleData *sampledata;
-	// the next position in the datastream
+	// the next position in the datastream (uses the top 24 bits)
 	u32 nextchunk;
 
 	// parameters for the sample

@@ -101,12 +101,15 @@ void Sample::SetChunkSize(u16 setsize)
 // this is used by audio layer to get the next chunk of audio to be sent to the hardware
 s8 *Sample::GetChunk()
 {
+//	dprintf("Returning %d bytes.\n", chunksize);
+	
 	// use only 24 bits of next chunk
 	s8 *returnchunk = (s8 *)sampledata->data + (nextchunk >> 8);
 	
 	//nextchunk += chunksize;
 	// go forward at our frequency
 	nextchunk += frequency;
+	//dprintf("chunk: %ld\n", (nextchunk >> 8));
 	
 	// NOTE: because our chunksize is only 4 on the gba it's not really an issue reading past the end of the data
 	// however if this is going to be ported to other platforms, this should be adressed with a temporary buffer

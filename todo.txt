@@ -34,6 +34,7 @@ Looper Advance Live (1.0):
 	- display current note position for this loop (Jordan)
 	- allow for different volumes (Evans)
 	+ B is a delete button in the editbox
+	- selecting a pitch - a keyboard appears
 
 - original gb synth pages
 	- square wave 1

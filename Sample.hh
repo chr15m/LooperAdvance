@@ -20,13 +20,14 @@
 
 #include "gba.h"
 #include "typedefs.h"
+#include "emudp.h"
 #include "SampleData.hh"
 
 class Sample
 {
 private:
 	// number of samples to jump forward each time
-	u16 chunksize;
+	u32 chunksize;
 	// what sample data we're using
 	SampleData *sampledata;
 	// the next position in the datastream (uses the top 24 bits)
@@ -35,7 +36,7 @@ private:
 	// parameters for the sample
 	u8 volume;
 	s8 panning;
-	u16 frequency;
+	u32 frequency;
 	bool playing;
 public:
 	Sample(SampleData *usedata);

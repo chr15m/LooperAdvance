@@ -126,8 +126,8 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	// what samples are available?
 	for (i=0; i<NUMSAMPLES; i++)
 	{
-		sbSample->NewChoice((char *)samplenames[i], i);
-		debug("Sample: %s", (char *)samplenames[i]);
+		sbSample->NewChoice((char *)samples[i].name, i);
+		debug("Sample: %s", (char *)samples[i].name);
 	}
 	cbSample.MakeCallback(this, &Loop::SampleChange);
 	sbSample->UseCallBack(&cbSample);
@@ -471,7 +471,7 @@ void *Loop::Reset(void *ignore)
 u32 Loop::GetSize()
 {
 	u16 sample = sbSample->GetChoice();
-	return (u32)samples[sample]->end - (u32)samples[sample]->data;
+	return (u32)samples[sample].length;
 }
 
 // process the audio

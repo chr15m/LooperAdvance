@@ -19,9 +19,8 @@
 #include "charset.hh"
 #include "Page.hh"
 #include "Widgets.hh"
-#include "samples.h"
-#include "samplenames.hh"
-#include "krawall.h"
+#include "samples/samples.hh"
+#include "krawall_fake.h"
 
 #ifndef _LOOP_HH_
 #define _LOOP_HH_

@@ -13,9 +13,7 @@
 
 ******************************************************/
 
-#include "krawall.h"
-#include "samples.h"
-#include "instruments.h"
+#include "samples/samples.hh"
 
 #include "looper.hh"
 #include "charset.hh"
@@ -23,7 +21,7 @@
 #include "Loop.hh"
 #include "First.hh"
 
-#include "screens.hh"
+//#include "screens.hh"
 
 // IntrTable for crt0
 void (*IntrTable[])() =
@@ -64,7 +62,7 @@ int main()
 	SetBG(10, 0, 10);
 
 	// set up the krawall interrupt now that this is done
-	IntrTable[4] = kradInterrupt;
+	//IntrTable[4] = kradInterrupt;
 	
 	u16 i=0;
 	Keys *keys = new Keys();
@@ -80,6 +78,7 @@ int main()
 	// make it so we can see the background
 	REG_BG1CNT = BIT07 | BIT08 | BIT09 | BIT10 | BIT11 | BIT12; // high priority, 256 colour, point the banks at the right place etc
 	
+	/*
 	// load the splash screen
 	DMACopy((void*)splash_tiles, (u16*)VideoBuffer, SPLASH_TILESIZE, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT);
 	DMACopy((void*)splash_palette, (u16*)&BGPaletteMem[5], SPLASH_PALSIZE, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT);
@@ -91,18 +90,7 @@ int main()
 		keys->Jiffie();
 	}
 	keys->Jiffie();
-
-	// load the krawall splash screen
-	DMACopy((void*)krawall_splash_tiles, (u16*)VideoBuffer, KRAWALL_SPLASH_TILESIZE, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT);
-	DMACopy((void*)krawall_splash_palette, (u16*)&BGPaletteMem[5], KRAWALL_SPLASH_PALSIZE, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT);
-	DMACopy((void*)krawall_splash_map, (u16*)&VideoBuffer[0x7C00], 640, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT);
-
-	// check keys
-	while (keys->TestKey(keyA) != pressed)
-	{
-		keys->Jiffie();
-	}
-	keys->Jiffie();
+	*/
 	
 	// load charset into memory as a demo tileset
 	DMACopy((void*)font::tiles, (u16*)VideoBuffer, 3232, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT);
@@ -127,7 +115,7 @@ int main()
 	REG_WSCNT = ( 5 << 2 ) | ( 1 << 14 );	// set rom-timing
 	
 	// initialize krawall
-	kragInit( KRAG_INIT_STEREO );					// init krawall
+	//kragInit( KRAG_INIT_STEREO );					// init krawall
 	
 	while (1)
 	{
@@ -137,7 +125,7 @@ int main()
 		// figure out all our latest song positions
 		globals.Tick();
 		// calculate audio stuff
-		kramWorker();
+		//kramWorker();
 		// check keys
 		keys->Jiffie();
 		// automatically cascades all pages and processes them

@@ -20,7 +20,7 @@
 #define _GLOBALDATA_HH_
 
 #include "looper.hh"
-#include "samples.h"
+#include "samples/samples.hh"
 
 // the different types of things that can happen to notes at their end (before timeslot end)
 typedef enum noteType { note_continue, note_cut, note_loop, note_feed, note_stretch };

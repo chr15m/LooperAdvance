@@ -79,6 +79,7 @@ public:
 	void SetSong(structSongData *whichsong);
 	void FindSong(u16 whichsong);
 	void SetName(char *name);
+	void SetLoopName(char *name);
 	void SetBPM(u16 bpm);
 
 	void NewSong();

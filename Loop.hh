@@ -22,6 +22,7 @@ private:
 	
 	structLoopData *data;
 	
+	EditBox *ebName;
 	NumberBox *nbPitch;
 	SelectBox *sbPan;
 	NumberBox *nbBeats;
@@ -37,6 +38,7 @@ private:
 	TCallback<Loop> cbAddLoopButton;
 	TCallback<Loop> cbDelLoopButton;
 	
+	TCallback<Loop> cbName;
 	TCallback<Loop> cbPitch;
 	TCallback<Loop> cbPan;
 	TCallback<Loop> cbBeats;
@@ -47,7 +49,7 @@ public:
 	Loop(Keys *inkeys, structLoopData *whichloop);
 	virtual ~Loop();
 
-	inline void DoDraw() { debugloop("Draw"); };
+	void DoDraw();
 	
 	void DoProcess();
 	void *AddLoopButton(void *data);
@@ -55,6 +57,7 @@ public:
 	structLoopData *GetAddress();
 	void UpdateWidgets();
 	void UpdateParameters();
+	void *Name(void *name);
 	void *Pitch(void *number);
 	void *Pan(void *number);
 	void *Beats(void *number);

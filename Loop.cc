@@ -18,6 +18,7 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	// set up the GUI
 	debug("Setting up GUI");
 	
+	ebName = new EditBox(10, 1, 10, inkeys);
 	sbOn = new SelectBox(10, 3, 3, inkeys);
 	debug("sbOn: 0x%lx", sbOn);
 	nbPitch = new NumberBox(10, 4, 10, 1, 100000, 100, inkeys);
@@ -32,6 +33,7 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	sbAddLoopButton = new SelectBox(18, 17, 8, inkeys);
 	sbDelLoopButton = new SelectBox(18, 18, 8, inkeys);
 	
+	AddWidget(ebName);
 	AddWidget(sbOn);
 	AddWidget(nbPitch);
 	AddWidget(lbPitch);
@@ -43,7 +45,8 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	AddWidget(sbAddLoopButton);
 	AddWidget(sbDelLoopButton);
 	
-	sbOn->SetTransitions(NULL, NULL, NULL, nbPitch);
+	ebName->SetTransitions(NULL, NULL, NULL, sbOn);
+	sbOn->SetTransitions(NULL, NULL, ebName, nbPitch);
 	nbPitch->SetTransitions(NULL, NULL, sbOn, sbPan);
 	sbPan->SetTransitions(NULL, NULL, nbPitch, nbBeats);
 	nbBeats->SetTransitions(NULL, NULL, sbPan, sbReset);
@@ -74,6 +77,9 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	sbDelLoopButton->NewChoice("-------------", 1);	
 	cbDelLoopButton.MakeCallback(this, &Loop::DelLoopButton);
 	sbDelLoopButton->UseCallBack(&cbDelLoopButton);
+
+	cbName.MakeCallback(this, &Loop::Name);
+	ebName->UseCallBack(&cbName);
 
 	cbPitch.MakeCallback(this, &Loop::Pitch);
 	nbPitch->UseCallBack(&cbPitch);
@@ -187,6 +193,7 @@ void Loop::UpdateWidgets()
 	sbPan->ChooseByValue(data->pan);
 	nbBeats->SetValue(data->divisions);
 	sbSample->ChooseByValue(data->sample);
+	ebName->SetString(data->name);
 }
 
 // what to do if the pitch is changed
@@ -210,6 +217,13 @@ void *Loop::Pan(void *pan)
 	return NULL;
 }
 
+// if they change the name of this loop
+void *Loop::Name(void *pan)
+{
+	globals.SetLoopName((char *)pan);
+	return NULL;
+}
+
 // if the reset button is pressed
 void *Loop::Reset(void *ignore)
 {
@@ -223,12 +237,14 @@ void *Loop::Reset(void *ignore)
 	return NULL;
 }
 
+// get the size of the current sample in samples
 u32 Loop::GetSize()
 {
 	u16 sample = sbSample->GetChoice();
 	return (u32)samples[sample]->end - (u32)samples[sample]->data;
 }
 
+// process the audio
 void Loop::DoProcess()
 {
 	beat = globals.beat % nbBeats->GetValue();
@@ -246,6 +262,13 @@ void Loop::DoProcess()
 	debugloop("Beat: %d", beat);
 }
 
+// during the draw phase make sure we're the current loop
+void Loop::DoDraw()
+{
+	globals.currentloop = data;
+}
+
+// update the parameters of a specific loop
 void Loop::UpdateParameters()
 {
 	kramSetFreq(handle, ((nbPitch->GetValue() * 44100) / 1000));
@@ -254,6 +277,7 @@ void Loop::UpdateParameters()
 	kramSetPos(handle, (GetSize() * (beat % nbBeats->GetValue()))/nbBeats->GetValue());
 }
 
+// what to do when they select a different sample
 void *Loop::SampleChange(void *whichsample)
 {
 	if (whichsample)

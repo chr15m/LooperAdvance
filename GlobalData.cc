@@ -184,6 +184,23 @@ void GlobalData::SetName(char *inname)
 	}
 }
 
+// change the name of the current loop
+void GlobalData::SetLoopName(char *inname)
+{
+	if (currentloop)
+	{
+		// forget whatever data this char used to be attached to
+		delete[] currentloop->name;
+		// create a new array of characters one longer
+		currentloop->name = new char[strlen(inname) + 1];
+		// read in a string
+		strncpy(currentloop->name, inname, strlen(inname));
+		// make sure the last element is zero
+		currentloop->name[strlen(inname)] = '\0';
+		debug("set loop name to %s", currentloop->name);
+	}
+}
+
 // add another loop to this song
 void GlobalData::NewLoop()
 {

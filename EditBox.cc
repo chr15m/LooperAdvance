@@ -98,7 +98,6 @@ Widget *EditBox::Process()
 		{
 			callback->Execute(text);
 		}
-
 	}
 	
 	if (!newselect)

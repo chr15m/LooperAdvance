@@ -60,6 +60,10 @@ ifeq ($(TARGET),audiolayertest)
 	GAMEOBJECTS = samples/samples.o Sample.o AudioLayer.o
 endif
 
+ifeq ($(TARGET),clarkinoutest)
+	GAMEOBJECTS = samples/samples.o ClarkMix.o
+endif
+
 ifdef RELEASE
 	#release build
 	CFLAGS 	= -O -Wall -ffreestanding -fomit-frame-pointer -funroll-loops -mcpu=arm7tdmi  $(INCLUDE) -DRAN_SEED=322187 -D_FIXED_NO_FLOATINGPOINT_ -D_VECTOR_NO_FLOATINGPOINT_ -DNO_DPRINT -DNO_COLOUR_PROFILING -DINTERWORK ${GNUDEBUG} -mthumb-interwork -msoft-float -mno-long-calls -DFIXED_USE_BIOS_DIVIDE ${MMFLAGS}

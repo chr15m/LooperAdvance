@@ -64,8 +64,9 @@ int main()
 //	globals.NewSong();
 //	globals.NewLoop();
 //	globals.NewNote();
-//	globals.DelSong();	
+//	globals.DelSong();
 	globals.DelSong();	
+	globals.SetName("pants");
 	globals.SaveSongs();
 	
 	while (1);

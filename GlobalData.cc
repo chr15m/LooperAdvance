@@ -426,8 +426,8 @@ void GlobalData::SaveSongs()
 void GlobalData::WriteString(char *instr)
 {
 	// write our letters to disk
-	bcopy(instr, (char *)(SRAM + offset), strlen(instr));
-	bcopy((const char*)&zero, (char *)(SRAM + offset), 1);
+	bcopy(instr, (char *)(SRAM + offset), strlen(instr) + 1);
+	bcopy((const char*)&zero, (char *)(SRAM + offset + strlen(instr)), 1);
 	offset += strlen(instr) + 1;
 	debug("Wrote: %s", instr);
 	// if (offset % 2) offset++;

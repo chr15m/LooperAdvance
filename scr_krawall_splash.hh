@@ -1,8 +1,24 @@
+/*****************************************************
+
+	looper advance
+	(c) chris mccormick, 2004
+	
+	licensed under the terms of the GPL
+	see the file gpl.txt for details
+	
+	chris@mccormick.cx
+	http://looper.mccormick.cx/
+	
+	$Id$
+
+******************************************************/
+
 #include "gba.h"
 #include "typedefs.h"
 
-extern const u16 krawall_splash_tiles[7040];
-extern const u16 krawall_splash_palette[107];
-extern const u16 krawall_splash_map[600];
-extern const u16 krawall_splash_height;
-extern const u16 krawall_splash_width;
+#define KRAWALL_SPLASH_TILESIZE 7040
+#define KRAWALL_SPLASH_PALSIZE 107
+
+extern const u16 krawall_splash_tiles[KRAWALL_SPLASH_TILESIZE];
+extern const u16 krawall_splash_palette[KRAWALL_SPLASH_PALSIZE];
+extern const u16 krawall_splash_map[640];

@@ -1,8 +1,24 @@
+/*****************************************************
+
+	looper advance
+	(c) chris mccormick, 2004
+	
+	licensed under the terms of the GPL
+	see the file gpl.txt for details
+	
+	chris@mccormick.cx
+	http://looper.mccormick.cx/
+	
+	$Id$
+
+******************************************************/
+
 #include "gba.h"
 #include "typedefs.h"
 
-extern const u16 bg_tiles[5984];
-extern const u16 bg_palette[24];
-extern const u16 bg_map[600];
-extern const u16 bg_height;
-extern const u16 bg_width;
+#define BG_TILESIZE 5984
+#define BG_PALSIZE 24
+
+extern const u16 bg_tiles[BG_TILESIZE];
+extern const u16 bg_palette[BG_PALSIZE];
+extern const u16 bg_map[640];

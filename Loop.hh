@@ -1,4 +1,17 @@
-// This file is part of the looping program for GBA which Chrism&Fenris use in their live show
+/*****************************************************
+
+	looper advance
+	(c) chris mccormick, 2004
+	
+	licensed under the terms of the GPL
+	see the file gpl.txt for details
+	
+	chris@mccormick.cx
+	http://looper.mccormick.cx/
+	
+	$Id$
+
+******************************************************/
 
 // Represents a single loop-page
 

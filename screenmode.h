@@ -1,14 +1,3 @@
-/**********************************************\
-** Meltdown                                   **
-** ========                                   **
-** All code, artwork, design, sound copyright **
-** Pixelogic. All copying and distribution    **
-** prohibited. All rights reserved.           **
-**                                            **
-** $Id$
-** $Revision$
-\**********************************************/ 
-
 /*****************************\
 * 	screenmode.h
 *	Original by dovoto

@@ -1,3 +1,18 @@
+/*****************************************************
+
+	looper advance
+	(c) chris mccormick, 2004
+	
+	licensed under the terms of the GPL
+	see the file gpl.txt for details
+	
+	chris@mccormick.cx
+	http://looper.mccormick.cx/
+	
+	$Id$
+
+******************************************************/
+
 #include "krawall.h"
 #include "samples.h"
 #include "instruments.h"
@@ -7,6 +22,8 @@
 
 #include "Loop.hh"
 #include "First.hh"
+
+#include "screens.hh"
 
 // IntrTable for crt0
 void (*IntrTable[])() =
@@ -55,13 +72,37 @@ int main()
 	Page *selected = firstpage;
 	
 	// set up a nice screen mode
-	REG_DISPCNT = SCREENMODE0 | BG1_ENABLE; // 4 | ( 1 << 10 );
+	REG_DISPCNT = SCREENMODE0 | BG1_ENABLE;
 	REG_IME = 1;			// enable interrupts
 	REG_IME |= ( 1 << 13 ); 	// cart-remove-interrupt (handled by crt0)
 	REG_IE |= BIT00;
-
+	
 	// make it so we can see the background
 	REG_BG1CNT = BIT07 | BIT08 | BIT09 | BIT10 | BIT11 | BIT12; // high priority, 256 colour, point the banks at the right place etc
+	
+	// load the splash screen
+	DMACopy((void*)splash_tiles, (u16*)VideoBuffer, SPLASH_TILESIZE, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT);
+	DMACopy((void*)splash_palette, (u16*)&BGPaletteMem[5], SPLASH_PALSIZE, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT);
+	DMACopy((void*)splash_map, (u16*)&VideoBuffer[0x7C00], 640, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT);
+
+	// check keys
+	while (keys->TestKey(keyA) != pressed)
+	{
+		keys->Jiffie();
+	}
+	keys->Jiffie();
+
+	// load the krawall splash screen
+	DMACopy((void*)krawall_splash_tiles, (u16*)VideoBuffer, KRAWALL_SPLASH_TILESIZE, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT);
+	DMACopy((void*)krawall_splash_palette, (u16*)&BGPaletteMem[5], KRAWALL_SPLASH_PALSIZE, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT);
+	DMACopy((void*)krawall_splash_map, (u16*)&VideoBuffer[0x7C00], 640, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT);
+
+	// check keys
+	while (keys->TestKey(keyA) != pressed)
+	{
+		keys->Jiffie();
+	}
+	keys->Jiffie();
 	
 	// load charset into memory as a demo tileset
 	DMACopy((void*)font::tiles, (u16*)VideoBuffer, 3232, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT);
@@ -71,9 +112,9 @@ int main()
 	for (i=0;i<7;i++)
 		BGPaletteMem[i] = RGB(0, 0, 0);
 	// this starts from 7 becuase the kludgy legacy converter used a 7-color offset (for parallax-starfield reasons)
-
+	
 	BGPaletteMem[7] = RGB(0x1F, 0x1F, 0x1F);
-	//BGPaletteMem[8] = RGB(0, 15, 26);
+	BGPaletteMem[8] = RGB(0, 0, 0);
 	
 	// set the H and V offset of our background to zero
 	REG_BG1HOFS = 0;	

@@ -26,6 +26,7 @@ private:
 
 public:
 	SelectBox(u16 x, u16 y, u16 iwidth, Keys *inkeys);
+	virtual ~SelectBox();
 
 	// choose the choice-th entry in the list
 	void Choose(u16 choice);

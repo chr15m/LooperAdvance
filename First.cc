@@ -80,10 +80,11 @@ First::First(Keys *inkeys)
 	
 	UseKeys(inkeys);
 	
-	globals.LoadSongs();
-	RebuildSongList();
 	sbSong->Select();
 	selected = sbSong;
+
+	globals.LoadSongs();
+	RebuildSongList();
 	debug("Songdata: 0x%lx", (u32)globals.songdata);
 }
 
@@ -121,13 +122,18 @@ void *First::ChangeSongName(void *data)
 // if they've moved the song selecta
 void *First::Song(void *data)
 {
+	//structSelectList *bit = (structdata;
+	structSongData *newsong = (structSongData *)((structSelectList *)data)->value;
 	debug("Song select callback");
 	// change currentsong variable to point at the newly selected song
-	
+	globals.SetSong(newsong);
 	// remove all our old loops
+	
 	// for every loop in this song, create it's loop
-	// set the BPM to be this song's BPM
-	// set the songname field to be this song's songname
+	
+	// set this song's data
+	nbBPM->SetValue(newsong->bpm);
+	ebSongName->SetString(newsong->name);
 	return NULL;
 }
 
@@ -138,8 +144,10 @@ void *First::NewButton(void *data)
 {
 	debug("New button callback");
 	// create a new song in the songdata
+	globals.NewSong();
 	// rebuild the choices
-	// choose the new song
+	RebuildSongList();
+	
 	return NULL;
 }
 
@@ -149,7 +157,9 @@ void *First::DelButton(void *data)
 	debug("Del button callback");
 	// delete all the live loops
 	// delete the current song
+	globals.DelSong();
 	// rebuild choices
+	RebuildSongList();
 	return NULL;
 }
 
@@ -160,16 +170,20 @@ void *First::AddLoopButton(void *data)
 	// add a loop to currentsong
 	globals.NewLoop();
 	// add a live loop
-	if (this->right)
+	if (right)
 	{
+		debug("Inserting a new loop");
 		// make our next loop have a new loop
-		this->right->left = new Loop(keys);
-		this->right = this->right->left;
+//		right->left = new Loop(keys);
+//		right = right->left;
 	}
 	else
 	{
-		this->right = new Loop(keys);
+		debug("Appending a new loop");
+		right = new Loop(keys);
+		right->left = this;
 	}
+
 	return NULL;
 }
 
@@ -181,18 +195,10 @@ void *First::BPM(void *data)
 	return NULL;
 }
 
-// we don't need to do anything in here as it's all handled by callbacks
-void First::DoProcess()
-{
-	debugloop("Songdata: 0x%lx", (u32)globals.songdata);
-}
-
 // this function takes all the songs in songdata and makes a list of them
 void First::RebuildSongList()
 {
-	structSongData *selected = (structSongData *)sbSong->GetChoice();
 	structSongData *traverse = globals.songdata;
-	
 	sbSong->ClearChoices();
 	
 	while (traverse)
@@ -201,19 +207,13 @@ void First::RebuildSongList()
 		traverse = traverse->next;
 	}
 	
-
-	// if we haven't selected one, select the first one
-	if (!selected)
-	{
-		selected = globals.songdata;
-	}
-	
-
 	if (selected)
 	{
+		debug("Setting Name='%s' BPM='%d'", globals.currentsong->name, globals.currentsong->bpm);
 		// with the selected song
-		sbSong->ChooseByValue((u32)selected);
-		nbBPM->SetValue(selected->bpm);
-		ebSongName->SetString(selected->name);
+		sbSong->ChooseByValue((u32)globals.currentsong);
+		nbBPM->SetValue(globals.currentsong->bpm);
+		ebSongName->SetString(globals.currentsong->name);
 	}
 }
+

@@ -49,7 +49,7 @@ void GlobalData::NewSong()
 	{
 		currentsong->next = new structSongData;
 		currentsong = currentsong->next;
-		debug("Next song data at: 0x%lx", (u32)currentsong->next);
+		debug("Next song data at: 0x%lx", (u32)currentsong);
 	}
 	else
 	{
@@ -132,8 +132,20 @@ void GlobalData::DelSong()
 	}
 }
 
-// choose a different song
-void GlobalData::SetSong(u16 whichsong)
+// find a song by index number
+void GlobalData::SetSong(structSongData *whichsong)
+{
+	currentsong = whichsong;
+	currentloop = currentsong->loops;
+	if (currentloop)
+	{
+		currentnote = currentloop->notes;
+	}
+	debug("Set current song: 0x%lx, '%s', %d", (u32)currentsong, currentsong->name, currentsong->bpm);
+}
+
+// find a song by index number
+void GlobalData::FindSong(u16 whichsong)
 {
 	u16 counter=0;
 	structSongData *songtrav = songdata;

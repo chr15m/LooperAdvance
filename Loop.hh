@@ -34,17 +34,17 @@ private:
 	NumberBox *nbOn;
 	SelectBox *sbSample;
 	NumberBox *nbReset;
-	Widget *selected;
 
 public:
 	Loop(Keys *inkeys);
 	virtual ~Loop();
-	void DoDraw();
-	void DoProcess();
+	inline void DoDraw() { debug("Draw"); };
+	inline void DoProcess() { debug("Draw"); };
 
-	void ResetLoopPitch();
+/*	void ResetLoopPitch();
 	u32 GetSize();
 	void SetParameters(u16 newsample, bool newpan, u32 newpitch, u16 newbeats);
+*/
 };
 
 #endif

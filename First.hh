@@ -37,7 +37,7 @@ public:
 	First(Keys *inkeys);
 	virtual ~First();
 	inline void DoDraw() {};
-	void DoProcess();
+	void DoProcess() {};
 		
 	// build the choice list of song names
 	void RebuildSongList();

@@ -76,7 +76,8 @@ public:
 	void Tick();
 	void Reset();
 	
-	void SetSong(u16 whichsong);
+	void SetSong(structSongData *whichsong);
+	void FindSong(u16 whichsong);
 	void SetName(char *name);
 	void SetBPM(u16 bpm);
 

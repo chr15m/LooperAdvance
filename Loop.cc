@@ -7,13 +7,13 @@
 Loop::Loop(Keys *inkeys)
 {
 	u16 i;
-	dprint("Loop() init\n");
+	debug("Loop() init");
 	UseKeys(inkeys);
 	
 	sample=0;
 	pan = false;
 	vol = false;
-	dprintf("Init setting pan to %d.\n", pan);
+	debug("Init setting pan to %d", pan);
 	pitch = 0;
 	beats = 0;
 	
@@ -21,20 +21,31 @@ Loop::Loop(Keys *inkeys)
 	handle = 0;
 	
 	// set up the GUI
+	debug("Setting up GUI");
+	
 	nbOn = new NumberBox(10, 3, 1, 0, 1, 1, inkeys);
 	nbPitch = new NumberBox(10, 4, 10, 1, 100000, 20, inkeys);
 	nbPan = new NumberBox(10, 5, 1, 0, 1, 1, inkeys);
 	nbBeats = new NumberBox(10, 6, 2, 1, 64, 8, inkeys);
 	nbReset = new NumberBox(10, 7, 1, 0, 1, 1, inkeys);
 	sbSample = new SelectBox(10, 9, 1, inkeys);
-	
+
+	AddWidget(nbOn);
+	AddWidget(nbPitch);
+	AddWidget(nbPan);
+	AddWidget(nbBeats);
+	AddWidget(nbReset);
+	AddWidget(sbSample);
+
 	nbOn->SetTransitions(NULL, NULL, NULL, nbPitch);
 	nbPitch->SetTransitions(NULL, NULL, nbOn, nbPan);
 	nbPan->SetTransitions(NULL, NULL, nbPitch, nbBeats);
 	nbBeats->SetTransitions(NULL, NULL, nbPan, nbReset);
 	nbReset->SetTransitions(NULL, NULL, nbBeats, sbSample);
 	sbSample->SetTransitions(NULL, NULL, nbReset, NULL);
-	
+
+	debug("Filling sample list");
+
 	// what samples are available?
 	for (i=0; i<NUMSAMPLES; i++)
 	{
@@ -43,6 +54,8 @@ Loop::Loop(Keys *inkeys)
 		dprintf("\n");
 	}
 	
+	debug("Done");
+
 	UseKeys(inkeys);
 	nbOn->Select();
 	selected = nbOn;
@@ -50,11 +63,15 @@ Loop::Loop(Keys *inkeys)
 
 Loop::~Loop()
 {
+	delete nbOn;
 	delete nbPitch;
 	delete nbPan;
 	delete nbBeats;
+	delete nbReset;
+	delete sbSample;
 }
 
+/*
 void Loop::DoDraw()
 {
 	selected = selected->Process();
@@ -160,3 +177,4 @@ void Loop::SetParameters(u16 newsample, bool newpan, u32 newpitch, u16 newbeats)
 	
 	handle = kramPlay(samples[sample], 1, 0);
 }
+*/

@@ -26,9 +26,9 @@ void GlobalData::Tick()
 	counter++;
 	if (globals.currentsong)
 	{
-		setbeat = (u32)(counter * currentsong->bpm/3600.0);
-		if (!(counter % 60/(currentsong->bpm/60)))
-			incbeat++;
+		beat = (u32)(counter * currentsong->bpm/3600.0);
+		//if (!(counter % 60/(currentsong->bpm/60)))
+		//	beat++;
 	}
 }
 
@@ -36,7 +36,7 @@ void GlobalData::Reset()
 {
 	counter = 0;
 	setbeat = 0;
-	incbeat = 0;
+	beat = 0;
 }
 
 // create a new blank song
@@ -210,7 +210,7 @@ void GlobalData::NewLoop()
 		currentloop->sample = 0;
 		currentloop->pan = false;
 		currentloop->pitch = 1000;
-		currentloop->divisions = 0;
+		currentloop->divisions = 1;
 		currentloop->notes = NULL;
 		currentloop->next = NULL;
 		
@@ -457,6 +457,7 @@ void GlobalData::ReadString(char **instr)
 	// make sure the last element is zero
 	*instr[strlen(*instr)] = 0;
 	offset += strlen(*instr) + 1;
+	debug("Read: %s", *instr);
 }
 
 // writes a number into the SRAM
@@ -473,6 +474,7 @@ void GlobalData::ReadNumber(void *number, u8 size)
 {
 	bcopy((const char*)(SRAM + offset), (char *)number, size);
 	offset += size;
+	debug("Read: %ld", *((u16 *)number));
 }
 
 // this checks if the current offset contains magic! (doesn't update offset at all)

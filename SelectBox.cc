@@ -8,7 +8,7 @@ SelectBox::SelectBox(u16 ix, u16 iy, u16 iwidth, Keys *inkeys): Widget (ix, iy, 
 	last = NULL;
 	timer = 0;
 	maxtime = 0;
-//	dprintf("Width: %d\n", width);
+	debug("Width: %d", width);
 }
 
 SelectBox::~SelectBox()
@@ -19,6 +19,7 @@ SelectBox::~SelectBox()
 // choose item number choice
 void SelectBox::Choose(u16 choice)
 {
+	debug("Chose %d", choice);
 	structSelectList *travel = first;
 	u16 i = 0;
 	
@@ -209,6 +210,7 @@ void SelectBox::Draw()
 		
 		if (callback)
 		{
+			debug("Making callback");
 			callback->Execute(which);
 		}
 	}

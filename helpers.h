@@ -15,7 +15,7 @@
 
 #define debugloop(format, args...) ;
 
-#ifdef DEBUGLOOPS
+#ifdef DBLOOPS
 #define debugloop(format, args...)	\
 ({	\
 	dprintf("[%s - %s()] Line %d: ", __FILE__, __FUNCTION__, __LINE__);	\

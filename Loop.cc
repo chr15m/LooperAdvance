@@ -4,19 +4,14 @@
 
 #include "Loop.hh"
 
-Loop::Loop(Keys *inkeys)
+Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 {
 	u16 i;
-	debug("Loop() init");
+	debug("Loop() init at 0x%lx", (u32)whichloop);
 	UseKeys(inkeys);
 	
-	sample=0;
-	pan = false;
-	vol = false;
-	debug("Init setting pan to %d", pan);
-	pitch = 0;
-	beats = 0;
-	
+	data = whichloop;
+
 	lastbeat = 0;
 	handle = 0;
 	
@@ -24,11 +19,12 @@ Loop::Loop(Keys *inkeys)
 	debug("Setting up GUI");
 	
 	sbOn = new SelectBox(10, 3, 3, inkeys);
-	nbPitch = new NumberBox(10, 4, 10, 1, 100000, 20, inkeys);
+	debug("sbOn: 0x%lx", sbOn);
+	nbPitch = new NumberBox(10, 4, 10, 1, 100000, 100, inkeys);
 	sbPan = new SelectBox(10, 5, 5, inkeys);
 	nbBeats = new NumberBox(10, 6, 2, 1, 64, 8, inkeys);
 	sbReset = new SelectBox(10, 7, 5, inkeys);
-	sbSample = new SelectBox(10, 9, 18, inkeys);
+	sbSample = new SelectBox(10, 9, 10, inkeys);
 	
 	lbPitch = new Label(2, 4, "Pitch");
 	lbBeats = new Label(2, 6, "Beats");
@@ -64,6 +60,8 @@ Loop::Loop(Keys *inkeys)
 		sbSample->NewChoice((char *)samplenames[i], i);
 		debug("Sample: %s", (char *)samplenames[i]);
 	}
+	cbSample.MakeCallback(this, &Loop::SampleChange);
+	sbSample->UseCallBack(&cbSample);
 	
 	sbAddLoopButton->AutoOff();
 	sbAddLoopButton->NewChoice("Add Loop", 0);
@@ -76,26 +74,45 @@ Loop::Loop(Keys *inkeys)
 	sbDelLoopButton->NewChoice("-------------", 1);	
 	cbDelLoopButton.MakeCallback(this, &Loop::DelLoopButton);
 	sbDelLoopButton->UseCallBack(&cbDelLoopButton);
+
+	cbPitch.MakeCallback(this, &Loop::Pitch);
+	nbPitch->UseCallBack(&cbPitch);
+
+	cbBeats.MakeCallback(this, &Loop::Beats);
+	nbBeats->UseCallBack(&cbBeats);
 	
 	sbReset->AutoOff();
 	sbReset->NewChoice("Reset", 0);
 	sbReset->NewChoice("-----", 1);
+	cbReset.MakeCallback(this, &Loop::Reset);
+	sbReset->UseCallBack(&cbReset);
 	
 	sbOn->NewChoice("Off", 0);
 	sbOn->NewChoice("On", 1);
 	
 	sbPan->NewChoice("Left", 0);
 	sbPan->NewChoice("Right", 1);
+	cbPan.MakeCallback(this, &Loop::Pan);
+	sbPan->UseCallBack(&cbPan);
 	
 	UseKeys(inkeys);
 	sbOn->Select();
 	selected = sbOn;
+	
+	UpdateWidgets();
+	SampleChange(NULL);
 	
 	debug("Done setting up");
 }
 
 Loop::~Loop()
 {
+	debug("Deleting loop");
+	
+	// stop playing our sample
+	if (kramHandleValid(handle))
+		kramStop(handle);
+	
 	delete sbOn;
 	delete nbPitch;
 	delete sbPan;
@@ -121,7 +138,7 @@ void *Loop::AddLoopButton(void *data)
 		debug("Inserting a new loop");
 		// make our next loop have a new loop
 		old = right;
-		right->left = new Loop(keys);
+		right->left = new Loop(keys, globals.currentloop);
 		right = right->left;
 		right->left = this;
 		right->right = old;
@@ -129,7 +146,7 @@ void *Loop::AddLoopButton(void *data)
 	else
 	{
 		debug("Appending a new loop");
-		right = new Loop(keys);
+		right = new Loop(keys, globals.currentloop);
 		right->left = this;
 	}
 	
@@ -141,11 +158,13 @@ void *Loop::DelLoopButton(void *data)
 {
 	Page *old;
 	debug("DelLoop button callback");
-	// delete the current loop in currentsong
-	globals.DelLoop();
 	// delete the liveloop associated with it
 	if (right)
 	{
+		// delete the current loop in currentsong
+		globals.SetLoop(((Loop *)right)->GetAddress());
+		globals.DelLoop();
+		
 		old = right->right;
 		delete right;
 		right = old;
@@ -155,100 +174,106 @@ void *Loop::DelLoopButton(void *data)
 	return NULL;
 }
 
-/*
-void Loop::DoDraw()
+// return which bit of loop data we're using
+structLoopData *Loop::GetAddress()
 {
-
-	if ((selected == nbReset) && (((NumberBox *)nbReset)->GetValue() == 1))
-	{
-		ResetLoopPitch();
-		((NumberBox *)nbReset)->SetValue(0);
-	}
-	
-	// if they choose a new sample, compute some nice defaults
-	if ((selected == sbSample) && (sample != sbSample->GetChoice()))
-	{
-		SetParameters(sbSample->GetChoice(), pan, pitch, beats);
-		ResetLoopPitch();
-	}
-	
-	// labels
-	if (sample != 0xFF)
-		cprintf(1,1, samplenames[sample]);
-	
-	cprintf(1,3,"On");
-	nbOn->Draw();
-
-	cprintf(1,4,"Pitch");
-	nbPitch->Draw();
-
-	cprintf(1,5,"Pan");
-	nbPan->Draw();
-	
-	cprintf(1,6,"Beats");
-	nbBeats->Draw();
-
-	cprintf(1,7,"Reset");
-	nbReset->Draw();
-
-	sbSample->Draw();
+	return data;
 }
 
-void Loop::DoProcess()
+// this resets all our widgets to their correct values
+void Loop::UpdateWidgets()
 {
-//	dprintf("Loop Process: %ld, sample handle = %d\n", (u32)this, handle);
-	if ((sample != 0xFF) && kramHandleValid(handle))
-	{
-		// update our position
-		beat = globals.counter * globals.currentsong->bpm/3600;
-		
-		if (beat != lastbeat)
-		{
-			kramSetFreq(handle, ((pitch * 44100) / 1000));
-			kramSetPan(handle, (pan * 128 - 64));
-			kramSetVol(handle, vol * 64);
-			kramSetPos(handle, (size * (beat % beats))/beats);
-			lastbeat = beat;
-		}
-	}
+	nbPitch->SetValue(data->pitch);
+	sbPan->ChooseByValue(data->pan);
+	nbBeats->SetValue(data->divisions);
+	sbSample->ChooseByValue(data->sample);
 }
 
-void Loop::ResetLoopPitch()
-{	
+// what to do if the pitch is changed
+void *Loop::Pitch(void *number)
+{
+	data->pitch = *((u16 *)number);
+	return NULL;
+}
+
+// what to do if the number of beat divisions is changed
+void *Loop::Beats(void *number)
+{
+	data->divisions = *((u16 *)number);
+	return NULL;
+}
+
+// if they change the panning of this one
+void *Loop::Pan(void *pan)
+{
+	data->pan = ((structSelectList *)pan)->value;
+	return NULL;
+}
+
+// if the reset button is pressed
+void *Loop::Reset(void *ignore)
+{
 	// (1000*(tracks[selected].sample->len)/(tracks[selected].sample->freq))/(tracks[selected].bpl*T*4/1000	
+	u16 beats = nbBeats->GetValue();
 	
-	debug("Top = %ld\n", globals.currentsong->bpm * GetSize());
-	debug("Bottom = %ld\n", (2646*beats));
-	debug("New ratio = %d\n", (globals.songdata->bpm * GetSize())/(2646*beats));
-	pitch = (globals.songdata->bpm * GetSize()) / (2646 * beats);
-	nbPitch->SetValue(pitch);
+	debug("Top = %ld", globals.currentsong->bpm * GetSize());
+	debug("Bottom = %d", (2646 * beats));
+	debug("New ratio = %ld", (globals.songdata->bpm * GetSize())/(2646 * beats));
+	nbPitch->SetValue((globals.songdata->bpm * GetSize()) / (2646 * beats));
+	return NULL;
 }
 
 u32 Loop::GetSize()
 {
+	u16 sample = sbSample->GetChoice();
 	return (u32)samples[sample]->end - (u32)samples[sample]->data;
 }
 
-void Loop::SetParameters(u16 newsample, bool newpan, u32 newpitch, u16 newbeats)
+void Loop::DoProcess()
 {
-	dprintf("SetParameters\n");
-	sample = newsample;
-	pan = newpan;
-	pitch = newpitch;
-	beats = newbeats;
-	size = GetSize();
+	beat = globals.beat % nbBeats->GetValue();
 	
-	nbPitch->SetValue(pitch);
-	nbPan->SetValue(pan);
-	nbBeats->SetValue(beats);
-	sbSample->Choose(sample);
+	if ((sbSample->GetChoice() != 0xFF) && kramHandleValid(handle))
+	{
+		
+		if (beat != lastbeat)
+		{
+			UpdateParameters();
+			lastbeat = beat;
+		}
+	}
 	
-	if ((sample != 0xFF) && kramHandleValid(handle))
+	debugloop("Beat: %d", beat);
+}
+
+void Loop::UpdateParameters()
+{
+	kramSetFreq(handle, ((nbPitch->GetValue() * 44100) / 1000));
+	kramSetPan(handle, (sbPan->GetChoice() * 128 - 64));
+	kramSetVol(handle, sbOn->GetChoice() * 64);
+	kramSetPos(handle, (GetSize() * (beat % nbBeats->GetValue()))/nbBeats->GetValue());
+}
+
+void *Loop::SampleChange(void *whichsample)
+{
+	if (whichsample)
+	{
+		data->sample = ((structSelectList *)whichsample)->value;
+	}
+	
+	debug("Changing sample");
+	
+	Reset(NULL);
+	
+	if ((data->sample != 0xFF) && kramHandleValid(handle))
 	{
 		// first stop the current sample
 		kramStop(handle);
 	}
 	
-	handle = kramPlay(samples[sample], 1, 0);
+	handle = kramPlay(samples[data->sample], 1, 0);
+	UpdateParameters();
+	debug("New Handle: %d", handle);
+
+	return NULL;
 }
-*/

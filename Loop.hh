@@ -16,16 +16,12 @@
 class Loop : public Page
 {
 private:
-	u16 sample;
-	bool pan;
-	bool vol;
-	u32 pitch;
-	u32 beats;
 	u32 lastbeat;
-	u32 beat;
 	u16 handle;
-	u32 size;
-
+	u16 beat;
+	
+	structLoopData *data;
+	
 	NumberBox *nbPitch;
 	SelectBox *sbPan;
 	NumberBox *nbBeats;
@@ -37,22 +33,34 @@ private:
 	
 	Label *lbPitch;
 	Label *lbBeats;
-
+	
 	TCallback<Loop> cbAddLoopButton;
 	TCallback<Loop> cbDelLoopButton;
-
+	
+	TCallback<Loop> cbPitch;
+	TCallback<Loop> cbPan;
+	TCallback<Loop> cbBeats;
+	TCallback<Loop> cbReset;
+	TCallback<Loop> cbSample;
+	
 public:
-	Loop(Keys *inkeys);
+	Loop(Keys *inkeys, structLoopData *whichloop);
 	virtual ~Loop();
-	inline void DoDraw() { debug("Draw"); };
-	inline void DoProcess() { debug("Process"); };
 
+	inline void DoDraw() { debugloop("Draw"); };
+	
+	void DoProcess();
 	void *AddLoopButton(void *data);
 	void *DelLoopButton(void *data);
-/*	void ResetLoopPitch();
-	u32 GetSize();
-	void SetParameters(u16 newsample, bool newpan, u32 newpitch, u16 newbeats);
-*/
+	structLoopData *GetAddress();
+	void UpdateWidgets();
+	void UpdateParameters();
+	void *Pitch(void *number);
+	void *Pan(void *number);
+	void *Beats(void *number);
+	void *SampleChange(void *whichsample);
+	void *Reset(void *ignore);
+	u32 GetSize();	
 };
 
 #endif

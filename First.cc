@@ -95,6 +95,7 @@ First::First(Keys *inkeys)
 
 	globals.LoadSongs();
 	RebuildSongList();
+	Song(NULL);
 	debug("Songdata: 0x%lx", (u32)globals.songdata);
 }
 
@@ -133,18 +134,46 @@ void *First::ChangeSongName(void *data)
 // if they've moved the song selecta
 void *First::Song(void *data)
 {
-	//structSelectList *bit = (structdata;
-	structSongData *newsong = (structSongData *)((structSelectList *)data)->value;
+	structLoopData *loop=NULL;
+	structSongData *newsong;
+	if (data)
+	{
+		// if we were called in callback
+		newsong = (structSongData *)((structSelectList *)data)->value;
+	}
+	else
+	{
+		// otherwise ask what we're doing
+		newsong = (structSongData *)sbSong->GetChoice();
+	}
+	Page *newloop=this;
+
 	debug("Song select callback");
 	// change currentsong variable to point at the newly selected song
 	globals.SetSong(newsong);
 	// remove all our old loops
+	while (right)
+	{
+		DelLoopButton(NULL);
+	}
 	
 	// for every loop in this song, create it's loop
+	loop = newsong->loops;
+	while (loop)
+	{
+		newloop->right = new Loop(keys, loop);
+		newloop->right->left = newloop;
+		newloop = newloop->right;
+		loop = loop->next;
+	}
 	
 	// set this song's data
 	nbBPM->SetValue(newsong->bpm);
 	ebSongName->SetString(newsong->name);
+	
+	// reset the counters each time we change songs
+	globals.Reset();
+	
 	return NULL;
 }
 
@@ -167,6 +196,10 @@ void *First::DelButton(void *data)
 {
 	debug("Del button callback");
 	// delete all the live loops
+	while(right)
+	{
+		DelLoopButton(NULL);
+	}
 	// delete the current song
 	globals.DelSong();
 	// rebuild choices
@@ -187,7 +220,7 @@ void *First::AddLoopButton(void *data)
 		debug("Inserting a new loop");
 		// make our next loop have a new loop
 		old = right;
-		right->left = new Loop(keys);
+		right->left = new Loop(keys, globals.currentloop);
 		right = right->left;
 		right->left = this;
 		right->right = old;
@@ -195,7 +228,7 @@ void *First::AddLoopButton(void *data)
 	else
 	{
 		debug("Appending a new loop");
-		right = new Loop(keys);
+		right = new Loop(keys, globals.currentloop);
 		right->left = this;
 	}
 	
@@ -207,11 +240,13 @@ void *First::DelLoopButton(void *data)
 {
 	Page *old;
 	debug("DelLoop button callback");
-	// delete the current loop in currentsong
-	globals.DelLoop();
 	// delete the liveloop associated with it
 	if (right)
 	{
+		// delete the current loop in currentsong
+		globals.SetLoop(((Loop *)right)->GetAddress());
+		globals.DelLoop();
+
 		old = right->right;
 		delete right;
 		right = old;

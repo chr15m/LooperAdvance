@@ -30,6 +30,7 @@ public:
 	structWidgetList *last;
 	
 	Page();
+	virtual ~Page();
 	virtual void DoDraw()=0;
 	virtual void DoProcess()=0;
 	

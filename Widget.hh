@@ -23,6 +23,7 @@ protected:
 
 public:
 	Widget(u16 x, u16 y, Keys *inkeys);
+	virtual ~Widget();
 	cCallback *callback;
 	
 	void SetTransitions(Widget *newL, Widget *newR, Widget *newU, Widget *newD);

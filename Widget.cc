@@ -11,6 +11,10 @@ Widget::Widget(u16 ix, u16 iy, Keys *inkeys)
 	callback = NULL;
 }
 
+Widget::~Widget()
+{
+}
+
 void Widget::SetTransitions(Widget *newL, Widget *newR, Widget *newU, Widget *newD)
 {
 	// dprintf("Setting Transitions: %ld, %ld, %ld, %ld\n", newL, newR, newU, newD);

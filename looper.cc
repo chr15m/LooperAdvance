@@ -76,6 +76,7 @@ int main()
 	
 	while (1)
 	{
+		SetBG(10, 10, 10);
 		// this is zerosync
 		while(REG_VCOUNT);
 		// figure out all our latest song positions
@@ -86,6 +87,8 @@ int main()
 		keys->Jiffie();
 		// automatically cascades all pages and processes them
 		firstpage->Process();
+		
+		SetBG(0, 0, 0);
 		
 		// this is vsync
 		while(REG_VCOUNT != 160);

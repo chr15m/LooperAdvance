@@ -1,8 +1,12 @@
 GNUDEBUG = -g -ggdb
 
+ifdef DEBUGLOOPS
+	DBLOOPS=-DDEBUGLOOPS
+endif
+
 ifdef DEBUG
 	# debug build
-	CFLAGS 	= -Wall -O -ffreestanding -fomit-frame-pointer -funroll-loops -mcpu=arm7tdmi  $(INCLUDE) -DRAN_SEED=322187 -DUSE_VGBA -mthumb-interwork -msoft-float -mno-long-calls -DUSE_VBA -DINTERWORK -DFIXED_USE_BIOS_DIVIDE ${GNUDEBUG}
+	CFLAGS 	= -Wall -O -ffreestanding -fomit-frame-pointer -funroll-loops -mcpu=arm7tdmi  $(INCLUDE) -DRAN_SEED=322187 -DUSE_VGBA -mthumb-interwork -msoft-float -mno-long-calls -DUSE_VBA -DINTERWORK -DFIXED_USE_BIOS_DIVIDE ${GNUDEBUG} ${DBLOOPS}
 	CXXFLAGS = -fno-rtti
 else
 	#release build

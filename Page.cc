@@ -11,3 +11,8 @@ Page::Page()
 	first = NULL;
 	last = NULL;
 }
+
+Page::~Page()
+{
+	debug("Destroying Page()");
+}

@@ -62,17 +62,23 @@ public:
 	u16 magic;
 	struct structSongData *songdata;
 	struct structSongData *currentsong;
+	struct structLoopData *currentloop;
+	struct structNoteData *currentnote;
 	
 	GlobalData();
 	void Init();
 	
-	void NewSong();
-	void DelSong();
 	void SetSong(u16 whichsong);
 	void SetName(char *name);
-	void AddLoop();
-	void DelLoop();
 	void SetBPM(u16 bpm);
+
+	void NewSong();
+	void DelSong();
+	void NewLoop();
+	void DelLoop();
+	void NewNote();
+	void DelNote();
+	
 	void SaveSongs();
 	void LoadSongs();
 	

@@ -32,7 +32,6 @@ typedef struct structSelectList
 class SelectBox : public Widget
 {
 private:
-	u16 width;			// how many characters wide is this?
 	u16 timer;			// if it's an auto-reset button
 	u16 maxtime;			// if set the select box will reset after this amount of time
 	structSelectList *which;	// currently selected item

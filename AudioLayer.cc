@@ -49,13 +49,13 @@ AudioLayer::AudioLayer(u16 mixlength)
 	REG_IE = INT_TM0; 	//enable timer 0 irq
 	REG_IME = 1; 	//enable interrupts
 	
-	// REG_TM0D = 0xffff;
+	//REG_TM0D = 0xffff;
 	// TODO: figure out the correct frequency of playback for 22050
 	// REG_TM0D = 0xf400;
-	REG_TM0D = 0xffff;
+	REG_TM0D = 0xfd50;
 	
 	//REG_TM0CNT = 0x00C3;	//enable timer at CPU freq/1024 +irq =16384Khz sample rate
-	REG_TM0CNT = TIMER_IRQ_ENABLE | TIMER_ENABLE | TIMER_FREQ_1024;
+	REG_TM0CNT = TIMER_IRQ_ENABLE | TIMER_ENABLE | TIMER_FREQ_SYSTEM;
 }
 
 AudioLayer::~AudioLayer()
@@ -72,8 +72,8 @@ void AudioLayer::Manage(Sample *newsample)
 void AudioLayer::Interrupt()
 {
 //	Sample *next = samples;
-	s8 *chunkdata = 0;
-	u16 i = 0;
+//	s8 *chunkdata = 0;
+//	u16 i = 0;
 	
 	// initialise our mixbank to zeroes
 //	for (i=0; i<banksize; i++);
@@ -99,18 +99,23 @@ void AudioLayer::Interrupt()
 		
 	//	REG_SGFIFOA = mixbank[0] + (mixbank[1] << 8) + (mixbank[2] << 16) + (mixbank[3] << 24);
 	
-	chunkdata = samples->GetChunk();
+	//chunkdata = samples->GetChunk();
 	
-	for (i = 0; i < banksize; i++)
-	{
-		mixbank[i] = chunkdata[i];
+	REG_DMA1SAD = (u32)samples->GetChunk();
+	REG_DMA1DAD = (u32)&REG_SGFIFOA;
+	REG_DM1CNT_L = 4;
+	REG_DM1CNT_H = DMA32NOW | DMA_ENABLE;
+	
+//	for (i = 0; i < banksize; i++)
+//	{
+//		mixbank[i] = chunkdata[i];
 		//dprintf("%d ", mixbank[i]);
 		//dprintf("%d ", i);
-		if (mixbank[i] > 255) mixbank[i] = 255;
-	}
+//		if (mixbank[i] > 255) mixbank[i] = 255;
+//	}
 	
 	//REG_SGFIFOA = chunkdata[0] + (chunkdata[1] << 8) + (chunkdata[2] << 16) + (chunkdata[3] << 24);
-	REG_SGFIFOA = mixbank[0] + (mixbank[1] << 8) + (mixbank[2] << 16) + (mixbank[3] << 24);
+	//REG_SGFIFOA = mixbank[0] + (mixbank[1] << 8) + (mixbank[2] << 16) + (mixbank[3] << 24);
 	
 		// jump to the next sample in the queue
 		//next = next->next;

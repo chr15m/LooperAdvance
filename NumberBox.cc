@@ -103,15 +103,6 @@ Widget *NumberBox::Process()
 
 void NumberBox::Draw()
 {	
-	sprintf(text, "[%*d]", width, value);
-	
-	if (selected)
-	{
-		hprintf(x, y, text);
-		selected = false;
-	}
-	else
-	{
-		cprintf(x, y, text);
-	}
+	sprintf(text, "%*d", width, value);
+	Render(text);
 }

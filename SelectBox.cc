@@ -217,10 +217,12 @@ void SelectBox::Draw()
 {
 	// make sure we don't draw an empty select box
 	if (which)
-		sprintf(text, "[%-*s]", width, which->text);
+		sprintf(text, "%-*s", width, which->text);
 	else
-		sprintf(text, "[%-*s]", width, "");
-		
+		sprintf(text, "%-*s", width, "");
+	
+	Render(text);
+	
 	if (timer)
 	{
 		// if the timer is started, keep counting down
@@ -233,16 +235,6 @@ void SelectBox::Draw()
 		}
 
 		timer--;
-	}
-	
-	if (selected)
-	{
-		hprintf(x, y, text);
-		selected = false;
-	}
-	else
-	{
-		cprintf(x, y, text);
 	}
 }
 

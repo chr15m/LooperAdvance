@@ -20,40 +20,39 @@ First::First(Keys *inkeys)
 {
 	debug("First page Constructor");
 	
-	lbSong = new Label(2, 1, "Song");
-	sbSong = new SelectBox(7, 1, 13, inkeys);
-	sbNewButton = new SelectBox(2, 3, 3, inkeys);
-	sbDelButton = new SelectBox(9, 3, 6, inkeys);
-	sbSaveButton = new SelectBox(2, 5, 13, inkeys);
+	lbSong = new Label(1, 1, "Song");
+	sbSong = new SelectBox(5, 1, 13, inkeys);
+	ebSongName = new EditBox(5, 2, 13, inkeys);
 	
-	lbSongName = new Label(2, 8, "Name");
-	ebSongName = new EditBox(7, 8, 13, inkeys);
-	lbBPM = new Label(2, 10, "BPM");
-	nbBPM = new NumberBox(7, 10, 3, 1, 600, 10, inkeys);
+	sbNewButton = new SelectBox(5, 4, 3, inkeys);
+	sbDelButton = new SelectBox(5, 5, 6, inkeys);
+	sbSaveButton = new SelectBox(5, 6, 8, inkeys);
+	
+	lbBPM = new Label(26, 2, "BPM");
+	nbBPM = new NumberBox(21, 1, 3, 1, 600, 10, inkeys);
 	
 	sbAddLoopButton = new SelectBox(18, 17, 8, inkeys);
 	sbDelLoopButton = new SelectBox(18, 18, 8, inkeys);
 	
 	AddWidget(lbSong);
 	AddWidget(sbSong);
-	AddWidget(sbNewButton);
-	AddWidget(sbDelButton);
-	AddWidget(sbSaveButton);
-	AddWidget(lbSongName);
 	AddWidget(ebSongName);
 	AddWidget(lbBPM);
 	AddWidget(nbBPM);
+	AddWidget(sbNewButton);
+	AddWidget(sbDelButton);
+	AddWidget(sbSaveButton);
 	AddWidget(sbAddLoopButton);
 	AddWidget(sbDelLoopButton);
 	
-	sbSong->SetTransitions(NULL, NULL, NULL, sbNewButton);
-	sbNewButton->SetTransitions(NULL, sbDelButton, sbSong, sbSaveButton);
-	sbDelButton->SetTransitions(sbNewButton, NULL, sbSong, sbSaveButton);
-	sbSaveButton->SetTransitions(NULL, NULL, sbNewButton, ebSongName);
-	ebSongName->SetTransitions(NULL, NULL, sbSaveButton, nbBPM);
-	nbBPM->SetTransitions(NULL, sbAddLoopButton, ebSongName, sbAddLoopButton);
-	sbAddLoopButton->SetTransitions(nbBPM, NULL, nbBPM, sbDelLoopButton);
-	sbDelLoopButton->SetTransitions(nbBPM, NULL, sbAddLoopButton, NULL);
+	sbSong->SetTransitions(NULL, nbBPM, NULL, ebSongName);
+	nbBPM->SetTransitions(sbSong, NULL, NULL, sbAddLoopButton);
+	ebSongName->SetTransitions(NULL, nbBPM, sbSong, sbNewButton);
+	sbNewButton->SetTransitions(NULL, nbBPM, ebSongName, sbDelButton);
+	sbDelButton->SetTransitions(NULL, nbBPM, sbNewButton, sbSaveButton);
+	sbSaveButton->SetTransitions(NULL, sbAddLoopButton, sbDelButton, sbAddLoopButton);
+	sbAddLoopButton->SetTransitions(sbSaveButton, NULL, nbBPM, sbDelLoopButton);
+	sbDelLoopButton->SetTransitions(sbSaveButton, NULL, sbAddLoopButton, NULL);
 	
 	sbNewButton->AutoOff();
 	sbDelButton->AutoOff();
@@ -67,8 +66,8 @@ First::First(Keys *inkeys)
 	sbDelButton->NewChoice("Delete", 0);
 	sbDelButton->NewChoice("------", 1);
 	
-	sbSaveButton->NewChoice("Write Changes", 0);
-	sbSaveButton->NewChoice("-------------", 1);
+	sbSaveButton->NewChoice("Save all", 0);
+	sbSaveButton->NewChoice("--------", 1);
 
 	sbAddLoopButton->NewChoice("Add Loop", 0);
 	sbAddLoopButton->NewChoice("--------", 1);
@@ -119,7 +118,6 @@ First::~First()
 	delete sbNewButton;
 	delete sbDelButton;
 	delete sbSaveButton;
-	delete lbSongName;
 	delete ebSongName;
 	delete lbBPM;
 	delete nbBPM;
@@ -189,7 +187,7 @@ void *First::Song(void *data)
 	// reset the counters each time we change songs
 	globals.Reset();
 	
-	debug("Right page = 0x%lx", right);
+	debug("Right page = 0x%lx", (u32)right);
 	debug("New song loaded successfully");
 	
 	REG_IME = 1; // enable interrupts

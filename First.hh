@@ -31,7 +31,6 @@ private:
 	SelectBox *sbDelButton;
 	SelectBox *sbSaveButton;
 	SelectBox *sbAddButton;
-	Label *lbSongName;
 	EditBox *ebSongName;
 	Label *lbBPM;
 	NumberBox *nbBPM;

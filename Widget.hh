@@ -35,6 +35,7 @@ protected:
 	Widget *down;	// these are the transition vectors (tell what other UI widgets are to which side)
 	u16 x,y;	// where on the screen
 	char text[MAXSTRING];	// hold the text to print to screen
+	u8 width;	// how wide is our widget?
 
 public:
 	Widget(u16 x, u16 y, Keys *inkeys);
@@ -44,6 +45,7 @@ public:
 	void SetTransitions(Widget *newL, Widget *newR, Widget *newU, Widget *newD);
 	void Select();
 	void UseCallBack(cCallback *pCBFunc);
+	void Render(char *itext);
 	virtual void Draw()=NULL;
 	virtual Widget *Process()=NULL;
 
@@ -53,6 +55,10 @@ public:
 		{
 			debug("Making callback");
 			return callback->Execute(data);
+		}
+		else
+		{
+			return NULL;
 		}
 	}
 };

@@ -61,6 +61,11 @@
 	}\
 })
 
+#define hchar(x, y, char)  ({    \
+	VideoBuffer[0x7C00 + x + y * 32] = font::charoffset[char] + 101;\
+})
+
+
 inline void DMACopy(void* a_Source, void* a_Destination, u32 a_WordCount, u32 a_Control)
 {
 	REG_DMA3SAD = (u32) a_Source;

@@ -41,9 +41,7 @@ INCLUDE	= -I$(shell pwd)
 
 # what to build if we're building the whole program
 ifeq ($(TARGET),looper)
-	GAMEOBJECTS = Keys.o Page.o First.o Loop.o Widget.o Label.o EditBox.o SelectBox.o NumberBox.o GlobalData.o instruments.o samples.o krawall.lib charset.o samplenames.o
-	AUDIOOBJECTS = modules.h samples.hh instruments.h samples.s instruments.s
-	SCREENOBJECTS = scr_bg.o scr_krawall_splash.o scr_splash.o
+	GAMEOBJECTS = Keys.o Page.o First.o Loop.o Widget.o Label.o EditBox.o SelectBox.o NumberBox.o GlobalData.o charset.o samples/samples.o
 endif
 
 ifeq ($(TARGET),audiotest)

@@ -48,3 +48,18 @@ void Widget::UseCallBack(cCallback *pCBFunc)
 {
 	callback = pCBFunc;
 }
+
+void Widget::Render(char *itext)
+{
+	if (selected)
+	{
+		cprintf(x + 1, y, "%s", itext);
+		hchar(x, y, '[');
+		hchar(x + width + 1, y, ']');
+		selected = false;
+	}
+	else
+	{
+		cprintf(x, y, "[%s]", itext);
+	}
+}

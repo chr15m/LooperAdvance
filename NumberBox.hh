@@ -22,7 +22,6 @@
 class NumberBox : public Widget
 {
 private:
-	u16 width;	// how many digits wide is this?
 	u16 min;	// minimum value this number box can go to
 	u16 max;	// maximum value this number box can go to
 	u16 value;	// current value

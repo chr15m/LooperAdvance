@@ -393,7 +393,7 @@ void GlobalData::DelNote()
 			}
 			
 			// the next note is the last one so delete it
-			debug("Deleting 0x%lx", notetrav->next);
+			debug("Deleting 0x%lx", (u32)notetrav->next);
 			delete notetrav->next;
 			
 			// set the current ref to NULL so we know we're the end of the list
@@ -402,15 +402,15 @@ void GlobalData::DelNote()
 		else
 		{
 			// tell this loop we don't currently have any notes
-			debug("Deleting 0x%lx", notetrav);
+			debug("Deleting 0x%lx", (u32)notetrav);
 			delete notetrav;
 			currentloop->notes = NULL;
 			currentnote = NULL;
 		}
 	}
-	debug("Currentnote: 0x%lx", currentnote);
-	debug("First: 0x%lx", currentloop->notes);
-	debug("Next: 0x%lx", currentnote->next);
+	debug("Currentnote: 0x%lx", (u32)currentnote);
+	debug("First: 0x%lx", (u32)currentloop->notes);
+	debug("Next: 0x%lx", (u32)currentnote->next);
 }
 
 // set the beats per minute of this song
@@ -469,7 +469,7 @@ void GlobalData::SaveSongs()
 			notetrav = looptrav->notes;
 			while (notetrav)
 			{
-				debug("Writing note 0x%lx", notetrav);
+				debug("Writing note 0x%lx", (u32)notetrav);
 				
 				// write the note end action;
 				WriteNumber(notetrav->noteEnd, sizeof(u8));
@@ -488,7 +488,7 @@ void GlobalData::SaveSongs()
 			
 			// next loop
 			looptrav = looptrav->next;
-			debug("Next loop: 0x%lx", looptrav);
+			debug("Next loop: 0x%lx", (u32)looptrav);
 		}
 		// write the magic string for end-of-loops
 		WriteNumber(magic, sizeof(u16));

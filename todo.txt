@@ -3,15 +3,18 @@ Looper Advance Live (1.0):
 
 - re-write the hardware access layer (replace krawall)
 	+ create Sample class which points to ROM sample
-	- create AudioLayer class which manages samples
+		- panning and volume chunks calculated
+	+ create AudioLayer class which manages samples
+		- make sure sample order is correct
+		+ get dma working
+		- try implementing as dma fifo based instead of timer callback
+			- write mixing routine
 
-- allow for different volumes (Evans)
+- build system for different background themes
+	- python script to turn images into data files
+	- make a nice theme
 
-- make a python script to import tile sets and palettes etc. from images
-
-- add nifty background to pages
-
-- original gb synths
+* RELEASE *
 
 - interface changes:
 	- b button = browse notes (Jordan)
@@ -22,6 +25,10 @@ Looper Advance Live (1.0):
 	- note numbering should line up on specific note selector (Jordan)
 	- letter selection not so buggy (specific set of characters)
 	- display current note position for this loop (Jordan)
+	- allow for different volumes (Evans)
+	+ B is a delete button in the editbox
+
+- original gb synths
 
 - creating new notes changes
 	- use settings of last note if less than loop length

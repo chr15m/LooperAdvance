@@ -28,7 +28,6 @@ EditBox::EditBox(u16 ix, u16 iy, u16 inwidth, Keys *inkeys): Widget (ix, iy, ink
 	
 	which = 0;
 	width = inwidth;
-	blink = 0;	
 }
 
 EditBox::~EditBox()
@@ -77,12 +76,11 @@ Widget *EditBox::Process()
 		if (keys->TestKey(keyLeft) == pressed)
 		{
 			which -= 1;
-			blink = 0;
 		}
 		if (keys->TestKey(keyRight) == pressed)
 		{
-			which += 1;
-			blink = 0;
+			if (value[which] != NULL)
+				which += 1;
 		}
 		
 		// check our bounds
@@ -106,6 +104,13 @@ Widget *EditBox::Process()
 		if (keys->TestKey(keyRight) == pressed)
 			newselect = right;
 	}
+
+	// if they press the B key it deletes the current letter
+	if ((keys->TestKey(keyB) == pressed) && (value[which + 1] == NULL))
+	{
+		value[which] = NULL;
+		changed = true;
+	}
 	
 	// if they've changed the text box
 	if (changed)
@@ -125,21 +130,12 @@ Widget *EditBox::Process()
 
 void EditBox::Draw()
 {
-	sprintf(text, "[%-*s]", width, value);
+	bool highlight=selected;
+	sprintf(text, "%-*s", width, value);
+	Render(text);
 	
-	if (selected)
+	if (highlight)
 	{
-		// make the selected character toggle between _ and the letter
-		if (!(blink / 10 % 2))
-			text[which + 1] = '_';
-		
-		hprintf(x, y, text);
-		selected = false;
-		blink++;
-	}
-	else
-	{
-		cprintf(x, y, text);
-		blink = 0;
+		hchar(x + which + 1, y, text[which]);
 	}
 }

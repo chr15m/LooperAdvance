@@ -98,10 +98,11 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	nbNPitch->SetTransitions(NULL, sbAddLoopButton, nbNSwing, sbNAction);
 	sbNAction->SetTransitions(NULL, sbAddLoopButton, nbNPitch, NULL);
 
-	sbNAction->NewChoice("cont", 0);
-	sbNAction->NewChoice("cut", 1);
-	sbNAction->NewChoice("loop", 2);
-	sbNAction->NewChoice("bounce", 3);
+	sbNAction->NewChoice("cont", note_continue);
+	sbNAction->NewChoice("cut", note_cut);
+	sbNAction->NewChoice("loop", note_loop);
+	sbNAction->NewChoice("feed", note_feed);
+	sbNAction->NewChoice("strtch", note_stretch);
 	
 	sbAddLoopButton->SetTransitions(sbSample, NULL, nbNotes, sbDelLoopButton);
 	sbDelLoopButton->SetTransitions(sbSample, NULL, sbAddLoopButton, NULL);
@@ -463,7 +464,7 @@ void Loop::DoProcess()
 			beat = globals.beat % numnotes;
 			
 			debugloop("diff: %ld", diff);
-			if (diff == notes[beat]->swing)
+			if ((diff >= notes[beat]->swing) && (lastbeat != globals.beat))
 			{
 				debug("Swing detected: %ld", diff);
 				// update the parameters
@@ -472,19 +473,24 @@ void Loop::DoProcess()
 			}
 			
 			// if cont is not on
-			if (notes[beat]->noteEnd != note_continue)
+			if (notes[beat]->noteEnd != note_continue && notes[beat]->noteEnd != note_feed)
 			{
 				debug("Pos: %d > %ld > %ld", kramGetPos(handle), (GetSize() / nbBeats->GetValue()) * (notes[beat]->offset - 1), (GetSize() / nbBeats->GetValue()) * (notes[beat]->offset));
-				
+
+				// if cut is on, then set vol to zero
+				if (notes[beat]->noteEnd == note_stretch)
+				{
+					UpdateParametersNotes();
+				}
 				// are we past the end of this note, or before the beginning?
-				if ((kramGetPos(handle) < (GetSize() / nbBeats->GetValue()) * (notes[beat]->offset - 1)) || (kramGetPos(handle) > (GetSize() / nbBeats->GetValue()) * (notes[beat]->offset)))
+				else if ((kramGetPos(handle) < (GetSize() / nbBeats->GetValue()) * (notes[beat]->offset - 1)) || (kramGetPos(handle) > (GetSize() / nbBeats->GetValue()) * (notes[beat]->offset)))
 				{
 					// if cut is on, then set vol to zero
 					if (notes[beat]->noteEnd == note_cut)
 					{
 						kramSetVol(handle, 0);
 					}
-					else
+					else if (notes[beat]->noteEnd == note_loop)
 					{
 						// if loop is on, then set us to the start of this note again (call update parameters)
 						UpdateParametersNotes();
@@ -497,9 +503,9 @@ void Loop::DoProcess()
 			// otherwise it's simple style parameter updates
 			beat = globals.beat % nbBeats->GetValue();
 			
-			debug("Diff: %ld", diff);
+			debugloop("Diff: %ld", diff);
 			
-			if (diff == (u32)(nbSwing->GetValue() * (beat | 1)))
+			if ((diff >= (u32)(nbSwing->GetValue() * (beat | 1))) && (lastbeat != globals.beat))
 			{
 				UpdateParameters();
 				lastbeat = globals.beat;
@@ -519,7 +525,7 @@ void Loop::DoSwap()
 // update the parameters of a specific loop
 void Loop::UpdateParameters()
 {
-	kramSetFreq(handle, ((nbPitch->GetValue() * 44100) / 1000));
+	kramSetFreq(handle, ((nbPitch->GetValue() * 441) / 10));
 	kramSetPan(handle, (sbPan->GetChoice() * 128 - 64));
 	kramSetVol(handle, sbOn->GetChoice() * 64);
 	kramSetPos(handle, (GetSize() * (beat % nbBeats->GetValue()))/nbBeats->GetValue());
@@ -529,20 +535,25 @@ void Loop::UpdateParameters()
 void Loop::UpdateParametersNotes()
 {
 	u16 newpos = notes[beat]->offset;
+	s16 newpitch = notes[beat]->pitch - 128;
+	s16 octave=0;
+	s16 note=0;
+	
 	debug("Note lookup: %d", beat);
 	
-	s16 octave = notes[beat]->pitch / 12- 10;
-	s16 note = notes[beat]->pitch % 12 - 8;
-	
-	debug("Octave: %d, Note: %d", octave, note);
-	
-	if (octave >= 0)
+	if (newpitch < 0)
 	{
-		kramSetFreq(handle, (((nbPitch->GetValue() * frequency[note]) << octave) / 1000));	
+		octave = (newpitch + 1) / 12;
+		note = newpitch % 12;
+		debug("Octave: %d, Note: %d", -(octave - 1), (12 + note) % 12);	
+		kramSetFreq(handle, (((nbPitch->GetValue() * frequency[(12 + note) % 12]) >> -(octave - 1)) / 1000));
 	}
 	else
 	{
-		kramSetFreq(handle, (((nbPitch->GetValue() * frequency[note]) >> -octave) / 1000));				
+		octave = newpitch / 12;
+		note = newpitch % 12;
+		debug("Octave: %d, Note: %d", octave, note);
+		kramSetFreq(handle, (((nbPitch->GetValue() * frequency[note]) << octave) / 1000));
 	}
 	
 	kramSetPan(handle, (sbPan->GetChoice() * 128 - 64));
@@ -553,8 +564,8 @@ void Loop::UpdateParametersNotes()
 	}
 	else
 	{
-		// if bounce is on then i do'nt konw what the hell to do
-		if (notes[beat]->noteEnd != note_bounce)
+		// if feed is on then don't stop the note at the end of the loop
+		if (notes[beat]->noteEnd != note_feed)
 		{
 			kramSetVol(handle, 0);
 			kramSetPos(handle, 0);

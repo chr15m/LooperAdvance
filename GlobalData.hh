@@ -9,7 +9,7 @@
 #include "samples.h"
 
 // the different types of things that can happen to notes at their end (before timeslot end)
-typedef enum noteType { note_continue, note_cut, note_loop, note_bounce };
+typedef enum noteType { note_continue, note_cut, note_loop, note_feed, note_stretch };
 
 // this holds extra data relevant to samples
 typedef struct structSampleData

@@ -1,4 +1,4 @@
-#include "krawall_splash.hh"
+#include "scr_krawall_splash.hh"
 
 const u16 krawall_splash_tiles[7040] =
 {

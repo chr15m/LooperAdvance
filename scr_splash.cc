@@ -1,4 +1,4 @@
-#include "splash.hh"
+#include "scr_splash.hh"
 
 const u16 splash_tiles[8800] =
 {

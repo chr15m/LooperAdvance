@@ -1,4 +1,4 @@
-#include "bg.hh"
+#include "scr_bg.hh"
 
 const u16 bg_tiles[5984] =
 {

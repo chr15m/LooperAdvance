@@ -10,6 +10,7 @@ ASM	= $(shell ls *.s)
 OBJS	= $(SRCS:.c=.o) $(CXXSRCS:.cc=.o) $(ASM:.s=.o) 
 GAMEOBJECTS = Keys.o Page.o First.o Loop.o Widget.o Label.o EditBox.o SelectBox.o NumberBox.o GlobalData.o instruments.o samples.o krawall.lib charset.o samplenames.o
 AUDIOOBJECTS = modules.h samples.h instruments.h samples.s instruments.s
+SCREENOBJECTS = scr_bg.o scr_krawall_splash.o scr_splash.o
 
 ifdef RELEASE
 	#release build
@@ -51,8 +52,8 @@ all: $(TARGET).gba
 $(TARGET).gba: $(TARGET).elf
 	$(OBJCOPY) -O binary $(TARGET).elf $(TARGET).gba
 
-$(TARGET).elf: $(RESOURCES) $(TARGET).cc $(TARGET).o $(CRT) $(GAMEOBJECTS) $(LDSCRIPT) Makefile
-	$(LD) $(LFLAGS) crt0.o $(TARGET).o $(GAMEOBJECTS) -o $(TARGET).elf $(LIBS)
+$(TARGET).elf: $(RESOURCES) $(TARGET).cc $(TARGET).o $(CRT) $(GAMEOBJECTS) $(SCREENOBJECTS) $(LDSCRIPT) Makefile
+	$(LD) $(LFLAGS) crt0.o $(TARGET).o $(GAMEOBJECTS) $(SCREENOBJECTS) -o $(TARGET).elf $(LIBS)
 
 # links to lib
 krawall.lib: ../krawall/gcclib/krawall-32k-60-medium-sf.lib

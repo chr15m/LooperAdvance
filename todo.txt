@@ -35,7 +35,7 @@ Looper Advance Live (1.0):
 	- allow for different volumes (Evans)
 	+ B is a delete button in the editbox
 	- selecting a pitch - a keyboard appears
-
+	
 - original gb synth pages
 	- square wave 1
 	- square wave 2
@@ -51,6 +51,8 @@ Looper Advance Live (1.0):
 - implement nanoloop sync code
 
 - sample note one-shot
+
+- ability to turn on an off multiple notes at the same time
 
 Done:
 -----

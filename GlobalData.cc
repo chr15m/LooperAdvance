@@ -57,13 +57,16 @@ void GlobalData::Reset()
 // create a new blank song
 void GlobalData::NewSong()
 {
+	structSongData *oldsong;
 	// if we have other songs in memory already, then create a new blank one on the end
 	debug("Adding a song");
 	
 	if (songdata)
 	{
+		oldsong = currentsong->next;
 		currentsong->next = new structSongData;
 		currentsong = currentsong->next;
+		currentsong->next = oldsong;
 		debug("Next song data at: 0x%lx", (u32)currentsong);
 	}
 	else
@@ -71,6 +74,7 @@ void GlobalData::NewSong()
 		// initialise a fresh song
 		songdata = new structSongData;
 		currentsong = songdata;	
+		currentsong->next = NULL;
 		debug("New song data at: 0x%lx", (u32)songdata);
 	}
 	
@@ -79,7 +83,6 @@ void GlobalData::NewSong()
 	currentsong->name = new char[1];
 	currentsong->name[0] = '\0';
 	currentsong->loops = NULL;
-	currentsong->next = NULL;
 }
 
 // delete the current song

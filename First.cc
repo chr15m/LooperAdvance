@@ -28,7 +28,7 @@ First::First(Keys *inkeys)
 	sbDelButton = new SelectBox(5, 5, 6, inkeys);
 	sbSaveButton = new SelectBox(5, 6, 8, inkeys);
 	
-	lbBPM = new Label(26, 2, "BPM");
+	lbBPM = new Label(26, 1, "BPM");
 	nbBPM = new NumberBox(21, 1, 3, 1, 600, 10, inkeys);
 	
 	sbAddLoopButton = new SelectBox(18, 17, 8, inkeys);

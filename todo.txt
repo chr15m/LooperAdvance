@@ -1,3 +1,5 @@
+- = not done yet
++ = task completed
 
 Looper Advance Live (1.0):
 --------------------------
@@ -8,16 +10,18 @@ Looper Advance Live (1.0):
 	+ create AudioLayer class which manages samples
 		- make sure sample order is correct
 		+ get dma working
-		- try implementing as dma fifo based instead of timer callback
+		+ try implementing as dma fifo based instead of timer callback
 			- write mixing routine
+			- write panning/volume code and per-sample mixers
+			- think about a callback system for effects
+
+- fix the bug where every song above the current is deleted on 'new'
 
 - build system for different background themes
 	- python script to turn images into data files
 	- make a nice theme
 
 * RELEASE *
-
-- implement nanoloop sync code
 
 - interface changes:
 	- b button = browse notes (Jordan)
@@ -31,11 +35,19 @@ Looper Advance Live (1.0):
 	- allow for different volumes (Evans)
 	+ B is a delete button in the editbox
 
-- original gb synths
+- original gb synth pages
+	- square wave 1
+	- square wave 2
+	- noise wave
+	- programmable wave
+
+- drum constructor synth page
 
 - creating new notes changes
 	- use settings of last note if less than loop length
 	- use same note 1 loop length ago
+
+- implement nanoloop sync code
 
 - sample note one-shot
 

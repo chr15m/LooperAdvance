@@ -7,32 +7,54 @@
 
 First::First(Keys *inkeys)
 {
-	u16 i;
+	lbSong = new Label(2, 1, "Song");
+	sbSong = new SelectBox(7, 1, 13, inkeys);
+	sbNewButton = new SelectBox(2, 3, 3, inkeys);
+	sbDelButton = new SelectBox(9, 3, 6, inkeys);
+	sbSaveButton = new SelectBox(2, 5, 13, inkeys);
 	
-	// SelectBox(x, y, iwidth, *inext, *inkeys);
-	sbSong = new SelectBox(6, 1, 8, NULL, inkeys);
-	for (i=0; i<NUMSONGS; i++)
-		sbSong->NewChoice(songs::data[i].name, i);
-
-	// NumberBox(x, y, width, min, max, bigstep, next);
-	nbBPM = new NumberBox(6, 3, 2, 10, 350, 10, NULL, inkeys);
-	nbBeat = new NumberBox(24, 1, 4, 0, 9999, 1, NULL, inkeys);
-
-	sbSong->SetTransitions(NULL, NULL, NULL, nbBPM);
-	nbBPM->SetTransitions(NULL, NULL, sbSong, NULL);
-
-	nbBPM->SetValue(bpm);
-	oldsong = 1;
+	AddWidget(lbSong);
+	AddWidget(sbSong);
+	AddWidget(sbNewButton);
+	AddWidget(sbDelButton);
+	AddWidget(sbSaveButton);
+	
+	sbSong->SetTransitions(NULL, NULL, NULL, sbNewButton);
+	sbNewButton->SetTransitions(NULL, sbDelButton, sbSong, sbSaveButton);
+	sbDelButton->SetTransitions(sbNewButton, NULL, sbSong, sbSaveButton);
+	sbSaveButton->SetTransitions(NULL, NULL, sbNewButton, NULL);
+	
+	sbNewButton->AutoOff();
+	sbDelButton->AutoOff();
+	sbSaveButton->AutoOff();
+	
+	sbNewButton->NewChoice("New", 0);
+	sbNewButton->NewChoice("---", 0);
+	
+	sbDelButton->NewChoice("Delete", 0);
+	sbDelButton->NewChoice("------", 0);
+	
+	sbSaveButton->NewChoice("Write Changes", 0);
+	sbSaveButton->NewChoice("-------------", 0);
 	
 	UseKeys(inkeys);
+	
 	sbSong->Select();
-	selected = sbSong;
+	selected = sbSong;	
 }
 
 First::~First()
 {
-	delete nbBPM;
+	delete lbSong;
 	delete sbSong;
+	delete sbNewButton;
+	delete sbDelButton;
+	delete sbSaveButton;
+}
+
+void First::Load()
+{
+	sbSong->ClearChoices();
 }
 
 void First::Draw()
@@ -40,20 +62,9 @@ void First::Draw()
 	u16 beat;
 	
 	selected = selected->Process();
-	if (selected == nbBPM)
-		bpm = ((NumberBox *)selected)->GetValue();
-
-	// labels
-	cprintf(1,1,"Song");
-	sbSong->Draw();
-
-	cprintf(1,3,"BPM");
-	nbBPM->Draw();
 	
-	cprintf(20,1,"Beat");
-	beat = counter * bpm/3600;
-	nbBeat->SetValue(beat);
-	nbBeat->Draw();
+	if (globals.currentsong)
+		beat = globals.counter * globals.currentsong->bpm/3600;
 }
 
 void First::Process()
@@ -61,19 +72,17 @@ void First::Process()
 	u16 i;
 	Loop *ptrLoop;
 	structSongData *dataptr;
-
+	
 	dprintf("First Process: %ld\n", (u32)this);
 	
 	// if they've chosen a new song, load it
 	if (oldsong != sbSong->GetChoice())
 	{
-		dataptr = (structSongData *)&(songs::data[sbSong->GetChoice()]);
-		nbBPM->SetValue(dataptr->tempo);
-		bpm = dataptr->tempo;
+		//dataptr = (structSongData *)&(songs::data[sbSong->GetChoice()]);
 		ptrLoop = (Loop *)right;
-		for(i=0;i<4;i++)
+		while(ptrLoop)
 		{
-			ptrLoop->SetParameters(dataptr->loop[i].sample, dataptr->loop[i].pan, dataptr->loop[i].pitch, dataptr->loop[i].beats);
+			ptrLoop->SetParameters(dataptr->loop[i].sample, dataptr->loop[i].pan, dataptr->loop[i].pitch, dataptr->loop[i].divisions);
 			ptrLoop = (Loop *)ptrLoop->right;
 		}
 		oldsong = sbSong->GetChoice();

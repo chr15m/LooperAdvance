@@ -8,4 +8,6 @@ Page::Page()
 {
 	right = NULL;
 	left = NULL;
+	first = NULL;
+	last = NULL;
 }

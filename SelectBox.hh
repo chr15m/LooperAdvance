@@ -5,26 +5,36 @@
 #ifndef _SELECTBOX_HH_
 #define _SELECTBOX_HH_
 
-#define MAXSELECTIONS 40
-#define MAXSTRING 18
-
 class SelectBox : public Widget
 {
+// this type is a linked list of select box items
+typedef struct structSelectList
+{
+	char *text;
+	s16 value;
+	structSelectList *next;
+	structSelectList *prev;
+} structSelectList;
+
 private:
-	u16 width;	// how many digits wide is this?
-	u16 last;	// what's our top number in the array
-	u16 which;	// currently selected item
-	char selection[MAXSELECTIONS][MAXSTRING]; 	// an array to hold all of the selections
-	u16 value[MAXSELECTIONS];		// array to hold all values for each selection
+	u16 width;			// how many characters wide is this?
+	u16 timer;			// if it's an auto-reset button
+	u16 maxtime;			// if set the select box will reset after this amount of time
+	structSelectList *which;	// currently selected item
+	structSelectList *last;		// last one in the list
+	structSelectList *first; 	// first one in the list
 
 public:
-	SelectBox(u16 x, u16 y, u16 iwidth, Widget *inext, Keys *inkeys);
+	SelectBox(u16 x, u16 y, u16 iwidth, Keys *inkeys);
 	
 	void Choose(u16 choice);
 	void ChooseByValue(u16 value);
 	u16 GetChoice();
-	void NewChoice(char *text, u16 myval);
+	void NewChoice(char *text, s16 myval);
+	void ClearChoices();
+	bool IsEmpty();
 	char *GetChoiceString();
+	void AutoOff(u16 time = 10);
 	Widget *Process();
 	void Draw();
 };

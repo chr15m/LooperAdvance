@@ -1,83 +1,160 @@
 #include "SelectBox.hh"
 
-SelectBox::SelectBox(u16 ix, u16 iy, u16 iwidth, Widget *inext, Keys *inkeys): Widget (ix, iy, inext, inkeys)
+SelectBox::SelectBox(u16 ix, u16 iy, u16 iwidth, Keys *inkeys): Widget (ix, iy, inkeys)
 {
-	u16 i=0;
-	x = ix;
-	y = iy;
 	width = iwidth;
-	which = 0;
-	
-	left = right = up = down = NULL;
-
-	for (i=0; i<MAXSELECTIONS; i++)
-	{
-		selection[i][0] = NULL;
-		value[i] = 0;
-	}
-	
-	next = inext;
+	first = NULL;
+	which = NULL;
+	last = NULL;
+	timer = 0;
+	maxtime = 0;
+//	dprintf("Width: %d\n", width);
 }
 
+// choose item number choice
 void SelectBox::Choose(u16 choice)
 {
-	which = choice;
+	structSelectList *travel = first;
+	u16 i = 0;
+	
+	while (i != choice && travel)
+	{
+		travel = travel->next;
+		i++;
+	}
+	
+	if (travel)
+	{
+		which = travel;
+	}
 }
 
+// choose an item by it's value
 void SelectBox::ChooseByValue(u16 inval)
 {
-	u16 i = MAXSELECTIONS;
-	while (--i)
+	structSelectList *travel = first;
+	
+	while (travel)
 	{
-		if (value[i] == inval)
-			which = i;
+		if (travel->value == inval)
+			which = travel;
+		travel = travel->next;
 	}
 }
 
+// get which choice we have selected
 u16 SelectBox::GetChoice()
 {
-	return value[which];
+	if (which)
+		return which->value;
+	else
+		return 0;
 }
 
+// get the string for the currently selected choice
 char *SelectBox::GetChoiceString()
 {
-	return selection[which];
+	if (which)
+		return which->text;
+	else
+		return "";
 }
 
-void SelectBox::NewChoice(char *text, u16 myval)
+// add a new choice to the linked list of choices
+void SelectBox::NewChoice(char *text, s16 myval)
 {
-	if (last < MAXSELECTIONS)
+	dprintf("Address: 0x%x\n", last);
+	// if we have at least one already then add another one
+	if (last != NULL)
 	{
-		value[last] = myval;
-		strcpy(selection[last], text);
-		last ++;
+		last->next = new structSelectList;
+		last->next->prev = last;
+		last = last->next;
 	}
+	else
+	{
+		// this is our first one
+		last = new structSelectList;
+		last->prev = NULL;
+		first = last;
+		which = last;
+	}
+	dprintf("Address: 0x%x\n", last);
+	
+	// make a new character array
+	last->next = NULL;
+	last->text = new char[width+1];
+	strncpy(last->text, text, width);
+	// make sure it's null terminated
+	last->text[width] = '\0';
+	last->value = myval;
+	
+	dprintf("%s -> %d\n\n", last->text, last->value);
 }
 
+// clear out our linked list of select items
+void SelectBox::ClearChoices()
+{
+	structSelectList *traverse = first;
+	
+	while (traverse)
+	{
+		traverse = first->next;
+		delete[] first->text;
+		delete first;
+		first = traverse;
+	}
+	first = NULL;
+	last = NULL;
+	which = NULL;
+}
+
+// check if we have any in the list
+bool SelectBox::IsEmpty()
+{
+	return (first == NULL);
+}
+
+// set to zero after this number of seconds
+void SelectBox::AutoOff(u16 time)
+{
+	maxtime = time;
+}
+
+// process when we're selected
 Widget *SelectBox::Process()
 {
 	Widget *newselect = NULL;
-	s16 tmpval = which;
 	
 	if (keys->IsPressed(keyA))
-	{	
-		// what keys was pressed ey
-		if (keys->TestKey(keyUp) == pressed)
-			tmpval += 1;
-		if (keys->TestKey(keyDown) == pressed)
-			tmpval -= 1;
-		if (keys->TestKey(keyLeft) == pressed)
-			tmpval -= 1;
-		if (keys->TestKey(keyRight) == pressed)
-			tmpval += 1;
-		
-		// check our bounds
-		if (tmpval >= last)
-			tmpval = last - 1;
-		if (tmpval < 0)
-			tmpval = 0;
-		
-		which = tmpval;
+	{
+		if (which)
+		{
+			// what keys was pressed ey
+			if (keys->TestKey(keyUp) == pressed && which->next)
+			{
+				which = which->next;
+				if (maxtime)
+					timer = maxtime;
+			}
+			
+			if (keys->TestKey(keyDown) == pressed && which->prev)
+			{
+				which = which->prev;
+			}
+			
+			if (keys->TestKey(keyLeft) == pressed && which->prev)
+			{
+				which = which->prev;
+			}
+			
+			if (keys->TestKey(keyRight) == pressed && which->next)
+			{
+				which = which->next;
+				if (maxtime)
+					timer = maxtime;
+			}
+		}
 	}
 	else
 	{
@@ -105,14 +182,22 @@ Widget *SelectBox::Process()
 	return newselect;
 }
 
+// draw us
 void SelectBox::Draw()
-{	
-	char fmtstr[MAXSTRING+2];
+{
+	// make sure we don't draw an empty select box
+	if (which)
+		sprintf(text, "[%-*s]", width, which->text);
+	else
+		sprintf(text, "[%-*s]", width, "");
 	
-	sprintf(fmtstr, "[%%%ds]", width);
-	sprintf(text, fmtstr, selection[which]);
-//	dprintf(text);
-//	dprintf("\n");
+	// if the timer is started, keep counting down
+	if (timer==1)
+		Choose(0);
+	
+	if (timer)
+		timer--;
+	
 	if (selected)
 	{
 		hprintf(x, y, text);

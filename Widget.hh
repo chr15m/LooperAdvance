@@ -5,6 +5,8 @@
 #ifndef _WIDGET_HH_
 #define _WIDGET_HH_
 
+#define MAXSTRING	30
+
 class Widget
 {
 private:
@@ -15,12 +17,11 @@ protected:
 	Widget *right;
 	Widget *up;
 	Widget *down;	// these are the transition vectors (tell what other UI widgets are to which side)
-	Widget *next;	// this is a linked list of all number boxes
 	u16 x,y;	// where on the screen
 	char text[16];	// hold the text to print to screen
 
 public:
-	Widget(u16 x, u16 y, Widget *inext, Keys *inkeys);
+	Widget(u16 x, u16 y, Keys *inkeys);
 	
 	void SetTransitions(Widget *newL, Widget *newR, Widget *newU, Widget *newD);
 	void Select();

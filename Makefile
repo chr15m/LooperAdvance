@@ -1,13 +1,14 @@
 #!/usr/bin/make -f
 
-TARGET = looper.gba
-ELF    = looper.elf
+ifndef TARGET
+	TARGET = looper
+endif
 
 SRCS	= $(shell ls *.c)
 CXXSRCS = $(shell ls *.cc)
 ASM	= $(shell ls *.s)
 OBJS	= $(SRCS:.c=.o) $(CXXSRCS:.cc=.o) $(ASM:.s=.o) 
-GAMEOBJECTS = crt0.o main.o Keys.o Page.o First.o Loop.o Widget.o SelectBox.o NumberBox.o instruments.o samples.o krawall.lib charset.o songdata.o samplenames.o
+GAMEOBJECTS = Keys.o Page.o First.o Loop.o Widget.o Label.o EditBox.o SelectBox.o NumberBox.o instruments.o samples.o krawall.lib charset.o samplenames.o
 
 ifdef RELEASE
 	#release build
@@ -44,20 +45,22 @@ include Makefile.inc
 %.o : %.cc samples.h
 	$(CXX) $(CFLAGS) $(CXXFLAGS) -mthumb -c $< -o $@
 
-all: $(TARGET)
+all: $(TARGET).gba
 
 # main game stuff
 
-$(TARGET): $(ELF)
-	$(OBJCOPY) -O binary $(ELF) $(TARGET)
+$(TARGET).gba: $(TARGET).elf
+	$(OBJCOPY) -O binary $(TARGET).elf $(TARGET).gba
 
-$(ELF): $(RESOURCES) main.cc $(GAMEOBJECTS) $(CRT) $(LDSCRIPT) Makefile
-	$(LD) $(LFLAGS) $(GAMEOBJECTS) -o $(ELF) $(LIBS)
+$(TARGET).elf: $(RESOURCES) $(TARGET).cc $(TARGET).o $(GAMEOBJECTS) $(CRT) $(LDSCRIPT) Makefile
+	$(LD) $(LFLAGS) crt0.o $(TARGET).o $(GAMEOBJECTS) -o $(TARGET).elf $(LIBS)
 
 # audio stuff
 
-samplenames.cc modules.h samples.h instruments.h samples.s instruments.s: samples.xm
+modules.h samples.h instruments.h samples.s instruments.s: samples.xm
 	../krawall/converter/converter.linux samples.xm
+
+samplenames.cc: samples.h
 	./samplenames.py
 
 krawall.lib: ../krawall/gcclib/krawall-32k-60-medium-sf.lib
@@ -80,8 +83,8 @@ depend: $(MKDEP)
 	@echo Build sources\(c,c++\) dependencies...
 	-$(CC) -MM *.cc >.sdepend
 
-run: $(TARGET)
-	@$(EMULATOR) $(TARGET)
+run: $(TARGET).gba
+	@$(EMULATOR) $(TARGET).gba
 
 ###
 -include .depend

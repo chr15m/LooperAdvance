@@ -21,12 +21,12 @@ Loop::Loop(Keys *inkeys)
 	handle = 0;
 	
 	// set up the GUI
-	nbOn = new NumberBox(10, 3, 1, 0, 1, 1, NULL, inkeys);
-	nbPitch = new NumberBox(10, 4, 10, 1, 100000, 20, NULL, inkeys);
-	nbPan = new NumberBox(10, 5, 1, 0, 1, 1, NULL, inkeys);
-	nbBeats = new NumberBox(10, 6, 2, 1, 64, 8, NULL, inkeys);
-	nbReset = new NumberBox(10, 7, 1, 0, 1, 1, NULL, inkeys);
-	sbSample = new SelectBox(10, 9, 1, NULL, inkeys);
+	nbOn = new NumberBox(10, 3, 1, 0, 1, 1, inkeys);
+	nbPitch = new NumberBox(10, 4, 10, 1, 100000, 20, inkeys);
+	nbPan = new NumberBox(10, 5, 1, 0, 1, 1, inkeys);
+	nbBeats = new NumberBox(10, 6, 2, 1, 64, 8, inkeys);
+	nbReset = new NumberBox(10, 7, 1, 0, 1, 1, inkeys);
+	sbSample = new SelectBox(10, 9, 1, inkeys);
 	
 	nbOn->SetTransitions(NULL, NULL, NULL, nbPitch);
 	nbPitch->SetTransitions(NULL, NULL, nbOn, nbPan);
@@ -109,7 +109,7 @@ void Loop::Process()
 	if ((sample != 0xFF) && kramHandleValid(handle))
 	{
 		// update our position
-		beat = counter * bpm/3600;
+		beat = globals.counter * globals.currentsong->bpm/3600;
 		
 		if (beat != lastbeat)
 		{
@@ -126,10 +126,10 @@ void Loop::ResetLoopPitch()
 {	
 	// (1000*(tracks[selected].sample->len)/(tracks[selected].sample->freq))/(tracks[selected].bpl*T*4/1000	
 	
-	dprintf("Top = %ld\n", bpm * GetSize());
+	dprintf("Top = %ld\n", globals.bpm * GetSize());
 	dprintf("Bottom = %ld\n", (2646*beats));
-	dprintf("New ratio = %d\n", (bpm * GetSize())/(2646*beats));
-	pitch = (bpm * GetSize()) / (2646 * beats);
+	dprintf("New ratio = %d\n", (globals.songdata->bpm * GetSize())/(2646*beats));
+	pitch = (globals.songdata->bpm * GetSize()) / (2646 * beats);
 	nbPitch->SetValue(pitch);
 }
 

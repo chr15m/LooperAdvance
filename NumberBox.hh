@@ -14,7 +14,7 @@ private:
 	u16 bigstep;	// how big the big steps should be
 	
 public:
-	NumberBox(u16 x, u16 y, u16 iwidth, u16 imin, u16 imax, u16 ibigstep, NumberBox *inext, Keys *inkeys);
+	NumberBox(u16 x, u16 y, u16 iwidth, u16 imin, u16 imax, u16 ibigstep, Keys *inkeys);
 	
 	void SetValue(u16 newVal);
 	u16 GetValue();

@@ -6,22 +6,30 @@
 #include "charset.hh"
 #include "Page.hh"
 #include "Loop.hh"
-#include "NumberBox.hh"
-#include "SelectBox.hh"
-#include "songdata.hh"
+#include "Widgets.hh"
+#include "GlobalData.hh"
 
 class First : public Page
 {
 private:
-	NumberBox *nbBPM;
+	Label *lbSong;
 	SelectBox *sbSong;
-	NumberBox *nbBeat;
+	SelectBox *sbNewButton;
+	SelectBox *sbDelButton;
+	SelectBox *sbSaveButton;
+	SelectBox *sbAddButton;
+	
 	Widget *selected;
+	structSongData *songdata;
+	structSongData *currentsong;
 	u16 oldsong;
-
+	
 public:
 	First(Keys *inkeys);
 	virtual ~First();
 	void Draw();
 	void Process();
+	
+	// this loads the save bank into ram
+	void Load();
 };

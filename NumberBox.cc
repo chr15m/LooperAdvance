@@ -1,17 +1,11 @@
 #include "NumberBox.hh"
 
-NumberBox::NumberBox(u16 ix, u16 iy, u16 iwidth, u16 imin, u16 imax, u16 ibigstep, NumberBox *inext, Keys *inkeys): Widget (ix, iy, inext, inkeys)
+NumberBox::NumberBox(u16 ix, u16 iy, u16 iwidth, u16 imin, u16 imax, u16 ibigstep, Keys *inkeys): Widget (ix, iy, inkeys)
 {
-	x = ix;
-	y = iy;
 	width = iwidth;
 	min = imin;
 	max = imax;
-	bigstep = ibigstep;
-	
-	left = right = up = down = NULL;
-	
-	next = inext;
+	bigstep = ibigstep;	
 	value = min;
 }
 

@@ -1,37 +1,59 @@
-todo:
+Looper Advance Live (1.0):
+--------------------------
+
+- make a python script to import tile sets from images
+
+- nicer font (LCD font?)
+
+- add nifty background to pages
+
 - interface changes:
 	- b button = browse notes (Jordan)
 	- start button = on/off (Jordan)
-	- pause button = remember/recall current loop settings
 	- rename beat and note to slice and step (Jordan)
-	- display current note position for this loop
 	- holding down button on select & number boxes will scroll (Evans)
 	- option to 'wrap' on select/number boxes (Evans)
-	- better letter selection (more intuitive?)
 	- note numbering should line up on specific note selector (Jordan)
+	- letter selection not so buggy (specific set of characters)
+	- display current note position for this loop (Jordan)
 
 - allow for different panning positions
+
 - allow for different volumes (Evans)
 
-- sample note one-shot
+
+Looper Advance Live (2.0):
+--------------------------
 
 - fix time stretching
-- fix to make bpm more correct
 
 - creating new notes changes
 	- use settings of last note if less than loop length
 	- use same note 1 loop length ago
+
+- re-write the hardware access layer (replace krawall)
+
+- interface changes
+	- pause button = remember/recall current loop settings
+	- better letter selection (more intuitive?)
+
+- sample note one-shot
+
 - when adding a new loop, jumps to that loop
+
 - 'clone loop' button
 
-- nicer font
-- add nifty background to pages
+- fix to make bpm more correct
 
 - make load/save format more robust (data types stored)
 
-Feature Wishlist:
+- make a windowing library to have sprite windows appear on top of stuff
 
-- re-write the hardware access layer (replace krawall)
+- use STL for linked lists
+
+
+Looper Advance:
+---------------
 
 - parameters on pages can be set as being tracker controllable
 
@@ -39,15 +61,12 @@ Feature Wishlist:
 	- loops can be turned on and off at any point
 	- tracker controllable parameters can be modified over time
 
-- make a new type of page sample triggers like a tracker
+- make a new type of page sample triggers like a tracker instead of loops
 
-- make a python script to import pictures in to be used in the tile set
 
-- make a windowing library to have sprite windows appear on top of stuff
+Done:
+-----
 
-- use STL for linked lists
-
-done:
 + make a releasable sample bank
 + add splash screens
 + make tutorial (and screenshots)

@@ -218,6 +218,7 @@ Loop::~Loop()
 {
 	debug("Deleting loop");
 	
+	sample->Pause();
 	mixer->Forget(sample);
 	delete sample;
 	
@@ -463,7 +464,9 @@ void *Loop::Reset(void *ignore)
 {
 	// (1000 * (tracks[selected].sample->len) / (tracks[selected].sample->freq) ) / (tracks[selected].bpl * T * 4 / 1000
 	// (256 * (tracks[selected].sample->len) / (tracks[selected].sample->freq) ) / (tracks[selected].bpl * T * 4 / 256)
-	u32 result = ((sample->GetLength() / nbBeats->GetValue()) * 256 * 60) / globals.currentsong->bpm;
+	u32 p1 = 6 * sample->GetLength();
+	u32 p2 = nbBeats->GetValue() * globals.currentsong->bpm;
+	u32 result = p1 / p2;
 	
 	debug("New pitch: %d", result);
 	
@@ -580,7 +583,7 @@ void Loop::UpdateParametersNotes()
 		debug("Octave: %d, Note: %d", -(octave - 1), (12 + note) % 12);	
 		//sample->SetFrequency();
 		// kramSetFreq(handle, (((nbPitch->GetValue() * frequency[(12 + note) % 12]) >> -(octave - 1)) / 1000));
-		sample->SetVelocity(nbPitch->GetValue() >> -(octave - 1));
+		sample->SetVelocity((nbPitch->GetValue() >> -(octave - 1)) + note * ((nbPitch->GetValue() - (nbPitch->GetValue() << 1)) / 12));
 	}
 	else
 	{
@@ -589,7 +592,7 @@ void Loop::UpdateParametersNotes()
 		debug("Octave: %d, Note: %d", octave, note);
 		//sample->SetFrequency();
 		//kramSetFreq(handle, (((nbPitch->GetValue() * frequency[note]) << octave) / 1000));
-		sample->SetVelocity(nbPitch->GetValue() >> -(octave - 1));
+		sample->SetVelocity((nbPitch->GetValue() << octave) + note * ((nbPitch->GetValue() - (nbPitch->GetValue() << 1)) / 12));
 	}
 	
 	sample->SetPanning(sbPan->GetChoice() * 16 - 8);

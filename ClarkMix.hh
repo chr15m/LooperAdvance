@@ -35,10 +35,11 @@
 // 547 - VCOUNT goes down slow (14)
 // 548 - VCOUNT goes up fast (one or two every count)
 
-#define BUFFER_SIZE 128
+#define BUFFER_SIZE 256
 
 // 16khz play back freq
 #define PLAYER_FREQ 0xFBFF
+//#define PLAYER_FREQ 0xFD06
 
 #include "gba.h"
 #include "typedefs.h"

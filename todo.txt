@@ -4,17 +4,6 @@
 Looper Advance Live (1.0):
 --------------------------
 
-- re-write the hardware access layer (replace krawall)
-	+ create Sample class which points to ROM sample
-		- panning and volume chunks calculated
-	+ create AudioLayer class which manages samples
-		+ make sure sample order is correct
-		+ get dma working
-		+ try implementing as dma fifo based instead of timer callback
-			+ write mixing routine
-			- write panning/volume code and per-sample mixers
-			+ think about a callback system for effects
-
 - interface changes:
 	+ rename beat and note to slice and step (Jordan)
 	+ display current note position for this loop (Jordan)
@@ -66,4 +55,14 @@ Done:
 	+ python script to turn images into data files
 	+ make a nice theme
 	+ get it working with looper's current build system
++ re-write the hardware access layer (replace krawall)
+	+ create Sample class which points to ROM sample
+		+ panning and volume chunks calculated
+	+ create AudioLayer class which manages samples
+		+ make sure sample order is correct
+		+ get dma working
+		+ try implementing as dma fifo based instead of timer callback
+			+ write mixing routine
+			+ write panning/volume code and per-sample mixers
+			+ think about a callback system for effects
 

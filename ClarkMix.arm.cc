@@ -113,7 +113,7 @@ void ClarkMix::switchBuffers(void)
 // mix together everything down into the buffers
 void ClarkMix::mixBuffers(void)
 {
-	//SetBG(31, 0, 0);
+	SetBG(31, 0, 0);
 	u16 b;
 	structSampleList *traverse = samplelist;
 	
@@ -135,7 +135,7 @@ void ClarkMix::mixBuffers(void)
 		traverse = traverse->next;
 	}
 	
-	//SetBG(SCREENS_BG_R, SCREENS_BG_B, SCREENS_BG_G);
+	SetBG(SCREENS_BG_R, SCREENS_BG_B, SCREENS_BG_G);
 }
 
 // Interrupt process

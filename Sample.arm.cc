@@ -114,8 +114,8 @@ void Sample::SetPanning(s8 pan)
 // set the volume of this sample
 void Sample::SetVolume(u8 vol)
 {
-	if (vol > 8)
-		vol = 8;
+	if (vol > 7)
+		vol = 7;
 	
 	volume = 8 - vol;
 	debug("Set volume to %d\n", volume);
@@ -148,6 +148,7 @@ void Sample::MixDown(s8 *mixBufA, s8 *mixBufB, u16 buffSize)
 		s8 *dataptr = (s8 *)sampledata->data;
 		// we want to make sure we don't overstep by 4 if playing a sample of length not divisible by four
 		u32 end = sampledata->length - 5;
+		u16 val=0;
 		
 		// figure out our pan shifting
 		panshift[0] = 0;
@@ -159,17 +160,17 @@ void Sample::MixDown(s8 *mixBufA, s8 *mixBufB, u16 buffSize)
 		
 		// note, we lost a fair bit of precision doing all this
 		// but it's only in chunks of four samples, so it's not so bad.
-		for (b = 0; b < buffSize; b++)
+		buffSize = b;
+		do
 		{
-			nextchunk += velocity;
-			
-			chunkR = nextchunk >> 8;
+			chunkR = (nextchunk += velocity) >> 8;
 			// fill up our buffers byte by byte
-			mixBufA[b] += dataptr[chunkR] >> panshift[0] >> volume;
-			mixBufB[b] += dataptr[chunkR] >> panshift[1] >> volume;
+			val = dataptr[chunkR] >> volume;
+			mixBufA[buffSize - b] += val >> panshift[0];
+			mixBufB[buffSize - b] += val >> panshift[1];
 			
 			if ((u32)chunkR >= end)
 				nextchunk = 0;
-		}
+		} while(--b);
 	}
 }

@@ -15,7 +15,7 @@ void (*IntrTable[])() =
 	0, // h-blank
 	0, // vcount
 	0, // timer0
-	kradInterrupt, // timer1
+	0, // timer1
 	0, // timer2
 	0, // timer3
 	0, // serial
@@ -31,10 +31,24 @@ GlobalData globals;
 
 int main()
 {
+	// starting
+	SetBG(10, 10, 0);
+	
 	// i don't get why this isn't run automatically when the globaldata object is created
 	// perhaps my understanding of c++ isn't so strong :]
 	globals.Init();
+	
+	// starting
+	SetBG(0, 10, 10);
 
+	globals.LoadSongs();
+
+	// starting
+	SetBG(10, 0, 10);
+
+	// set up the krawall interrupt now that this is done
+	IntrTable[4] = kradInterrupt;
+	
 	u16 i=0;
 	Keys *keys = new Keys();
 	First *firstpage = new First(keys);

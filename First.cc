@@ -7,6 +7,8 @@
 // initialise
 First::First(Keys *inkeys)
 {
+	debug("First page Constructor");
+	
 	lbSong = new Label(2, 1, "Song");
 	sbSong = new SelectBox(7, 1, 13, inkeys);
 	sbNewButton = new SelectBox(2, 3, 3, inkeys);
@@ -93,7 +95,6 @@ First::First(Keys *inkeys)
 	sbSong->Select();
 	selected = sbSong;
 
-	globals.LoadSongs();
 	RebuildSongList();
 	Song(NULL);
 	debug("Songdata: 0x%lx", (u32)globals.songdata);
@@ -241,7 +242,7 @@ void *First::AddLoopButton(void *data)
 		right = new Loop(keys, globals.currentloop);
 		right->left = this;
 	}
-	
+		
 	return NULL;
 }
 

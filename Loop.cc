@@ -123,43 +123,43 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	sbAddLoopButton->NewChoice("-------------", 1);	
 	cbAddLoopButton.MakeCallback(this, &Loop::AddLoopButton);
 	sbAddLoopButton->UseCallBack(&cbAddLoopButton);
-
+	
 	sbDelLoopButton->AutoOff();
 	sbDelLoopButton->NewChoice("Del Loop", 0);
 	sbDelLoopButton->NewChoice("-------------", 1);	
 	cbDelLoopButton.MakeCallback(this, &Loop::DelLoopButton);
 	sbDelLoopButton->UseCallBack(&cbDelLoopButton);
-
+	
 	cbName.MakeCallback(this, &Loop::Name);
 	ebName->UseCallBack(&cbName);
-
+	
 	cbPitch.MakeCallback(this, &Loop::Pitch);
 	nbPitch->UseCallBack(&cbPitch);
-
+	
 	cbSwing.MakeCallback(this, &Loop::Swing);
 	nbSwing->UseCallBack(&cbSwing);
-
+	
 	cbBeats.MakeCallback(this, &Loop::Beats);
 	nbBeats->UseCallBack(&cbBeats);
-
+	
 	cbNotes.MakeCallback(this, &Loop::Notes);
 	nbNotes->UseCallBack(&cbNotes);
-
+	
 	cbNote.MakeCallback(this, &Loop::NoteChange);
 	nbNote->UseCallBack(&cbNote);
-
+	
 	cbNBeat.MakeCallback(this, &Loop::NBeat);
 	nbNBeat->UseCallBack(&cbNBeat);
-
+	
 	cbNSwing.MakeCallback(this, &Loop::NSwing);
 	nbNSwing->UseCallBack(&cbNSwing);
-
+	
 	cbNPitch.MakeCallback(this, &Loop::NPitch);
 	nbNPitch->UseCallBack(&cbNPitch);
-
+	
 	cbNAction.MakeCallback(this, &Loop::NAction);
 	sbNAction->UseCallBack(&cbNAction);
-
+	
 	sbReset->AutoOff();
 	sbReset->NewChoice("Reset", 0);
 	sbReset->NewChoice("-----", 1);
@@ -177,7 +177,7 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	UseKeys(inkeys);
 	sbOn->Select();
 	selected = sbOn;
-
+	
 	globals.SetCurrentLoop(data);
 	
 	SampleChange(NULL);
@@ -218,7 +218,7 @@ Loop::~Loop()
 }
 
 // if they press the loop-add button
-void *Loop::AddLoopButton(void *data)
+void *Loop::AddLoopButton(void *mydata)
 {
 	Page *old;
 	debug("AddLoop button callback");
@@ -241,6 +241,8 @@ void *Loop::AddLoopButton(void *data)
 		right = new Loop(keys, globals.currentloop);
 		right->left = this;
 	}
+	
+	globals.SetCurrentLoop(data);
 	
 	return NULL;
 }
@@ -298,6 +300,7 @@ void Loop::UpdateWidgets()
 void *Loop::Pitch(void *number)
 {
 	data->pitch = *((u16 *)number);
+	debug("Set pitch to %d", data->pitch);
 	return NULL;
 }
 
@@ -434,14 +437,19 @@ void *Loop::Reset(void *ignore)
 	// (1000 * (tracks[selected].sample->len) / (tracks[selected].sample->freq) ) / (tracks[selected].bpl * T * 4 / 1000	
 	u32 p1 = globals.currentsong->bpm * GetSize();
 	u32 p2 = 2646 * nbBeats->GetValue();
+	u16 result = 0;
 	
-	debug("Bpm: %ld", globals.currentsong->bpm);
+	debug("Bpm: %d", globals.currentsong->bpm);
 	debug("Size: %ld", GetSize());
 	debug("Top: %ld", p1);
-	debug("Bottom: %d", p2);
-	debug("New ratio: %ld", p1/p2);
+	debug("Bottom: %ld", p2);
 
-	nbPitch->SetValue(p1/p2);
+	result = p1/p2;
+
+	debug("New ratio: %d", result);
+	
+	nbPitch->SetValue(result);
+	Pitch(&result);
 	return NULL;
 }
 
@@ -580,14 +588,13 @@ void Loop::UpdateParametersNotes()
 // what to do when they select a different sample
 void *Loop::SampleChange(void *whichsample)
 {
+	debug("Changing sample");
+
 	if (whichsample)
 	{
 		data->sample = ((structSelectList *)whichsample)->value;
+		Reset(NULL);
 	}
-	
-	debug("Changing sample");
-	
-	Reset(NULL);
 	
 	if ((data->sample != 0xFF) && kramHandleValid(handle))
 	{

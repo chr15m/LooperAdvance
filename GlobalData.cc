@@ -223,6 +223,8 @@ void GlobalData::SetLoopName(char *inname)
 // add another loop to this song
 void GlobalData::NewLoop()
 {
+	structLoopData *holder=NULL;
+	
 	// if we have some loops, then append it to the end
 	if (currentsong)
 	{
@@ -230,11 +232,15 @@ void GlobalData::NewLoop()
 		
 		if (currentsong->loops)
 		{
+			debug("Appending loop");
+			if (currentloop->next)
+				holder = currentloop->next;
 			currentloop->next = new structLoopData;
 			currentloop = currentloop->next;
 		}
 		else
 		{
+			debug("First loop");
 			// initialise a fresh song
 			currentsong->loops = new structLoopData;
 			currentloop = currentsong->loops;
@@ -248,7 +254,7 @@ void GlobalData::NewLoop()
 		currentloop->pitch = 1000;
 		currentloop->divisions = 1;
 		currentloop->notes = NULL;
-		currentloop->next = NULL;
+		currentloop->next = holder;
 		
 		debug("Loop addresses (base, current): 0x%lx, 0x%lx", (u32)currentsong->loops, (u32)currentloop);
 	}
@@ -400,6 +406,8 @@ void GlobalData::SetBPM(u16 bpm)
 // save all songs from memory into the writeable ROM
 void GlobalData::SaveSongs()
 {
+	REG_IME = 0; // disable interrupts
+
 	// pointers for traversing the data
 	structSongData *songtrav = songdata;
 	structLoopData *looptrav = NULL;
@@ -426,7 +434,7 @@ void GlobalData::SaveSongs()
 		debug("looptrav initial address: 0x%lx", (u32)looptrav);
 		while (looptrav)
 		{
-			debug("Writing loop.");
+			debug("Writing loop %s", looptrav->name);
 			
 			// write the loop name
 			WriteString(looptrav->name);
@@ -441,30 +449,28 @@ void GlobalData::SaveSongs()
 
 			// go through each note
 			notetrav = looptrav->notes;
-			if (notetrav)
+			while (notetrav)
 			{
-				while (notetrav)
-				{
-					debug("Writing note.");
-					
-					// write the note end action;
-					WriteNumber(notetrav->noteEnd, sizeof(u8));
-					// write the beat offset
-					WriteNumber(notetrav->offset, sizeof(u8));
-					// write the pitch
-					WriteNumber(notetrav->pitch, sizeof(u8));
-					// write the swing
-					WriteNumber(notetrav->swing, sizeof(u8));
-					
-					// next note
-					notetrav = notetrav->next;
-				}
+				debug("Writing note 0x%lx", notetrav);
+				
+				// write the note end action;
+				WriteNumber(notetrav->noteEnd, sizeof(u8));
+				// write the beat offset
+				WriteNumber(notetrav->offset, sizeof(u8));
+				// write the pitch
+				WriteNumber(notetrav->pitch, sizeof(u8));
+				// write the swing
+				WriteNumber(notetrav->swing, sizeof(u8));
+				
+				// next note
+				notetrav = notetrav->next;
 			}
 			// write the magic string for end-of-notes
 			WriteNumber(magic, sizeof(u16));
 			
 			// next loop
 			looptrav = looptrav->next;
+			debug("Next loop: 0x%lx", looptrav);
 		}
 		// write the magic string for end-of-loops
 		WriteNumber(magic, sizeof(u16));
@@ -478,6 +484,8 @@ void GlobalData::SaveSongs()
 
 	// reset the offset
 	offset = 0;
+
+	REG_IME = 1; // enable interrupts
 }
 
 // writes a string into the SRAM
@@ -545,8 +553,12 @@ void GlobalData::LoadSongs()
 	u16 checkmagic=0;
 	offset = 0;
 	
+	REG_IME = 0; // disable interrupts
+	
 	debug("Loading songs.");
-	/// first delete all songs
+
+	// black = starting
+	SetBG(0, 0, 0);
 	
 	ReadNumber(&checkmagic, sizeof(u16));
 	
@@ -556,6 +568,9 @@ void GlobalData::LoadSongs()
 		// until we find the end of the songs
 		while (!CheckMagic())
 		{
+			// red = song
+			SetBG(10, 0, 0);
+			
 			// start a new song
 			debug("Creating a new song struct.");
 			NewSong();
@@ -573,6 +588,9 @@ void GlobalData::LoadSongs()
 			// until we find the end of the loops
 			while (!CheckMagic())
 			{
+				// green = loop
+				SetBG(0, 10, 0);
+				
 				// create a new loop
 				debug("Creating a new loop struct.");
 				NewLoop();
@@ -592,6 +610,9 @@ void GlobalData::LoadSongs()
 				
 				while (!CheckMagic())
 				{
+					// blue = note
+					SetBG(0, 0, 10);
+					
 					// create a new note
 					debug("Creating a new note struct.");
 					NewNote();
@@ -617,5 +638,7 @@ void GlobalData::LoadSongs()
 		debug("No load data; creating a new song.");
 		NewSong();
 	}
+
+	REG_IME = 1; // enable interrupts
 }
 

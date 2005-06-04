@@ -36,8 +36,34 @@ void (*IntrTable[])() =
 	0  // cart
 };
 
-// This is a test of the clarkinou mixing system
+void Pause(ClarkMix *mixer, Keys *keys)
+{
+	// check keys
+        while (keys->TestKey(keyA) != pressed)
+	{
+		// wait for zero sync
+		while(REG_VCOUNT != 0);
+		
+		SetBG(31, 0, 0);
+                keys->Jiffie();
+		
+		// mix our buffers
+		SetBG(0, 0, 31);
+		mixer->DoMix();
+		SetBG(SCREENS_BG_R, SCREENS_BG_B, SCREENS_BG_G);
+		
+		// wait until we're in the non-redraw bit
+		while(REG_VCOUNT != 160);
+		
+		// do our interrupt process (swap buffers)
+		SetBG(28, 28, 0);
+		mixer->InterruptProcess();
+		SetBG(SCREENS_BG_R, SCREENS_BG_B, SCREENS_BG_G);
+	}
+        keys->Jiffie();
+}
 
+// This is a test of the clarkinou mixing system
 int main()
 {
 	Keys *keys = new Keys();
@@ -46,31 +72,19 @@ int main()
 	Sample *other = new Sample((SampleData *)&samples[1]);
 	s8 rotpan=0;
 	
+	REG_DISPCNT = SCREENMODE0;
+	
 	mixer->Manage(other);
 	mixer->Manage(mysample);
 	
-	// check keys
-        while (keys->TestKey(keyA) != pressed)
-        {
-                keys->Jiffie();
-		// mix our buffer if it needs it
-		mixer->DoMix();
-        }
-        keys->Jiffie();
+	Pause(mixer, keys);
 
 	dprintf("Turning off volume of mysample\n");
 	// try volume tests
 	mysample->SetVolume(0);
 	dprintf("---\n");
 	
-	// check keys
-        while (keys->TestKey(keyA) != pressed)
-        {
-                keys->Jiffie();
-		// mix our buffer if it needs it
-		mixer->DoMix();
-        }
-        keys->Jiffie();
+	Pause(mixer, keys);
 
 	dprintf("Turning on volume of mysample to half\n");
 	dprintf("Setting Panning of samples to opposite ends\n");
@@ -80,14 +94,7 @@ int main()
 	other->SetPanning(-8);
 	dprintf("---\n");
 
-	// check keys
-        while (keys->TestKey(keyA) != pressed)
-        {
-                keys->Jiffie();
-		// mix our buffer if it needs it
-		mixer->DoMix();
-        }
-        keys->Jiffie();
+	Pause(mixer, keys);
 
 	dprintf("Pausing mysample\n");
 	dprintf("setting other sample loop start to %ld\n", other->GetLength()/8 * 1);
@@ -98,14 +105,7 @@ int main()
 	other->SetLoopEnd(other->GetLength()/8 * 2);
 	dprintf("---\n");
 	
-	// check keys
-        while (keys->TestKey(keyA) != pressed)
-        {
-                keys->Jiffie();
-		// mix our buffer if it needs it
-		mixer->DoMix();
-        }
-        keys->Jiffie();
+	Pause(mixer, keys);
 
 	dprintf("Unpausing mysample\n");
 	dprintf("Pausing other sample\n");

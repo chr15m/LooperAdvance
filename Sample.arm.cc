@@ -169,3 +169,35 @@ void Sample::MixDown(s8 *mixBufA, s8 *mixBufB, u16 buffSize, u8 mixshifter)
 		}
 	}
 }
+
+u16 Sample::GetSamples()
+{
+	// the vehicle to transfer our points in the sample stream
+	u8 left = 0;
+	u8 right = 0;
+	
+	// temporary storage variables
+	u32 chunkR = 0;
+	s8 *dataptr = (s8 *)sampledata->data;
+	s8 val = 0;
+	
+	chunkR = (nextchunk += velocity) >> 8;
+	
+	val = dataptr[chunkR] >> volume;
+	
+	left = val >> panshift[0];
+	right = val >> panshift[1];
+	
+	return (left << 8) + right;
+}
+
+void Sample::Rewind(u8 howfar, u16 buffSize)
+{
+	nextchunk -= (velocity * howfar);
+	
+	if (((nextchunk + velocity) >> 8) + buffSize > sampledata->length)
+		nextchunk = 0;
+	
+	if (nextchunk < 0)
+		nextchunk = 0;
+}

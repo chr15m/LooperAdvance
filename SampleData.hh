@@ -1,5 +1,5 @@
-#ifndef __MTYPES_H__
-#define __MTYPES_H__
+#ifndef __SAMPLEDATA_HH__
+#define __SAMPLEDATA_HH__
 
 typedef struct {
 	void*	data;

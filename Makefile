@@ -102,7 +102,7 @@ export LANGUAGE=en
 %.text.iwram.o : %.text.iwram.cc
 	$(CXX) $(CFLAGS) $(CXXFLAGS) -marm -c $< -o $@
 	
-%.o : %.cc
+%.o : %.cc screens.hh splash.hh samples/samples.hh
 	$(CXX) $(CFLAGS) $(CXXFLAGS) -mthumb -c $< -o $@
 
 all: $(TARGET).gba
@@ -114,7 +114,8 @@ $(TARGET).elf: $(RESOURCES) $(TARGET).cc $(TARGET).o $(CRT) $(GAMEOBJECTS) $(LDS
 	$(LD) $(LFLAGS) crt0.o $(TARGET).o $(GAMEOBJECTS) -o $(TARGET).elf $(LIBS)
 
 # audio stuff
-samples/samples.o: samples/samples.hh samples/samples.cc
+samples.o: samples/samples.hh samples/samples.cc
+	make -C samples/
 
 samples/samples.hh samples/samples.cc: samples/Makefile
 	make -C samples/
@@ -125,6 +126,8 @@ splash.hh splash.cc: screens/$(THEME)/*.png
 
 screens.hh screens.cc: screens/$(THEME)/*.png
 	./createscreendata.py -b`cat screens/$(THEME)/transparent` -oscreens -nscreens/$(THEME)/font.png -nscreens/$(THEME)/altfont.png screens/$(THEME)/loop.png screens/$(THEME)/first.png
+
+$(GAMEOBJECTS): screens.hh splash.hh
 
 # clean
 clean:

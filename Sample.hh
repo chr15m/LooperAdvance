@@ -23,6 +23,7 @@
 #include "emudp.h"
 #include "helpers.h"
 #include "SampleData.hh"
+#include "SampleTrader.hh"
 
 class Sample
 {
@@ -46,7 +47,7 @@ public:
 	~Sample();
 
 	void SetData(SampleData *usedata);
-
+	
 	void Play();
 	void Pause();
 	void SetPlaying(bool);
@@ -63,6 +64,13 @@ public:
 	char *GetName() __attribute__ ((section (".iwram")));
 	
 	void MixDown(s8 *mixBufA, s8 *mixBufB, u16 buffSize, u8 mixshifter) __attribute__ ((section (".iwram")));
+	u16 GetSamples() __attribute__ ((section (".iwram")));
+	void Rewind(u8 howfar, u16 buffSize) __attribute__ ((section (".iwram")));
+	
+	inline bool IsPlaying()
+	{
+		return playing;
+	}
 };
 
 typedef struct structSampleList

@@ -20,7 +20,6 @@
 
 #include "Loop.hh"
 #include "First.hh"
-#include "ClarkMix.hh"
 
 #include "splash.hh"
 #include "screens.hh"
@@ -63,9 +62,6 @@ int main()
 	// starting
 	//SetBG(10, 0, 10);
 
-	// set up the krawall interrupt now that this is done
-	//IntrTable[4] = kradInterrupt;
-	
 	Keys *keys = new Keys();
 	
 	// set up a nice screen mode
@@ -118,17 +114,22 @@ int main()
 	REG_BG1HOFS = 0;
 	REG_BG1VOFS = 0;
 	
-	// CST_ROM0_1ST_3WAIT | CST_ROM0_2ND_1WAIT | CST_PREFETCH_ENABLE
-	//REG_WSCNT = ( 5 << 2 ) | ( 1 << 14 );	// set rom-timing
-	
 	ClarkMix *mixer = new ClarkMix();
 	First *firstpage = new First(keys, mixer);
 	Page *selected = firstpage;
 	
+        //CST_ROM0_1ST_3WAIT | CST_ROM0_2ND_1WAIT | CST_PREFETCH_ENABLE
+        REG_WSCNT = ( 5 << 2 ) | ( 1 << 14 );       // set rom-timing
+
 	while (1)
 	{
 		// this is zerosync
 		//SetBG(0, 0, 10);
+		
+		// mix our buffers
+		SetBG(0, 0, 31);
+		mixer->DoMix();
+		SetBG(SCREENS_BG_R, SCREENS_BG_B, SCREENS_BG_G);
 		
 		// figure out all our latest song positions
 		globals.Tick();
@@ -137,22 +138,21 @@ int main()
 		// automatically cascades all pages and processes them
 		firstpage->Process();
 		
-		// mix our buffer if it needs it
-		mixer->DoMix();
-		
-		debug("Loop");
+		//debug("Loop");
 		//SetBG(0, 0, 0);
 		
 		// this is vsync
 		// try and fit the drawing stuff into the off-screen sync
 		while(REG_VCOUNT != 160);
+		// do our interrupt process (swap buffers)
+		SetBG(28, 28, 0);
+		mixer->InterruptProcess();
+		SetBG(SCREENS_BG_R, SCREENS_BG_B, SCREENS_BG_G);
+		
 		//SetBG(10, 0, 0);
 		// do all the display shit in here
 		BlankScreen();
 		selected = selected->Cycle();
 		selected->Draw();
-		
-		// mix our buffer if it needs it
-		mixer->DoMix();
 	}
 }

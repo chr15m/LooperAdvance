@@ -219,7 +219,9 @@ Loop::~Loop()
 	debug("Deleting loop");
 	
 	sample->Pause();
+	debug("Paused");
 	mixer->Forget(sample);
+	debug("Forgotten");
 	delete sample;
 	
 	delete sbOn;
@@ -290,7 +292,8 @@ void *Loop::DelLoopButton(void *data)
 		old = right->right;
 		delete right;
 		right = old;
-		right->left = this;
+		if (right)
+			right->left = this;
 	}
 	
 	return NULL;

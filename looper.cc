@@ -131,12 +131,14 @@ int main()
 		mixer->DoMix();
 		SetBG(SCREENS_BG_R, SCREENS_BG_B, SCREENS_BG_G);
 		
+		SetBG(0, 0, 10);
 		// figure out all our latest song positions
 		globals.Tick();
 		// check keys
 		keys->Jiffie();
 		// automatically cascades all pages and processes them
 		firstpage->Process();
+		SetBG(SCREENS_BG_R, SCREENS_BG_B, SCREENS_BG_G);
 		
 		//debug("Loop");
 		//SetBG(0, 0, 0);
@@ -149,10 +151,11 @@ int main()
 		mixer->InterruptProcess();
 		SetBG(SCREENS_BG_R, SCREENS_BG_B, SCREENS_BG_G);
 		
-		//SetBG(10, 0, 0);
+		SetBG(10, 0, 0);
 		// do all the display shit in here
 		BlankScreen();
 		selected = selected->Cycle();
 		selected->Draw();
+		SetBG(SCREENS_BG_R, SCREENS_BG_B, SCREENS_BG_G);
 	}
 }

@@ -146,8 +146,7 @@ char *Sample::GetName()
 
 void Sample::MixDown(s8 *mixBufA, s8 *mixBufB, u16 buffSize, u8 mixshifter)
 {
-	if (((nextchunk + velocity) >> 8) + buffSize > sampledata->length)
-		nextchunk = 0;
+	dprintf("Starting mix on %s at %ld.\n", sampledata->name, nextchunk);
 	
 	if (playing)
 	{

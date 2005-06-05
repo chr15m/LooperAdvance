@@ -358,6 +358,7 @@ void ClarkMix::Forget(Sample *which)
 		{
 			samplelist = traverse->next;
 			delete traverse;
+			traverse = NULL;
 			numberOfSamples--;
 		}
 		// if it's the next on in line, pop it out
@@ -371,6 +372,9 @@ void ClarkMix::Forget(Sample *which)
 				last = traverse;
 			numberOfSamples--;
 		}
-		traverse = traverse->next;
+		if (traverse)
+			traverse = traverse->next;
+		else
+			traverse = samplelist;
 	}
 }

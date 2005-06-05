@@ -299,11 +299,12 @@ void *First::DelLoopButton(void *data)
 		// delete the current loop in currentsong
 		globals.SetLoop(((Loop *)right)->GetAddress());
 		globals.DelLoop();
-
+		
 		old = right->right;
 		delete right;
 		right = old;
-		right->left = this;
+		if (right)
+			right->left = this;
 	}
 	
 	return NULL;

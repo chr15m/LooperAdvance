@@ -105,14 +105,22 @@ void Sample::SetLoopEnd(u32 end)
 // set the panning position of this sample
 void Sample::SetPanning(s8 pan)
 {
+	// make sure we don't shift it smaller than zero
+	if (pan < -8)
+		pan = -8;
+	else if (pan > 8)
+		pan = 8;
+	
 	// figure out our pan shifting
 	panshift[0] = 0;
 	panshift[1] = 0;
-	/*if (pan < 0)
-		panshift[0] = - pan + 2;
+	
+	// check which way we're panning, and attenuate that ear accordingly
+	if (pan < 0)
+		panshift[0] = - pan;
 	else if (pan > 0)
-		panshift[1] = pan + 2;
-	*/
+		panshift[1] = pan;
+	
 	debug("Set panning to l=%d r=%d", panshift[0], panshift[1]);
 }
 
@@ -144,7 +152,7 @@ char *Sample::GetName()
 	return sampledata->name;
 }
 
-void Sample::MixDown(s8 *mixBufA, s8 *mixBufB, u16 buffSize, u8 mixshifter)
+void Sample::MixDown(s8 *mixBufA, s8 *mixBufB, u16 buffSize)
 {
 	dprintf("Starting mix on %s at %ld.\n", sampledata->name, nextchunk);
 	
@@ -162,7 +170,7 @@ void Sample::MixDown(s8 *mixBufA, s8 *mixBufB, u16 buffSize, u8 mixshifter)
 			chunkR = (nextchunk += velocity) >> 8;
 			
 			// fill up our buffers byte by byte
-			val = dataptr[chunkR] >> volume >> mixshifter;
+			val = dataptr[chunkR] >> volume;
 			mixBufA[b] += val >> panshift[0];
 			mixBufB[b] += val >> panshift[1];
 		}
@@ -174,7 +182,7 @@ void Sample::MixDown(s8 *mixBufA, s8 *mixBufB, u16 buffSize, u8 mixshifter)
   */
 void Sample::Rewind(u16 buffSize)
 {
-	if (((nextchunk + velocity) >> 8) + buffSize > sampledata->length)
+	if (((nextchunk + velocity) >> 8) > sampledata->length)
 	{
 		nextchunk -= (sampledata->length << 8);
 		dprintf("Rewound! *****************************************************\n");

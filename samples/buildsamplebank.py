@@ -18,6 +18,11 @@
 
 import sys, string
 
+# This must match the audio buffer size
+# we extend each sample by copying this many bytes off the start and onto the end
+# so that loops don't click and buffer overruns don't happen
+BUFFERSIZE = 304
+
 # check they're using correctly
 if (len(sys.argv) > 1):
 	# how many samples are we dealing with?
@@ -76,14 +81,14 @@ if (len(sys.argv) > 1):
 			binfile.close()
 			
 			# create entries in the .cc and .hh data file for this particular sample
-			htext.append('extern const s8 ' + shortname + "[" + str(filesize) + "];")
-			ctext.append('const s8 ' + shortname + "[" + str(filesize) + "] = {")
+			htext.append('extern const s8 ' + shortname + "[" + str(filesize + BUFFERSIZE) + "];")
+			ctext.append('const s8 ' + shortname + "[" + str(filesize + BUFFERSIZE) + "] = {")
 			
 			# now loop through all of our data writing it to the .cc file
 			datachunks = []
-			for seek in range(len(adata)):
+			for seek in range(len(adata) + BUFFERSIZE):
 				# datachunks.append("0x%02x" % adata[seek])
-				datachunks.append("0x%02x" % adata[seek])
+				datachunks.append("0x%02x" % adata[seek % len(adata)])
 				# put a carriage return to make the file neater
 				if ((seek + 1) % 32 == 0):
 					ctext.append(string.join(datachunks, ", ") + ", ")
@@ -114,3 +119,4 @@ if (len(sys.argv) > 1):
 	hfile.close()
 else:
 	print sys.argv[0] + " file1.raw [file2.raw file3.raw ...]"
+

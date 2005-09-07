@@ -63,7 +63,7 @@ public:
 	u32 GetLength() __attribute__ ((section (".iwram")));
 	char *GetName() __attribute__ ((section (".iwram")));
 	
-	void MixDown(s8 *mixBufA, s8 *mixBufB, u16 buffSize, u8 mixshifter) __attribute__ ((section (".iwram")));
+	void MixDown(s8 *mixBufA, s8 *mixBufB, u16 buffSize) __attribute__ ((section (".iwram")));
 	void Rewind(u16 buffSize) __attribute__ ((section (".iwram")));
 	
 	inline bool IsPlaying()

@@ -184,7 +184,7 @@ void ClarkMix::DoMix()
 		while (traverse)
 		{
 			// debugloop("Mixing sample: %s\n", traverse->sample->GetName());
-			traverse->sample->MixDown(myBufA, myBufB, BUFFER_SIZE, Audio::mixDownSizes[numberOfPlayingSamples - 1]);
+			traverse->sample->MixDown(myBufA, myBufB, BUFFER_SIZE);
 			traverse = traverse->next;
 		}
 		

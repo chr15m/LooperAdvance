@@ -67,7 +67,7 @@ private:
 	s8 fifoAbuf1[BUFFER_SIZE];
 	s8 fifoBbuf0[BUFFER_SIZE];
 	s8 fifoBbuf1[BUFFER_SIZE];
-	
+
 	s8* curBufA;
 	s8* curBufB;
 	s8* mixBufA;

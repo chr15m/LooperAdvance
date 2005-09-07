@@ -31,9 +31,9 @@
 #define __CLARKMIX_HH__
 
 // this is how big our two buffers are - while one is playing the other is filling
-#define BUFFER_SIZE 280
+#define BUFFER_SIZE 304
 // this is how much overlap we want to allow for incase the fill buffer is called late or early or something
-#define BUFFER_OVERLAP 10
+// #define BUFFER_OVERLAP 10
 // this is where we start the new buffer from (duplicate some)
 
 
@@ -41,8 +41,8 @@
 // python: hex(pow(2,16) - pow(2,24) / freq)
 
 // freq = pow(2, 14) = 16384 Hz
-#define PLAYER_FREQ 0xFC00
-#define PLAYER_ACTUAL_FREQ 16384
+#define PLAYER_FREQ 0xFC64 // 64612
+#define PLAYER_ACTUAL_FREQ 18157
 
 // 16kHz:
 // #define PLAYER_FREQ 0xFBFF
@@ -74,9 +74,7 @@ private:
 	s8* mixBufB;
 	
 	bool mix;
-	bool DoRunInterrupt;
 	u16 bufferSwitch;
-	u16 upTo;
 	
 	// a pointer to a linked list of all the samples we're currently playing
 	structSampleList *samplelist;
@@ -93,16 +91,17 @@ public:
 	// this does the actual work of mixing fresh buffers full
 	void DoMix(void) __attribute__ ((section (".iwram")));
 	void InterruptProcess(void) __attribute__ ((section (".iwram")));
-
+	
 	void Manage(Sample* newsample) __attribute__ ((section (".iwram")));
 	void Forget(Sample* which) __attribute__ ((section (".iwram")));
 };
 
 namespace Audio
 {
-        extern void AudioCallBack() __attribute__ ((section (".iwram")));
-        extern ClarkMix *ClarkMixPtr;
+	extern void AudioCallBack() __attribute__ ((section (".iwram")));
+	extern ClarkMix *ClarkMixPtr;
 	extern u8 mixDownSizes[32];
 };
 
 #endif
+

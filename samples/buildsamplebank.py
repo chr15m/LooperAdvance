@@ -82,6 +82,7 @@ if (len(sys.argv) > 1):
 			# now loop through all of our data writing it to the .cc file
 			datachunks = []
 			for seek in range(len(adata)):
+				# datachunks.append("0x%02x" % adata[seek])
 				datachunks.append("0x%02x" % adata[seek])
 				# put a carriage return to make the file neater
 				if ((seek + 1) % 32 == 0):

@@ -1,10 +1,10 @@
 - = not done yet
 + = task completed
 
-Looper Advance Live (1.0):
---------------------------
+Looper Advance
+--------------
 
-* RELEASE *
+- fix horrible sounding mixing routines
 
 - interface changes:
 	- b button = browse notes (Jordan)
@@ -15,6 +15,7 @@ Looper Advance Live (1.0):
 	- allow for different volumes (Evans)
 	- allow for different pans (Christer)
 	- selecting a pitch - a keyboard appears (Crispin)
+	- make pitch selection up and down buttons go up and down by octave (multiply by 2)
 
 - implement nanoloop/lsdj/midi sync code
 

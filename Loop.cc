@@ -548,7 +548,7 @@ void Loop::DoProcess()
 	}
 	
 	// output our beat. Yeh!
-	sprintf(beatNumberText, "%3d", beat % 256);
+	sprintf(beatNumberText, "%3d", (beat % 256) + 1);
 	
 	debugloop("Beat: %d", beat);
 }

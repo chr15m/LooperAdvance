@@ -27,4 +27,4 @@ samples.cc samples.hh : $(RAWS) buildsamplebank.py
 clean:
 	rm -rf *.raw
 	rm -rf samples.cc samples.hh samples.o
-	
+

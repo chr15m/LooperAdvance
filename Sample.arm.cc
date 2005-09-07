@@ -108,11 +108,11 @@ void Sample::SetPanning(s8 pan)
 	// figure out our pan shifting
 	panshift[0] = 0;
 	panshift[1] = 0;
-	if (pan < 0)
+	/*if (pan < 0)
 		panshift[0] = - pan + 2;
 	else if (pan > 0)
 		panshift[1] = pan + 2;
-	
+	*/
 	debug("Set panning to l=%d r=%d", panshift[0], panshift[1]);
 }
 
@@ -169,34 +169,15 @@ void Sample::MixDown(s8 *mixBufA, s8 *mixBufB, u16 buffSize, u8 mixshifter)
 	}
 }
 
-u16 Sample::GetSamples()
+/**
+  *	Check if we've overrun our sample size and rewind us by the length of the sample if we have.
+  */
+void Sample::Rewind(u16 buffSize)
 {
-	// the vehicle to transfer our points in the sample stream
-	u8 left = 0;
-	u8 right = 0;
-	
-	// temporary storage variables
-	u32 chunkR = 0;
-	s8 *dataptr = (s8 *)sampledata->data;
-	s8 val = 0;
-	
-	chunkR = (nextchunk += velocity) >> 8;
-	
-	val = dataptr[chunkR] >> volume;
-	
-	left = val >> panshift[0];
-	right = val >> panshift[1];
-	
-	return (left << 8) + right;
+	if (((nextchunk + velocity) >> 8) + buffSize > sampledata->length)
+	{
+		nextchunk -= (sampledata->length << 8);
+		dprintf("Rewound! *****************************************************\n");
+	}
 }
 
-void Sample::Rewind(u8 howfar, u16 buffSize)
-{
-	nextchunk -= (velocity * howfar);
-	
-	if (((nextchunk + velocity) >> 8) + buffSize > sampledata->length)
-		nextchunk = 0;
-	
-	if (nextchunk < 0)
-		nextchunk = 0;
-}

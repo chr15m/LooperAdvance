@@ -39,13 +39,13 @@ void (*IntrTable[])() =
 void Pause(ClarkMix *mixer, Keys *keys)
 {
 	// check keys
-        while (keys->TestKey(keyA) != pressed)
+	while (keys->TestKey(keyA) != pressed)
 	{
 		// wait for zero sync
 		while(REG_VCOUNT != 0);
 		
 		SetBG(31, 0, 0);
-                keys->Jiffie();
+		keys->Jiffie();
 		
 		// mix our buffers
 		SetBG(0, 0, 31);
@@ -60,7 +60,7 @@ void Pause(ClarkMix *mixer, Keys *keys)
 		mixer->InterruptProcess();
 		SetBG(SCREENS_BG_R, SCREENS_BG_B, SCREENS_BG_G);
 	}
-        keys->Jiffie();
+	keys->Jiffie();
 }
 
 // This is a test of the clarkinou mixing system
@@ -78,14 +78,14 @@ int main()
 	mixer->Manage(mysample);
 	
 	Pause(mixer, keys);
-
+	
 	dprintf("Turning off volume of mysample\n");
 	// try volume tests
 	mysample->SetVolume(0);
 	dprintf("---\n");
 	
 	Pause(mixer, keys);
-
+	
 	dprintf("Turning on volume of mysample to half\n");
 	dprintf("Setting Panning of samples to opposite ends\n");
 	// try volume tests
@@ -93,9 +93,9 @@ int main()
 	mysample->SetPanning(8);
 	other->SetPanning(-8);
 	dprintf("---\n");
-
+	
 	Pause(mixer, keys);
-
+	
 	dprintf("Pausing mysample\n");
 	dprintf("setting other sample loop start to %ld\n", other->GetLength()/8 * 1);
 	dprintf("setting other sample loop end to %ld\n", other->GetLength()/8 * 2);

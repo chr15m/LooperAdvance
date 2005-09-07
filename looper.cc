@@ -70,12 +70,13 @@ int main()
 	REG_IME |= ( 1 << 13 ); 	// cart-remove-interrupt (handled by crt0)
 	REG_IE |= BIT00;
 	
+	// set our background layers and their priorities
 	REG_BG0CNT = BIT07 | BIT10 | BIT11 | BIT12;
 	REG_BG1CNT = BIT07 | BIT08 | BIT10 | BIT11 | BIT12;
 	REG_BG2CNT = BIT07 | BIT09 | BIT10 | BIT11 | BIT12;
 	REG_BG3CNT = BIT07 | BIT08 | BIT09 | BIT10 | BIT11 | BIT12;
 	
-	// initialise video memory
+	// initialise video memory with zeros
 	bzero((char *)VideoBuffer, 0x8000);
 	
 	// make it white for the splash
@@ -98,7 +99,7 @@ int main()
 	BlankScreen(BG1);
 	BlankScreen(BG2);
 	BlankScreen(BG3);
-
+	
 	debug("Setting Background Colour to %d,%d,%d\n", SCREENS_BG_R, SCREENS_BG_B, SCREENS_BG_G);
 	SetBG(SCREENS_BG_R, SCREENS_BG_B, SCREENS_BG_G);
 	
@@ -119,7 +120,7 @@ int main()
 	Page *selected = firstpage;
 	
         //CST_ROM0_1ST_3WAIT | CST_ROM0_2ND_1WAIT | CST_PREFETCH_ENABLE
-        REG_WSCNT = ( 5 << 2 ) | ( 1 << 14 );       // set rom-timing
+        // REG_WSCNT = ( 5 << 2 ) | ( 1 << 14 );       // set rom-timing
 
 	while (1)
 	{

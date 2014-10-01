@@ -2,8 +2,8 @@
 
 // Represents a single loop-page
 
-#include "First.hh"
-#include "songdata.hh"
+#include "First.h"
+#include "songdata.h"
 
 First::First(Keys *inkeys)
 {

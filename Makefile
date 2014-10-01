@@ -1,89 +1,142 @@
-#!/usr/bin/make -f
-
-TARGET = looper.gba
-ELF    = looper.elf
-
-SRCS	= $(shell ls *.c)
-CXXSRCS = $(shell ls *.cc)
-ASM	= $(shell ls *.s)
-OBJS	= $(SRCS:.c=.o) $(CXXSRCS:.cc=.o) $(ASM:.s=.o) 
-GAMEOBJECTS = crt0.o main.o Keys.o Page.o First.o Loop.o Widget.o SelectBox.o NumberBox.o instruments.o samples.o krawall.lib charset.o songdata.o samplenames.o
-
-ifdef RELEASE
-	#release build
-	CFLAGS 	= -O -Wall -ffreestanding -fomit-frame-pointer -funroll-loops -mcpu=arm7tdmi  $(INCLUDE) -DRAN_SEED=322187 -D_FIXED_NO_FLOATINGPOINT_ -D_VECTOR_NO_FLOATINGPOINT_ -DNO_DPRINT -DNO_COLOUR_PROFILING -DINTERWORK ${GNUDEBUG} -mthumb-interwork -msoft-float -mno-long-calls -DFIXED_USE_BIOS_DIVIDE ${MMFLAGS}
-	CXXFLAGS = -fno-rtti -fno-exceptions
-else
-	# debug build
-	CFLAGS 	= -Wall -O -ffreestanding -fomit-frame-pointer -funroll-loops -mcpu=arm7tdmi  $(INCLUDE) -DRAN_SEED=322187 -DUSE_VGBA -mthumb-interwork -msoft-float -mno-long-calls -DUSE_VBA -DINTERWORK -DFIXED_USE_BIOS_DIVIDE ${GNUDEBUG} ${BMDEBUG} ${TMDEBUG} ${SEDEBUG} ${WORLDDEBUG} ${OBJECTDEBUG} ${MMFLAGS}
-	CXXFLAGS = -fno-rtti
+#---------------------------------------------------------------------------------
+# Clear the implicit built in rules
+#---------------------------------------------------------------------------------
+.SUFFIXES:
+#---------------------------------------------------------------------------------
+ifeq ($(strip $(DEVKITARM)),)
+$(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM)
 endif
+include $(DEVKITARM)/gba_rules
 
-ARCHIVE=$(shell echo `basename ${PWD}``date '+%Y%m%d'`)
-DOC= doc/
+#---------------------------------------------------------------------------------
+# TARGET is the name of the output, if this ends with _mb generates a multiboot image
+# BUILD is the directory where object files & intermediate files will be placed
+# SOURCES is a list of directories containing source code
+# INCLUDES is a list of directories containing extra header files
+#---------------------------------------------------------------------------------
+TARGET		:=	LooperAdvance
+BUILD		:=	build
+SOURCES		:=	.
+INCLUDES	:=	./krawall/build/krawall/include
 
-export HPATH = ./
-export LANGUAGE=en
+#---------------------------------------------------------------------------------
+# options for code generation
+#---------------------------------------------------------------------------------
+ARCH	:=	-mthumb -mthumb-interwork
 
-include Makefile.inc
+CFLAGS	:=	-g -Wall -O3\
+			-mcpu=arm7tdmi -mtune=arm7tdmi\
+ 			-fomit-frame-pointer\
+			-ffast-math \
+			$(ARCH)
 
-# default stuff
+CFLAGS	+=	$(INCLUDE)
 
-%.text.iwram.o : %.text.iwram.c
-	$(CC) $(CFLAGS) -marm -c $< -o $@
+ASFLAGS	:=	$(ARCH)
+LDFLAGS	=	-g $(ARCH) -Wl,-Map,$(notdir $@).map
 
-%.o : %.c samples.h 
-	$(CC) $(CFLAGS) -mthumb -c $< -o $@
+#---------------------------------------------------------------------------------
+# path to tools - this can be deleted if you set the path in windows
+#---------------------------------------------------------------------------------
+export PATH		:=	$(DEVKITARM)/bin:$(PATH)
 
-%.o : %.s samples.h
-	$(AS) $< -o $@
+#---------------------------------------------------------------------------------
+# any extra libraries we wish to link with the project
+#---------------------------------------------------------------------------------
+LIBS	:=	-lgba $(CURDIR)/../krawall/build/krawall/lib/libkrawall.a $(CURDIR)/../krawall/build/krawall/src/krawall-cross-gba-build/examples/modules/libmodules.a
 
-%.text.iwram.o : %.text.iwram.cc
-	$(CXX) $(CFLAGS) $(CXXFLAGS) -marm -c $< -o $@
-	
-%.o : %.cc samples.h
-	$(CXX) $(CFLAGS) $(CXXFLAGS) -mthumb -c $< -o $@
+#---------------------------------------------------------------------------------
+# list of directories containing libraries, this must be the top level containing
+# include and lib
+#---------------------------------------------------------------------------------
+LIBDIRS	:=	$(LIBGBA) 
 
-all: $(TARGET)
+#---------------------------------------------------------------------------------
+# no real need to edit anything past this point unless you need to add additional
+# rules for different file extensions
+#---------------------------------------------------------------------------------
+ifneq ($(BUILD),$(notdir $(CURDIR)))
+#---------------------------------------------------------------------------------
 
-# main game stuff
+export OUTPUT	:=	$(CURDIR)/$(TARGET)
 
-$(TARGET): $(ELF)
-	$(OBJCOPY) -O binary $(ELF) $(TARGET)
+export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir))
+export PATH	:=	$(DEVKITARM)/bin:$(PATH)
+export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
-$(ELF): $(RESOURCES) main.cc $(GAMEOBJECTS) $(CRT) $(LDSCRIPT) Makefile
-	$(LD) $(LFLAGS) $(GAMEOBJECTS) -o $(ELF) $(LIBS)
+#---------------------------------------------------------------------------------
+# automatically build a list of object files for our project
+#---------------------------------------------------------------------------------
+CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
+CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
+SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
+BINFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.bin)))
 
-# audio stuff
+#---------------------------------------------------------------------------------
+# use CXX for linking C++ projects, CC for standard C
+#---------------------------------------------------------------------------------
+ifeq ($(strip $(CPPFILES)),)
+#---------------------------------------------------------------------------------
+	export LD	:=	$(CC)
+#---------------------------------------------------------------------------------
+else
+#---------------------------------------------------------------------------------
+	export LD	:=	$(CXX)
+#---------------------------------------------------------------------------------
+endif
+#---------------------------------------------------------------------------------
 
-samplenames.cc modules.h samples.h instruments.h samples.s instruments.s: samples.xm
-	../krawall/converter/converter.linux samples.xm
+export OFILES	:= $(BINFILES:.bin=.o) $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
+
+
+#---------------------------------------------------------------------------------
+# build a list of include paths
+#---------------------------------------------------------------------------------
+export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
+					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
+					-I$(CURDIR)/$(BUILD)
+
+#---------------------------------------------------------------------------------
+# build a list of library paths
+#---------------------------------------------------------------------------------
+export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
+
+.PHONY: $(BUILD) clean
+
+#---------------------------------------------------------------------------------
+$(BUILD): samples.h
+	@[ -d $@ ] || mkdir -p $@
+	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+
+#---------------------------------------------------------------------------------
+clean:
+	@echo clean ...
+	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).gba
+	@rm samplenames.cpp samplenames.h samples.S  samples.h instruments.S instruments.h modules.h
+
+#---------------------------------------------------------------------------------
+samplenames.cpp modules.h samples.h instruments.h samples.s instruments.S: samples.xm ./krawall/build/krawerter/krawerter
+	./krawall/build/krawerter/krawerter samples.xm
 	./samplenames.py
 
-krawall.lib: ../krawall/gcclib/krawall-32k-60-medium-sf.lib
-	ln -s ../krawall/gcclib/krawall-32k-60-medium-sf.lib krawall.lib
+#---------------------------------------------------------------------------------
+else
 
-samples.xm: ../samples.xm
-	ln -s ../samples.xm
+DEPENDS	:=	$(OFILES:.o=.d)
 
-clean:
-	rm -f *.elf *.gba *~ *.log *.bak *.o
-	rm -f `find -name \*.o -print -or -name \*~ -print`  
-	rm -f .depend .hdepend .sdepend
-	@touch `find`
+#---------------------------------------------------------------------------------
+# main targets
+#---------------------------------------------------------------------------------
+$(OUTPUT).gba	:	$(OUTPUT).elf
 
-#build dependencies
-dep: depend
-.hdepend: depend
-.sdepend: depend
-depend: $(MKDEP)
-	@echo Build sources\(c,c++\) dependencies...
-	-$(CC) -MM *.cc >.sdepend
+$(OUTPUT).elf	:	$(OFILES) $(LIBGBA)/lib/libgba.a $(CURDIR)/../krawall/build/krawall/lib/libkrawall.a $(CURDIR)/../krawall/build/krawall/src/krawall-cross-gba-build/examples/modules/libmodules.a
 
-run: $(TARGET)
-	@$(EMULATOR) $(TARGET)
+%.o	:	%.bin
+	@echo	$(notdir $<)
+	@$(bin2o)
 
-###
--include .depend
--include .sdepend
--include .hdepend
+-include $(DEPENDS)
+
+#---------------------------------------------------------------------------------
+endif
+#---------------------------------------------------------------------------------

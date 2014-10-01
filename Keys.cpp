@@ -1,7 +1,7 @@
 
 // Description: This class handles keys
 
-#include "Keys.hh"
+#include "Keys.h"
 
 Keys::Keys()
 {

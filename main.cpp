@@ -2,11 +2,11 @@
 #include "samples.h"
 #include "instruments.h"
 
-#include "looper.hh"
-#include "charset.hh"
+#include "looper.h"
+#include "charset.h"
 
-#include "Loop.hh"
-#include "First.hh"
+#include "Loop.h"
+#include "First.h"
 
 // IntrTable for crt0
 void (*IntrTable[])() = {

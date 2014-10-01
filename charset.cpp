@@ -1,6 +1,6 @@
 #include "gba.h"
 #include "typedefs.h"
-#include "charset.hh"
+#include "charset.h"
 
 namespace font
 {

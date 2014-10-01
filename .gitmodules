@@ -1,0 +1,3 @@
+[submodule "krawall"]
+	path = krawall
+	url = https://github.com/sebknzl/krawall.git

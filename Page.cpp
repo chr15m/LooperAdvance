@@ -2,7 +2,7 @@
 
 // Represents a single loop-page
 
-#include "Page.hh"
+#include "Page.h"
 
 Page::Page()
 {

@@ -2,13 +2,13 @@
 
 // Represents a single loop-page
 
-#include "looper.hh"
-#include "charset.hh"
-#include "Page.hh"
-#include "Loop.hh"
-#include "NumberBox.hh"
-#include "SelectBox.hh"
-#include "songdata.hh"
+#include "looper.h"
+#include "charset.h"
+#include "Page.h"
+#include "Loop.h"
+#include "NumberBox.h"
+#include "SelectBox.h"
+#include "songdata.h"
 
 class First : public Page
 {

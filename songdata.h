@@ -5,7 +5,7 @@
 #ifndef _SONGDATA_HH_
 #define _SONGDATA_HH_
 
-#include "looper.hh"
+#include "looper.h"
 #include "samples.h"
 
 #define NUMSONGS 7

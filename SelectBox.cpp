@@ -1,4 +1,4 @@
-#include "SelectBox.hh"
+#include "SelectBox.h"
 
 SelectBox::SelectBox(u16 ix, u16 iy, u16 iwidth, Widget *inext, Keys *inkeys): Widget (ix, iy, inext, inkeys)
 {

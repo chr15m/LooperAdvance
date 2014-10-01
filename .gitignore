@@ -1,0 +1,8 @@
+.*.swp
+*.o
+.sdepend
+depend
+modules.*
+samples.*
+samplenames.*
+instruments.*

@@ -1,6 +1,6 @@
-#include "looper.hh"
-#include "charset.hh"
-#include "Keys.hh"
+#include "looper.h"
+#include "charset.h"
+#include "Keys.h"
 
 #ifndef _WIDGET_HH_
 #define _WIDGET_HH_
@@ -24,8 +24,8 @@ public:
 	
 	void SetTransitions(Widget *newL, Widget *newR, Widget *newU, Widget *newD);
 	void Select();
-	virtual void Draw()=NULL;
-	virtual Widget *Process()=NULL;
+	virtual void Draw()=0;
+	virtual Widget *Process()=0;
 };
 
 #endif

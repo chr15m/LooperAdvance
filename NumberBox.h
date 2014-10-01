@@ -1,5 +1,5 @@
-#include "looper.hh"
-#include "Widget.hh"
+#include "looper.h"
+#include "Widget.h"
 
 #ifndef _NUMBERBOX_HH_
 #define _NUMBERBOX_HH_

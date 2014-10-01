@@ -1,5 +1,5 @@
-#include "looper.hh"
-#include "Widget.hh"
+#include "looper.h"
+#include "Widget.h"
 #include "string.h"
 
 #ifndef _SELECTBOX_HH_

@@ -1,4 +1,4 @@
-#include "Widget.hh"
+#include "Widget.h"
 
 Widget::Widget(u16 ix, u16 iy, Widget *inext, Keys *inkeys)
 {

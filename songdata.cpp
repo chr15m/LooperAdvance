@@ -2,7 +2,8 @@
 
 // Represents a single loop-page
 
-#include "songdata.hh"
+#include "songdata.h"
+#include "samples.h"
 
 namespace songs
 {
@@ -13,10 +14,10 @@ namespace songs
 			245,
 			"space ghost",
 			{
-				{SAMPLE_SG_VOX, false, 995, 16},
-				{SAMPLE_SG_CHUNK2, true, 510, 8},
-				{SAMPLE_SG_CHUNKS, true, 510, 8},
-				{SAMPLE_SG_SQBASS, false, 995, 16}
+				{SAMPLE_SPCGST, false, 995, 16},
+				{SAMPLE_CHUNKS, true, 510, 8},
+				{SAMPLE_CHUNKS, true, 510, 8},
+				{SAMPLE_SQBASS, false, 995, 16}
 			}
 		},
 		
@@ -52,7 +53,7 @@ namespace songs
 				{SAMPLE_180_606, false, 812, 8},
 				{SAMPLE_180_PHAT, true, 994, 16},
 				{SAMPLE_180_DNB, true, 948, 4},
-				{SAMPLE_180_SNARE, false, 1000, 2}
+				{SAMPLE_SNAPSNARE, false, 1000, 2}
 			}
 		},
 
@@ -74,9 +75,9 @@ namespace songs
 			"temp psych",
 			{
 				{SAMPLE_PSY_BASS, false, 420, 12},
-				{SAMPLE_SG_CHUNKS, true, 440, 7},
+				{SAMPLE_CHUNKS, true, 440, 7},
 				{SAMPLE_PSY_BLOOP, false, 560, 4},
-				{SAMPLE_PSY_COOP, false, 502, 24}
+				{NULL, false, 0, 0}
 			}
 		},
 		

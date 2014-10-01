@@ -13,7 +13,7 @@ for line in fileinput.input("samples.h"):
 		print "adding " + matches[0] + " at position " + str(numsamples)
 		codestring += '"' + matches[0] + '",' + "\n"
 		numsamples += 1
-ctext += "#include \"samplenames.hh\"\n\n"		
+ctext += "#include \"samplenames.h\"\n\n"		
 ctext += "const char *samplenames[NUMSAMPLES] = \n"
 ctext += "{\n"
 ctext += codestring + "};\n"
@@ -21,8 +21,8 @@ ctext += codestring + "};\n"
 htext += "#define NUMSAMPLES " + str(numsamples) + "\n"
 htext += "extern const char *samplenames[NUMSAMPLES];\n"
 
-cfile=open("samplenames.cc", "w")
-hfile=open("samplenames.hh", "w")
+cfile=open("samplenames.cpp", "w")
+hfile=open("samplenames.h", "w")
 
 # load in and write a header for each file
 cfile.write(ctext)

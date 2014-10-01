@@ -2,14 +2,15 @@
 
 // Represents a single loop-page
 
-#include "looper.hh"
-#include "charset.hh"
-#include "Page.hh"
-#include "NumberBox.hh"
-#include "SelectBox.hh"
+#include "looper.h"
+#include "charset.h"
+#include "Page.h"
+#include "NumberBox.h"
+#include "SelectBox.h"
 #include "samples.h"
-#include "samplenames.hh"
+#include "samplenames.h"
 #include "krawall.h"
+#include "krawall-override.h"
 
 #ifndef _LOOP_HH_
 #define _LOOP_HH_

@@ -1,8 +1,8 @@
 // This file is part of the looping program for GBA which Chrism&Fenris use in their live show
 
 // Represents a single loop-page
-#include "looper.hh"
-#include "Keys.hh"
+#include "looper.h"
+#include "Keys.h"
 
 #ifndef _PAGE_HH_
 #define _PAGE_HH_
@@ -37,6 +37,8 @@ public:
 		if (keys->TestKey(keyR) == pressed)
 			if (right)
 				return right;
+		
+		return NULL;
 	}
 	
 	//! this does a bunch of default stuff on the page

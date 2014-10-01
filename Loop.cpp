@@ -2,12 +2,14 @@
 
 // Represents a single loop-page
 
-#include "Loop.hh"
+#include "Loop.h"
+
+const SampleOverride* const *samplesall = (const SampleOverride* const*)samples;
 
 Loop::Loop(Keys *inkeys)
 {
 	u16 i;
-	dprint("Loop() init\n");
+	dprintf("Loop() init\n");
 	UseKeys(inkeys);
 	
 	sample=0;
@@ -135,7 +137,7 @@ void Loop::ResetLoopPitch()
 
 u32 Loop::GetSize()
 {
-	return (u32)samples[sample]->end - (u32)samples[sample]->data;
+	return (u32)samplesall[sample]->end - (u32)samplesall[sample]->data;
 }
 
 void Loop::SetParameters(u16 newsample, bool newpan, u32 newpitch, u16 newbeats)

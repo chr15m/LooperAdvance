@@ -1,6 +1,6 @@
 // Description: This class handles key presses
 
-#include "looper.hh"
+#include "looper.h"
 
 #ifndef _KEYS_HH_
 #define _KEYS_HH_
@@ -21,7 +21,7 @@ public:
 	Keys();
 
 	//! detect any changes to key states etc
-	inline void Keys::Jiffie()
+	inline void Jiffie()
 	{
 		u16 i=NUM_KEY_STATES;
 		// dprint("KeyManager: Jiffie()\n");
@@ -40,7 +40,7 @@ public:
 	}
 	
 	//! test if an individual key has changed state
-	inline KeyState Keys::TestKey(u16 key)
+	inline KeyState TestKey(u16 key)
 	{
 		// dprint("KeyManager: TestKey()\n");
 		if (currentstate[key] == oldstate[key])
@@ -50,7 +50,7 @@ public:
 	}
 	
 	//! test if a key is currently down
-	inline bool Keys::IsPressed(u16 key)
+	inline bool IsPressed(u16 key)
 	{
 		// dprint("KeyManager: IsPressed()\n");
 		return !(REG_JP & keymap[key]);

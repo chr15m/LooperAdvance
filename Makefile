@@ -43,7 +43,7 @@ export PATH		:=	$(DEVKITARM)/bin:$(PATH)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:=	-lgba $(CURDIR)/../krawall/build/krawall/lib/libkrawall.a $(CURDIR)/../krawall/build/krawall/src/krawall-cross-gba-build/examples/modules/libmodules.a
+LIBS	:=	-lgba $(CURDIR)/../krawall/build/krawall/src/krawall-cross-gba-build/lib/libkrawall.a $(CURDIR)/../krawall/build/krawall/src/krawall-cross-gba-build/examples/modules/libmodules.a
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -86,7 +86,7 @@ else
 endif
 #---------------------------------------------------------------------------------
 
-export OFILES	:= $(BINFILES:.bin=.o) $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
+export OFILES	:= $(BINFILES:.bin=.o) $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o) samplenames.o
 
 
 #---------------------------------------------------------------------------------
@@ -129,7 +129,7 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 $(OUTPUT).gba	:	$(OUTPUT).elf
 
-$(OUTPUT).elf	:	$(OFILES) $(LIBGBA)/lib/libgba.a $(CURDIR)/../krawall/build/krawall/lib/libkrawall.a $(CURDIR)/../krawall/build/krawall/src/krawall-cross-gba-build/examples/modules/libmodules.a
+$(OUTPUT).elf	:	$(OFILES) $(LIBGBA)/lib/libgba.a $(CURDIR)/../krawall/build/krawall/src/krawall-cross-gba-build/lib/libkrawall.a $(CURDIR)/../krawall/build/krawall/src/krawall-cross-gba-build/examples/modules/libmodules.a
 
 %.o	:	%.bin
 	@echo	$(notdir $<)

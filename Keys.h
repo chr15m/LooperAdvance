@@ -1,3 +1,18 @@
+/*****************************************************
+
+	looper advance
+	(c) chris mccormick, 2004
+	
+	licensed under the terms of the GPL
+	see the file gpl.txt for details
+	
+	chris@mccormick.cx
+	http://looper.mccormick.cx/
+	
+	$Id: Keys.hh,v 1.3 2004/04/08 06:09:42 chrism Exp $
+
+******************************************************/
+
 // Description: This class handles key presses
 
 #include "looper.h"
@@ -24,8 +39,7 @@ public:
 	inline void Jiffie()
 	{
 		u16 i=NUM_KEY_STATES;
-		// dprint("KeyManager: Jiffie()\n");
-				
+		
 		while(i)
 		{
 			i--;
@@ -42,7 +56,6 @@ public:
 	//! test if an individual key has changed state
 	inline KeyState TestKey(u16 key)
 	{
-		// dprint("KeyManager: TestKey()\n");
 		if (currentstate[key] == oldstate[key])
 			return unchanged;
 		else
@@ -52,7 +65,6 @@ public:
 	//! test if a key is currently down
 	inline bool IsPressed(u16 key)
 	{
-		// dprint("KeyManager: IsPressed()\n");
 		return !(REG_JP & keymap[key]);
 	}	
 };

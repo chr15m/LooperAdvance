@@ -9,17 +9,16 @@
 	chris@mccormick.cx
 	http://looper.mccormick.cx/
 	
-	$Id: charset.hh,v 1.2 2004/04/08 06:09:42 chrism Exp $
+	$Id: scr_splash.hh,v 1.2 2004/04/08 06:09:43 chrism Exp $
 
 ******************************************************/
 
 #include "gba.h"
 #include "typedefs.h"
 
-namespace font
-{
-	extern const u8 charlayout[95];
-	extern const u8 charoffset[127];
-	extern const u16 tiles[3232];
-	extern const u16 tiles_color[3232];
-}
+#define SPLASH_TILESIZE 9344
+#define SPLASH_PALSIZE 96
+
+extern const u16 splash_tiles[SPLASH_TILESIZE];
+extern const u16 splash_palette[SPLASH_PALSIZE];
+extern const u16 splash_map[640];

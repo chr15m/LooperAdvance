@@ -1,12 +1,24 @@
-// This file is part of the looping program for GBA which Chrism&Fenris use in their live show
+/*****************************************************
+
+	looper advance
+	(c) chris mccormick, 2004
+	
+	licensed under the terms of the GPL
+	see the file gpl.txt for details
+	
+	chris@mccormick.cx
+	http://looper.mccormick.cx/
+	
+	$Id: Loop.hh,v 1.13 2004/04/08 06:09:42 chrism Exp $
+
+******************************************************/
 
 // Represents a single loop-page
 
 #include "looper.h"
 #include "charset.h"
 #include "Page.h"
-#include "NumberBox.h"
-#include "SelectBox.h"
+#include "Widgets.h"
 #include "samples.h"
 #include "samplenames.h"
 #include "krawall.h"
@@ -18,35 +30,100 @@
 class Loop : public Page
 {
 private:
-	u16 sample;
-	bool pan;
-	bool vol;
-	u32 pitch;
-	u32 beats;
 	u32 lastbeat;
-	u32 beat;
-
 	u16 handle;
-
-	u32 size;
-
+	u16 beat;
+	u16 numnotes;
+	ptrNoteData *notes;
+	
+	structLoopData *data;
+	
+	EditBox *ebName;
 	NumberBox *nbPitch;
-	NumberBox *nbPan;
+	SelectBox *sbPan;
 	NumberBox *nbBeats;
-	NumberBox *nbOn;
+	SelectBox *sbOn;
 	SelectBox *sbSample;
-	NumberBox *nbReset;
-	Widget *selected;
-
+	SelectBox *sbReset;
+	SelectBox *sbAddLoopButton;
+	SelectBox *sbDelLoopButton;
+	NumberBox *nbSwing;
+	
+	// notes interface
+	NumberBox *nbNotes;
+	NumberBox *nbNote;
+	NumberBox *nbNBeat;
+	NumberBox *nbNPitch;
+	NumberBox *nbNSwing;
+	SelectBox *sbNAction;
+	
+	// notes labels
+	Label *lbNotes;
+	Label *lbNote;
+	Label *lbNSwing;
+	Label *lbNBeat;
+	Label *lbNAction;
+	Label *lbNPitch;
+	
+	// other labels
+	Label *lbPitch;
+	Label *lbBeats;
+	Label *lbSwing;
+	
+	// callbacks
+	TCallback<Loop> cbAddLoopButton;
+	TCallback<Loop> cbDelLoopButton;
+	
+	TCallback<Loop> cbName;
+	TCallback<Loop> cbPitch;
+	TCallback<Loop> cbPan;
+	TCallback<Loop> cbBeats;
+	TCallback<Loop> cbReset;
+	TCallback<Loop> cbSample;
+	TCallback<Loop> cbSwing;
+	
+	// note action callbacks
+	TCallback<Loop> cbNotes;
+	TCallback<Loop> cbNote;
+	TCallback<Loop> cbNBeat;
+	TCallback<Loop> cbNPitch;
+	TCallback<Loop> cbNSwing;
+	TCallback<Loop> cbNAction;
+	
 public:
-	Loop(Keys *inkeys);
+	Loop(Keys *inkeys, structLoopData *whichloop);
 	virtual ~Loop();
-	void Draw();
-	void Process();
+	
+	void DoSwap();
+	
+	void DoProcess();
+	void *AddLoopButton(void *data);
+	void *DelLoopButton(void *data);
+	structLoopData *GetAddress();
 
-	void ResetLoopPitch();
+	void UpdateWidgets();
+	void UpdateParameters();
+	void UpdateParametersNotes();
+
+	void *Name(void *name);
+	void *Pitch(void *number);
+	void *Pan(void *number);
+	void *Beats(void *number);
+	void *Swing(void *number);
+	void *SampleChange(void *whichsample);
+	void *Reset(void *ignore);
+	void *Notes(void *number);
+	void *NoteChange(void *note);
+
+	void *NBeat(void *number);
+	void *NSwing(void *number);
+	void *NPitch(void *number);
+	void *NAction(void *which);
+
+	void AddNote();
+	void DelNote();
+	void UpdateNotes();
 	u32 GetSize();
-	void SetParameters(u16 newsample, bool newpan, u32 newpitch, u16 newbeats);
 };
 
 #endif

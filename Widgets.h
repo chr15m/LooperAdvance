@@ -9,23 +9,17 @@
 	chris@mccormick.cx
 	http://looper.mccormick.cx/
 	
-	$Id: Page.cc,v 1.4 2004/04/08 06:09:42 chrism Exp $
+	$Id: Widgets.hh,v 1.2 2004/04/08 06:09:42 chrism Exp $
 
 ******************************************************/
 
-// Represents a single loop-page
+#ifndef _WIDGETS_HH_
+#define _WIDGETS_HH_
 
-#include "Page.h"
+#include "Widget.h"
+#include "NumberBox.h"
+#include "SelectBox.h"
+#include "EditBox.h"
+#include "Label.h"
 
-Page::Page()
-{
-	right = NULL;
-	left = NULL;
-	first = NULL;
-	last = NULL;
-}
-
-Page::~Page()
-{
-	debug("Destroying Page()");
-}
+#endif // _WIDGETS_HH_

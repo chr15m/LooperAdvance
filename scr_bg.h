@@ -9,23 +9,16 @@
 	chris@mccormick.cx
 	http://looper.mccormick.cx/
 	
-	$Id: Page.cc,v 1.4 2004/04/08 06:09:42 chrism Exp $
+	$Id: scr_bg.hh,v 1.2 2004/04/08 06:09:43 chrism Exp $
 
 ******************************************************/
 
-// Represents a single loop-page
+#include "gba.h"
+#include "typedefs.h"
 
-#include "Page.h"
+#define BG_TILESIZE 5984
+#define BG_PALSIZE 24
 
-Page::Page()
-{
-	right = NULL;
-	left = NULL;
-	first = NULL;
-	last = NULL;
-}
-
-Page::~Page()
-{
-	debug("Destroying Page()");
-}
+extern const u16 bg_tiles[BG_TILESIZE];
+extern const u16 bg_palette[BG_PALSIZE];
+extern const u16 bg_map[640];

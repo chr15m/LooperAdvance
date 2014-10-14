@@ -1,81 +1,333 @@
-// This file is part of the looping program for GBA which Chrism&Fenris use in their live show
+/*****************************************************
 
-// Represents a single loop-page
+	looper advance
+	(c) chris mccormick, 2004
+	
+	licensed under the terms of the GPL
+	see the file gpl.txt for details
+	
+	chris@mccormick.cx
+	http://looper.mccormick.cx/
+	
+	$Id: First.cc,v 1.19 2004/04/08 06:09:42 chrism Exp $
+
+******************************************************/
 
 #include "First.h"
-#include "songdata.h"
 
+// initialise
 First::First(Keys *inkeys)
 {
-	u16 i;
+	debug("First page Constructor");
 	
-	// SelectBox(x, y, iwidth, *inext, *inkeys);
-	sbSong = new SelectBox(6, 1, 8, NULL, inkeys);
-	for (i=0; i<NUMSONGS; i++)
-		sbSong->NewChoice(songs::data[i].name, i);
+	lbSong = new Label(2, 1, "Song");
+	sbSong = new SelectBox(7, 1, 13, inkeys);
+	sbNewButton = new SelectBox(2, 3, 3, inkeys);
+	sbDelButton = new SelectBox(9, 3, 6, inkeys);
+	sbSaveButton = new SelectBox(2, 5, 13, inkeys);
+	
+	lbSongName = new Label(2, 8, "Name");
+	ebSongName = new EditBox(7, 8, 13, inkeys);
+	lbBPM = new Label(2, 10, "BPM");
+	nbBPM = new NumberBox(7, 10, 3, 1, 600, 10, inkeys);
+	
+	sbAddLoopButton = new SelectBox(18, 17, 8, inkeys);
+	sbDelLoopButton = new SelectBox(18, 18, 8, inkeys);
+	
+	AddWidget(lbSong);
+	AddWidget(sbSong);
+	AddWidget(sbNewButton);
+	AddWidget(sbDelButton);
+	AddWidget(sbSaveButton);
+	AddWidget(lbSongName);
+	AddWidget(ebSongName);
+	AddWidget(lbBPM);
+	AddWidget(nbBPM);
+	AddWidget(sbAddLoopButton);
+	AddWidget(sbDelLoopButton);
+	
+	sbSong->SetTransitions(NULL, NULL, NULL, sbNewButton);
+	sbNewButton->SetTransitions(NULL, sbDelButton, sbSong, sbSaveButton);
+	sbDelButton->SetTransitions(sbNewButton, NULL, sbSong, sbSaveButton);
+	sbSaveButton->SetTransitions(NULL, NULL, sbNewButton, ebSongName);
+	ebSongName->SetTransitions(NULL, NULL, sbSaveButton, nbBPM);
+	nbBPM->SetTransitions(NULL, sbAddLoopButton, ebSongName, sbAddLoopButton);
+	sbAddLoopButton->SetTransitions(nbBPM, NULL, nbBPM, sbDelLoopButton);
+	sbDelLoopButton->SetTransitions(nbBPM, NULL, sbAddLoopButton, NULL);
+	
+	sbNewButton->AutoOff();
+	sbDelButton->AutoOff();
+	sbSaveButton->AutoOff();
+	sbAddLoopButton->AutoOff();
+	sbDelLoopButton->AutoOff();
+	
+	sbNewButton->NewChoice("New", 0);
+	sbNewButton->NewChoice("---", 1);
+	
+	sbDelButton->NewChoice("Delete", 0);
+	sbDelButton->NewChoice("------", 1);
+	
+	sbSaveButton->NewChoice("Write Changes", 0);
+	sbSaveButton->NewChoice("-------------", 1);
 
-	// NumberBox(x, y, width, min, max, bigstep, next);
-	nbBPM = new NumberBox(6, 3, 2, 10, 350, 10, NULL, inkeys);
-	nbBeat = new NumberBox(24, 1, 4, 0, 9999, 1, NULL, inkeys);
+	sbAddLoopButton->NewChoice("Add Loop", 0);
+	sbAddLoopButton->NewChoice("--------", 1);
 
-	sbSong->SetTransitions(NULL, NULL, NULL, nbBPM);
-	nbBPM->SetTransitions(NULL, NULL, sbSong, NULL);
+	sbDelLoopButton->NewChoice("Del Loop", 0);
+	sbDelLoopButton->NewChoice("--------", 1);
 
-	nbBPM->SetValue(bpm);
-	oldsong = 1;
+	// set up our callback functions for each UI element
+	cbSaveButton.MakeCallback(this, &First::SaveButton);
+	sbSaveButton->UseCallBack(&cbSaveButton);
+	
+	cbSong.MakeCallback(this, &First::Song);
+	sbSong->UseCallBack(&cbSong);
+
+	cbNewButton.MakeCallback(this, &First::NewButton);
+	sbNewButton->UseCallBack(&cbNewButton);
+
+	cbDelButton.MakeCallback(this, &First::DelButton);
+	sbDelButton->UseCallBack(&cbDelButton);
+
+	cbAddLoopButton.MakeCallback(this, &First::AddLoopButton);
+	sbAddLoopButton->UseCallBack(&cbAddLoopButton);
+
+	cbDelLoopButton.MakeCallback(this, &First::DelLoopButton);
+	sbDelLoopButton->UseCallBack(&cbDelLoopButton);
+
+	cbBPM.MakeCallback(this, &First::BPM);
+	nbBPM->UseCallBack(&cbBPM);
+	
+	cbSongName.MakeCallback(this, &First::ChangeSongName);
+	ebSongName->UseCallBack(&cbSongName);
 	
 	UseKeys(inkeys);
+	
 	sbSong->Select();
 	selected = sbSong;
+
+	RebuildSongList();
+	Song(NULL);
+	debug("Songdata: 0x%lx", (u32)globals.songdata);
 }
 
+// destructor
 First::~First()
 {
-	delete nbBPM;
+	delete lbSong;
 	delete sbSong;
+	delete sbNewButton;
+	delete sbDelButton;
+	delete sbSaveButton;
+	delete lbSongName;
+	delete ebSongName;
+	delete lbBPM;
+	delete nbBPM;
+	delete sbAddLoopButton;
+	delete sbDelLoopButton;
 }
 
-void First::Draw()
+// if they've clicked the save button, then save
+void *First::SaveButton(void *data)
 {
-	u16 beat;
-	
-	selected = selected->Process();
-	if (selected == nbBPM)
-		bpm = ((NumberBox *)selected)->GetValue();
-
-	// labels
-	cprintf(1,1,"Song");
-	sbSong->Draw();
-
-	cprintf(1,3,"BPM");
-	nbBPM->Draw();
-	
-	cprintf(20,1,"Beat");
-	beat = counter * bpm/3600;
-	nbBeat->SetValue(beat);
-	nbBeat->Draw();
+	debug("Save button callback");
+	globals.SaveSongs();
+	return NULL;
 }
 
-void First::Process()
+// if they change the name of this song
+void *First::ChangeSongName(void *data)
 {
-	u16 i;
-	Loop *ptrLoop;
-	structSongData *dataptr;
+	debug("Updating song name (callback)");
+	globals.SetName((char *)data);
+	RebuildSongList();
+	return NULL;
+}
 
-	dprintf("First Process: %ld\n", (u32)this);
+// if they've moved the song selecta
+void *First::Song(void *data)
+{
+	debug("Song select callback");
 	
-	// if they've chosen a new song, load it
-	if (oldsong != sbSong->GetChoice())
+	structLoopData *loop=NULL;
+	structSongData *newsong;
+	
+	if (data)
 	{
-		dataptr = (structSongData *)&(songs::data[sbSong->GetChoice()]);
-		nbBPM->SetValue(dataptr->tempo);
-		bpm = dataptr->tempo;
-		ptrLoop = (Loop *)right;
-		for(i=0;i<4;i++)
-		{
-			ptrLoop->SetParameters(dataptr->loop[i].sample, dataptr->loop[i].pan, dataptr->loop[i].pitch, dataptr->loop[i].beats);
-			ptrLoop = (Loop *)ptrLoop->right;
-		}
-		oldsong = sbSong->GetChoice();
+		// if we were called in callback
+		newsong = (structSongData *)((structSelectList *)data)->value;
+	}
+	else
+	{
+		// otherwise ask what we're doing
+		newsong = (structSongData *)sbSong->GetChoice();
+	}
+	Page *newloop=this;
+
+	REG_IME = 0; // disable interrupts
+
+	// remove all our old live loops
+	DelLiveLoops();
+	// change currentsong variable to point at the newly selected song
+	globals.SetSong(newsong);
+
+	// for every loop in this song, create it's loop
+	loop = newsong->loops;
+	while (loop)
+	{
+		newloop->right = new Loop(keys, loop);
+		debug("Creating new liveloop: 0x%lx", (u32)newloop->right);
+		newloop->right->left = newloop;
+		newloop = newloop->right;
+		loop = loop->next;
+	}
+	
+	// set this song's data
+	nbBPM->SetValue(newsong->bpm);
+	ebSongName->SetString(newsong->name);
+	
+	// reset the counters each time we change songs
+	globals.Reset();
+	
+	debug("Right page = 0x%lx", right);
+	debug("New song loaded successfully");
+	
+	REG_IME = 1; // enable interrupts
+
+	return NULL;
+}
+
+
+// if they've pressed the new button
+// creating a new song, add it on the end and switch to it
+void *First::NewButton(void *data)
+{
+	debug("New button callback");
+	// delete all the live loops
+	DelLiveLoops();
+	// create a new song in the songdata
+	globals.NewSong();
+	// rebuild the choices
+	RebuildSongList();
+	// change to the current song
+	Song(NULL);
+	
+	return NULL;
+}
+
+// if they're deleting a song
+void *First::DelButton(void *data)
+{
+	debug("Del button callback");
+	// delete all the live loops
+	while(right)
+	{
+		DelLoopButton(NULL);
+	}
+	// delete the current song
+	globals.DelSong();
+	// rebuild choices
+	RebuildSongList();
+	// change to the current song
+	Song(NULL);
+	
+	return NULL;
+}
+
+// if they press the loop-add button
+void *First::AddLoopButton(void *data)
+{
+	Page *old;
+	debug("AddLoop button callback");
+	// add a loop to currentsong
+	globals.NewLoop();
+	// add a live loop
+	if (right)
+	{
+		debug("Inserting a new loop");
+		// make our next loop have a new loop
+		old = right;
+		right->left = new Loop(keys, globals.currentloop);
+		right = right->left;
+		right->left = this;
+		right->right = old;
+	}
+	else
+	{
+		debug("Appending a new loop");
+		right = new Loop(keys, globals.currentloop);
+		right->left = this;
+	}
+		
+	return NULL;
+}
+
+// delete all current liveloops
+void First::DelLiveLoops()
+{
+	debug("Deleting all liveloops");
+
+	Page *traverse = right;
+	Page *tmp;
+	
+	while (traverse)
+	{
+		tmp = traverse;
+		delete traverse;
+		traverse = tmp->right;
+	}
+	
+	// make sure we don't still think we've got stuff to the right
+	right = NULL;
+}
+
+// if they press the del-loop button
+void *First::DelLoopButton(void *data)
+{
+	Page *old;
+	debug("DelLoop button callback");
+	// delete the liveloop associated with it
+	if (right)
+	{
+		// delete the current loop in currentsong
+		globals.SetLoop(((Loop *)right)->GetAddress());
+		globals.DelLoop();
+
+		old = right->right;
+		delete right;
+		right = old;
+		right->left = this;
+	}
+	
+	return NULL;
+}
+
+// if they change the BPM
+void *First::BPM(void *data)
+{
+	debug("BPM: %d", *(u16 *)data);
+	globals.SetBPM(*(u16 *)data);
+	return NULL;
+}
+
+// this function takes all the songs in songdata and makes a list of them
+void First::RebuildSongList()
+{
+	debug("Rebuilding song list");
+	structSongData *traverse = globals.songdata;
+	sbSong->ClearChoices();
+	
+	while (traverse)
+	{
+		sbSong->NewChoice(traverse->name, (u32)traverse);
+		traverse = traverse->next;
+	}
+	
+	if (selected)
+	{
+		debug("Setting Name='%s' BPM='%d'", globals.currentsong->name, globals.currentsong->bpm);
+		// with the selected song
+		sbSong->ChooseByValue((u32)globals.currentsong);
 	}
 }
+

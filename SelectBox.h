@@ -1,3 +1,18 @@
+/*****************************************************
+
+	looper advance
+	(c) chris mccormick, 2004
+	
+	licensed under the terms of the GPL
+	see the file gpl.txt for details
+	
+	chris@mccormick.cx
+	http://looper.mccormick.cx/
+	
+	$Id: SelectBox.hh,v 1.7 2004/04/08 06:09:42 chrism Exp $
+
+******************************************************/
+
 #include "looper.h"
 #include "Widget.h"
 #include "string.h"
@@ -5,26 +20,54 @@
 #ifndef _SELECTBOX_HH_
 #define _SELECTBOX_HH_
 
-#define MAXSELECTIONS 40
-#define MAXSTRING 18
+// this type is a linked list of select box items
+typedef struct structSelectList
+{
+	char *text;
+	u32 value;
+	structSelectList *next;
+	structSelectList *prev;
+} structSelectList;
 
 class SelectBox : public Widget
 {
 private:
-	u16 width;	// how many digits wide is this?
-	u16 last;	// what's our top number in the array
-	u16 which;	// currently selected item
-	char selection[MAXSELECTIONS][MAXSTRING]; 	// an array to hold all of the selections
-	u16 value[MAXSELECTIONS];		// array to hold all values for each selection
+	u16 width;			// how many characters wide is this?
+	u16 timer;			// if it's an auto-reset button
+	u16 maxtime;			// if set the select box will reset after this amount of time
+	structSelectList *which;	// currently selected item
+	structSelectList *last;		// last one in the list
+	structSelectList *first; 	// first one in the list
 
 public:
-	SelectBox(u16 x, u16 y, u16 iwidth, Widget *inext, Keys *inkeys);
-	
+	SelectBox(u16 x, u16 y, u16 iwidth, Keys *inkeys);
+	virtual ~SelectBox();
+
+	// choose the choice-th entry in the list
 	void Choose(u16 choice);
-	void ChooseByValue(u16 value);
-	u16 GetChoice();
-	void NewChoice(char *text, u16 myval);
+	// choose the choice with the value given
+	void ChooseByValue(u32 value);
+	// get the current choice value
+	u32 GetChoice();
+	// create a new choice
+	void NewChoice(char *text, u32 myval);
+	// forget all the choice
+	void ClearChoices();
+	// if the list is empty
+	bool IsEmpty();
+	// get the string of the current choice
 	char *GetChoiceString();
+
+	// set this select box to turn off after a number of ticks
+	void AutoOff(u16 time = 10);
+	// get the current count-down frame
+	u16 GetFrame();
+
+	inline bool Pressed()
+	{
+		return (GetFrame() == 1);
+	}
+	
 	Widget *Process();
 	void Draw();
 };

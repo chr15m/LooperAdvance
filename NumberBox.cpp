@@ -1,23 +1,43 @@
+/*****************************************************
+
+	looper advance
+	(c) chris mccormick, 2004
+	
+	licensed under the terms of the GPL
+	see the file gpl.txt for details
+	
+	chris@mccormick.cx
+	http://looper.mccormick.cx/
+	
+	$Id: NumberBox.cc,v 1.6 2004/04/08 06:09:42 chrism Exp $
+
+******************************************************/
+
 #include "NumberBox.h"
 
-NumberBox::NumberBox(u16 ix, u16 iy, u16 iwidth, u16 imin, u16 imax, u16 ibigstep, NumberBox *inext, Keys *inkeys): Widget (ix, iy, inext, inkeys)
+NumberBox::NumberBox(u16 ix, u16 iy, u16 iwidth, u16 imin, u16 imax, u16 ibigstep, Keys *inkeys): Widget (ix, iy, inkeys)
 {
-	x = ix;
-	y = iy;
 	width = iwidth;
 	min = imin;
 	max = imax;
-	bigstep = ibigstep;
-	
-	left = right = up = down = NULL;
-	
-	next = inext;
+	bigstep = ibigstep;	
 	value = min;
 }
 
 void NumberBox::SetValue(u16 newVal)
 {
 	value = newVal;
+//	Callback(&value);
+}
+
+void NumberBox::SetMax(u16 imax)
+{
+	if (value > imax)
+	{
+		value = imax;
+//		Callback(&value);
+	}
+	max = imax;
 }
 
 u16 NumberBox::GetValue()
@@ -48,7 +68,12 @@ Widget *NumberBox::Process()
 		if (tmpval < min)
 			tmpval = min;
 		
-		value = tmpval;
+		if (value != tmpval)
+		{
+			value = tmpval;
+			
+			Callback(&value);
+		}
 	}
 	else
 	{
@@ -61,7 +86,7 @@ Widget *NumberBox::Process()
 		
 		if (keys->TestKey(keyLeft) == pressed)
 			newselect = left;
-
+		
 		if (keys->TestKey(keyRight) == pressed)
 			newselect = right;
 	}
@@ -78,12 +103,8 @@ Widget *NumberBox::Process()
 
 void NumberBox::Draw()
 {	
-	char fmtstr[16];
+	sprintf(text, "[%*d]", width, value);
 	
-	sprintf(fmtstr, "[%%%dd]", width);
-	sprintf(text, fmtstr, value);
-//	dprintf(text);
-//	dprintf("\n");
 	if (selected)
 	{
 		hprintf(x, y, text);

@@ -1,3 +1,18 @@
+/*****************************************************
+
+	looper advance
+	(c) chris mccormick, 2004
+	
+	licensed under the terms of the GPL
+	see the file gpl.txt for details
+	
+	chris@mccormick.cx
+	http://looper.mccormick.cx/
+	
+	$Id: helpers.h,v 1.6 2004/04/08 06:09:42 chrism Exp $
+
+******************************************************/
+
 #include "gba.h"
 #include <stdio.h>
 
@@ -5,6 +20,24 @@
 #define _HELPERS_H_
 
 #define CHAR_BUFFER_SIZE 255
+
+#define debug(format, args...)	\
+({	\
+	dprintf("[%s - %s()] Line %d: ", __FILE__, __FUNCTION__, __LINE__);	\
+	dprintf(format, ## args);	\
+	dprintf("\n");	\
+})
+
+#define debugloop(format, args...) ;
+
+#ifdef DBLOOPS
+#define debugloop(format, args...)	\
+({	\
+	dprintf("[%s - %s()] Line %d: ", __FILE__, __FUNCTION__, __LINE__);	\
+	dprintf(format, ## args);	\
+	dprintf("\n");	\
+})
+#endif
 
 #define cprintf(x, y, format, args...)  ({    \
 	u16 i=0;\
@@ -51,4 +84,5 @@ inline void BlankScreen()
 	u32 zero=52;
 	DMACopy((void*)&zero, (u16*)&VideoBuffer[0x7C00], 0x400, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_FIXED | DMA_DEST_INCREMENT);
 }
+
 #endif //_HELPERS_H_

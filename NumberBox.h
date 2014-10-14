@@ -1,3 +1,18 @@
+/*****************************************************
+
+	looper advance
+	(c) chris mccormick, 2004
+	
+	licensed under the terms of the GPL
+	see the file gpl.txt for details
+	
+	chris@mccormick.cx
+	http://looper.mccormick.cx/
+	
+	$Id: NumberBox.hh,v 1.4 2004/04/08 06:09:42 chrism Exp $
+
+******************************************************/
+
 #include "looper.h"
 #include "Widget.h"
 
@@ -14,10 +29,11 @@ private:
 	u16 bigstep;	// how big the big steps should be
 	
 public:
-	NumberBox(u16 x, u16 y, u16 iwidth, u16 imin, u16 imax, u16 ibigstep, NumberBox *inext, Keys *inkeys);
+	NumberBox(u16 x, u16 y, u16 iwidth, u16 imin, u16 imax, u16 ibigstep, Keys *inkeys);
 	
 	void SetValue(u16 newVal);
 	u16 GetValue();
+	void SetMax(u16 imax);
 	Widget *Process();
 	void Draw();
 };

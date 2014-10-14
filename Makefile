@@ -43,7 +43,7 @@ export PATH		:=	$(DEVKITARM)/bin:$(PATH)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:=	-lgba $(CURDIR)/../krawall/build/krawall/src/krawall-cross-gba-build/lib/libkrawall.a $(CURDIR)/../krawall/build/krawall/src/krawall-cross-gba-build/examples/modules/libmodules.a
+LIBS	:=	-lgba $(CURDIR)/../krawall/build/krawall/lib/libkrawall.a $(CURDIR)/../krawall/build/krawall/src/krawall-cross-gba-build/examples/modules/libmodules.a
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -86,7 +86,7 @@ else
 endif
 #---------------------------------------------------------------------------------
 
-export OFILES	:= $(BINFILES:.bin=.o) $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o) samplenames.o
+export OFILES	:= $(BINFILES:.bin=.o) $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
 
 
 #---------------------------------------------------------------------------------
@@ -112,7 +112,8 @@ $(BUILD): samples.h
 clean:
 	@echo clean ...
 	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).gba
-	@rm samplenames.cpp samplenames.h samples.S  samples.h instruments.S instruments.h modules.h
+	@rm -f samplenames.cpp samplenames.h samples.S  samples.h instruments.S instruments.h modules.h
+	@rm -rf krawall/build
 
 #---------------------------------------------------------------------------------
 samplenames.cpp modules.h samples.h instruments.h samples.s instruments.S: samples.xm ./krawall/build/krawerter/krawerter
@@ -120,6 +121,21 @@ samplenames.cpp modules.h samples.h instruments.h samples.s instruments.S: sampl
 	./samplenames.py
 
 #---------------------------------------------------------------------------------
+
+unexport CC
+unexport CFLAGS
+unexport CXX
+unexport AR
+unexport AS
+unexport OBJCOPY
+unexport PORTLIBS
+./krawall/build/krawerter/krawerter krawall/build/krawall/src/krawall-cross-gba-build/lib/libkrawall.a krawall/build/krawall/src/krawall-cross-gba-build/examples/modules/libmodules.a: krawall
+	@echo Building Krawall library
+	mkdir -p $(CURDIR)/krawall/build
+	export
+	cd $(CURDIR)/krawall/build && cmake ..
+	make -C krawall/build
+
 else
 
 DEPENDS	:=	$(OFILES:.o=.d)

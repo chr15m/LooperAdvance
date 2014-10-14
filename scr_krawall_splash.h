@@ -9,17 +9,16 @@
 	chris@mccormick.cx
 	http://looper.mccormick.cx/
 	
-	$Id: charset.hh,v 1.2 2004/04/08 06:09:42 chrism Exp $
+	$Id: scr_krawall_splash.hh,v 1.2 2004/04/08 06:09:43 chrism Exp $
 
 ******************************************************/
 
 #include "gba.h"
 #include "typedefs.h"
 
-namespace font
-{
-	extern const u8 charlayout[95];
-	extern const u8 charoffset[127];
-	extern const u16 tiles[3232];
-	extern const u16 tiles_color[3232];
-}
+#define KRAWALL_SPLASH_TILESIZE 7040
+#define KRAWALL_SPLASH_PALSIZE 107
+
+extern const u16 krawall_splash_tiles[KRAWALL_SPLASH_TILESIZE];
+extern const u16 krawall_splash_palette[KRAWALL_SPLASH_PALSIZE];
+extern const u16 krawall_splash_map[640];

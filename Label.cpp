@@ -9,23 +9,18 @@
 	chris@mccormick.cx
 	http://looper.mccormick.cx/
 	
-	$Id: Page.cc,v 1.4 2004/04/08 06:09:42 chrism Exp $
+	$Id: Label.cc,v 1.2 2004/04/08 06:09:42 chrism Exp $
 
 ******************************************************/
 
-// Represents a single loop-page
+#include "Label.h"
 
-#include "Page.h"
-
-Page::Page()
+Label::Label(u16 ix, u16 iy, char *instring): Widget (ix, iy, NULL)
 {
-	right = NULL;
-	left = NULL;
-	first = NULL;
-	last = NULL;
+	text = instring;
 }
 
-Page::~Page()
-{
-	debug("Destroying Page()");
+void Label::Draw()
+{	
+	cprintf(x, y, text);
 }

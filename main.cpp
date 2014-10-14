@@ -1,3 +1,18 @@
+/*****************************************************
+
+	looper advance
+	(c) chris mccormick, 2004
+	
+	licensed under the terms of the GPL
+	see the file gpl.txt for details
+	
+	chris@mccormick.cx
+	http://looper.mccormick.cx/
+	
+	$Id: looper.cc,v 1.10 2004/04/08 06:09:42 chrism Exp $
+
+******************************************************/
+
 #include "krawall.h"
 #include "samples.h"
 #include "instruments.h"
@@ -8,13 +23,18 @@
 #include "Loop.h"
 #include "First.h"
 
+#include "scr_splash.h"
+#include "scr_krawall_splash.h"
+#include "scr_bg.h"
+
 // IntrTable for crt0
-void (*IntrTable[])() = {
+void (*IntrTable[])() =
+{
 	0, // v-blank
 	0, // h-blank
 	0, // vcount
 	0, // timer0
-	kradInterrupt, // timer1
+	0, // timer1
 	0, // timer2
 	0, // timer3
 	0, // serial
@@ -26,36 +46,65 @@ void (*IntrTable[])() = {
 	0  // cart
 };
 
-u32 counter=0;
-u32 bpm=180;
-// char __EH_FRAME_BEGIN__[] = {};
-// to resolve link-errors w/o crtbegin.o (-nostartfiles), which we don't really need in C
+GlobalData globals;
 
 int main()
 {
+	// starting
+	SetBG(10, 10, 0);
+	
+	// i don't get why this isn't run automatically when the globaldata object is created
+	// perhaps my understanding of c++ isn't so strong :]
+	globals.Init();
+	
+	// starting
+	SetBG(0, 10, 10);
+
+	globals.LoadSongs();
+
+	// starting
+	SetBG(10, 0, 10);
+
+	// set up the krawall interrupt now that this is done
+	IntrTable[4] = kradInterrupt;
+	
 	u16 i=0;
 	Keys *keys = new Keys();
 	First *firstpage = new First(keys);
 	Page *selected = firstpage;
-	Page *traverse;
-	// Loop *which;
-	
-	firstpage->right = new Loop(keys);
-	firstpage->right->left = firstpage;
-	firstpage->right->right = new Loop(keys);
-	firstpage->right->right->left = firstpage->right;
-	firstpage->right->right->right = new Loop(keys);
-	firstpage->right->right->right->left = firstpage->right->right;
-	firstpage->right->right->right->right = new Loop(keys);
-	firstpage->right->right->right->right->left = firstpage->right->right->right;
 	
 	// set up a nice screen mode
-	REG_DISPCNT = SCREENMODE0 | BG1_ENABLE; // 4 | ( 1 << 10 );
+	REG_DISPCNT = SCREENMODE0 | BG1_ENABLE;
 	REG_IME = 1;			// enable interrupts
 	REG_IME |= ( 1 << 13 ); 	// cart-remove-interrupt (handled by crt0)
+	REG_IE |= BIT00;
 	
 	// make it so we can see the background
 	REG_BG1CNT = BIT07 | BIT08 | BIT09 | BIT10 | BIT11 | BIT12; // high priority, 256 colour, point the banks at the right place etc
+	
+	// load the splash screen
+	DMACopy((void*)splash_tiles, (u16*)VideoBuffer, SPLASH_TILESIZE, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT);
+	DMACopy((void*)splash_palette, (u16*)&BGPaletteMem[5], SPLASH_PALSIZE, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT);
+	DMACopy((void*)splash_map, (u16*)&VideoBuffer[0x7C00], 640, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT);
+
+	// check keys
+	while (keys->TestKey(keyA) != pressed)
+	{
+		keys->Jiffie();
+	}
+	keys->Jiffie();
+
+	// load the krawall splash screen
+	DMACopy((void*)krawall_splash_tiles, (u16*)VideoBuffer, KRAWALL_SPLASH_TILESIZE, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT);
+	DMACopy((void*)krawall_splash_palette, (u16*)&BGPaletteMem[5], KRAWALL_SPLASH_PALSIZE, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT);
+	DMACopy((void*)krawall_splash_map, (u16*)&VideoBuffer[0x7C00], 640, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT);
+
+	// check keys
+	while (keys->TestKey(keyA) != pressed)
+	{
+		keys->Jiffie();
+	}
+	keys->Jiffie();
 	
 	// load charset into memory as a demo tileset
 	DMACopy((void*)font::tiles, (u16*)VideoBuffer, 3232, WORD_DMA | DMA_TIMING_IMMEDIATE | DMA_SOURCE_INCREMENT | DMA_DEST_INCREMENT);
@@ -65,10 +114,9 @@ int main()
 	for (i=0;i<7;i++)
 		BGPaletteMem[i] = RGB(0, 0, 0);
 	// this starts from 7 becuase the kludgy legacy converter used a 7-color offset (for parallax-starfield reasons)
-	//for (i=7;i<0x1F;i++)
-	//	BGPaletteMem[i] = RGB(0x1F-i, 0x1F-i, 0x1F-i);
+	
 	BGPaletteMem[7] = RGB(0x1F, 0x1F, 0x1F);
-	//BGPaletteMem[8] = RGB(0, 15, 26);
+	BGPaletteMem[8] = RGB(0, 0, 0);
 	
 	// set the H and V offset of our background to zero
 	REG_BG1HOFS = 0;	
@@ -82,40 +130,32 @@ int main()
 	
 	// initialize krawall
 	kragInit( KRAG_INIT_STEREO );					// init krawall
-
-//	which = (Loop *)firstpage->right;
-//	which->SetParameters(SAMPLE_AMEN, true, 1000, 8);
 	
 	while (1)
 	{
-//		dprintf("Main loop\n");
 		// this is zerosync
-		while(REG_VCOUNT);
-		SetBG(10, 0, 0);
-//		krapInstProcess();	// update sfx-instruments
-		kramWorker();		// do the stuff
+		SetBG(0, 0, 10);
+
+		// figure out all our latest song positions
+		globals.Tick();
+		// calculate audio stuff
+		kramWorker();
+		// check keys
 		keys->Jiffie();
-		// cycle through each page and process it
-		traverse = firstpage;
-		while (traverse)
-		{
-			traverse->Process();
-			traverse = traverse->right;
-		}
-		SetBG(3, 3, 3);
+		// automatically cascades all pages and processes them
+		firstpage->Process();
+		
+		SetBG(0, 0, 0);
 		
 		// this is vsync
+		// try and fit the drawing stuff into the off-screen sync
 		while(REG_VCOUNT != 160);
-		SetBG(0, 0, 10);
+		SetBG(10, 0, 0);
 		// do all the display shit in here
 		BlankScreen();
 		selected = selected->Cycle();
 		selected->Draw();
-		
-		// increment the global counter
-		counter++;
-		SetBG(0, 0, 0);
 	}
+	
+	return 1;
 }
-
-

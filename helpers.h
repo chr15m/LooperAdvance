@@ -96,7 +96,7 @@ inline void SetBG(u16 r, u16 g, u16 b)
 inline void BlankScreen()
 {
 	u32 zero=52;
-	DMA3COPY((void*)&zero, (u16*)&VideoBuffer[0x7C00], 0x400 | DMA32 | DMA_IMMEDIATE | DMA_SRC_FIXED | DMA_DST_INC);
+	DMA3COPY((void*)&zero, (u16*)&VideoBuffer[0x7C00], 0x400 | DMA16 | DMA_IMMEDIATE | DMA_SRC_FIXED | DMA_DST_INC);
 }
 
 #endif //_HELPERS_H_

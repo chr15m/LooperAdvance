@@ -65,10 +65,10 @@ int main()
 	REG_BG1CNT = BIT07 | BIT08 | BIT09 | BIT10 | BIT11 | BIT12; // high priority, 256 colour, point the banks at the right place etc
 	
 	// load the splash screen
-	DMA3COPY((void*)splash_tiles, (u16*)VideoBuffer, SPLASH_TILESIZE | DMA32 | DMA_IMMEDIATE | DMA_SRC_INC | DMA_DST_INC);
-	DMA3COPY((void*)splash_palette, (u16*)&BG_PALETTE[5], SPLASH_PALSIZE | DMA32 | DMA_IMMEDIATE | DMA_SRC_INC | DMA_DST_INC);
-	DMA3COPY((void*)splash_map, (u16*)&VideoBuffer[0x7C00], 640 | DMA32 | DMA_IMMEDIATE | DMA_SRC_INC | DMA_DST_INC);
-
+	DMA3COPY((void*)splash_tiles, (u16*)VideoBuffer, SPLASH_TILESIZE | DMA16 | DMA_IMMEDIATE | DMA_SRC_INC | DMA_DST_INC);
+	DMA3COPY((void*)splash_palette, (u16*)&BG_PALETTE[5], SPLASH_PALSIZE | DMA16 | DMA_IMMEDIATE | DMA_SRC_INC | DMA_DST_INC);
+	DMA3COPY((void*)splash_map, (u16*)&VideoBuffer[0x7C00], 640 | DMA16 | DMA_IMMEDIATE | DMA_SRC_INC | DMA_DST_INC);
+	
 	// check keys
 	while (keys->TestKey(keyA) != pressed)
 	{
@@ -77,9 +77,9 @@ int main()
 	keys->Jiffie();
 
 	// load the krawall splash screen
-	DMA3COPY((void*)krawall_splash_tiles, (u16*)VideoBuffer, KRAWALL_SPLASH_TILESIZE| DMA32 | DMA_IMMEDIATE | DMA_SRC_INC | DMA_DST_INC);
-	DMA3COPY((void*)krawall_splash_palette, (u16*)&BG_PALETTE[5], KRAWALL_SPLASH_PALSIZE | DMA32 | DMA_IMMEDIATE | DMA_SRC_INC | DMA_DST_INC);
-	DMA3COPY((void*)krawall_splash_map, (u16*)&VideoBuffer[0x7C00], 640 | DMA32 | DMA_IMMEDIATE | DMA_SRC_INC | DMA_DST_INC);
+	DMA3COPY((void*)krawall_splash_tiles, (u16*)VideoBuffer, KRAWALL_SPLASH_TILESIZE| DMA16 | DMA_IMMEDIATE | DMA_SRC_INC | DMA_DST_INC);
+	DMA3COPY((void*)krawall_splash_palette, (u16*)&BG_PALETTE[5], KRAWALL_SPLASH_PALSIZE | DMA16 | DMA_IMMEDIATE | DMA_SRC_INC | DMA_DST_INC);
+	DMA3COPY((void*)krawall_splash_map, (u16*)&VideoBuffer[0x7C00], 640 | DMA16 | DMA_IMMEDIATE | DMA_SRC_INC | DMA_DST_INC);
 
 	// check keys
 	while (keys->TestKey(keyA) != pressed)
@@ -89,8 +89,8 @@ int main()
 	keys->Jiffie();
 	
 	// load charset into memory as a demo tileset
-	DMA3COPY((void*)font::tiles, (u16*)VideoBuffer, 3232 | DMA32 | DMA_IMMEDIATE | DMA_SRC_INC | DMA_DST_INC);
-	DMA3COPY((void*)font::tiles_color, (u16*)&VideoBuffer[3232], 3232 | DMA32 | DMA_IMMEDIATE | DMA_SRC_INC | DMA_DST_INC);
+	DMA3COPY((void*)font::tiles, (u16*)VideoBuffer, 3232 | DMA16 | DMA_IMMEDIATE | DMA_SRC_INC | DMA_DST_INC);
+	DMA3COPY((void*)font::tiles_color, (u16*)&VideoBuffer[3232], 3232 | DMA16 | DMA_IMMEDIATE | DMA_SRC_INC | DMA_DST_INC);
 	
 	// set up the background palette
 	for (i=0;i<7;i++)
@@ -101,14 +101,14 @@ int main()
 	BG_PALETTE[8] = RGB(0, 0, 0);
 	
 	// set the H and V offset of our background to zero
-	REG_BG1HOFS = 0;	
-	REG_BG1VOFS = 0;
+	// REG_BG1HOFS = 0;	
+	// REG_BG1VOFS = 0;
 	
 	// clear out the whole area
 	BlankScreen();
 	
 	// CST_ROM0_1ST_3WAIT | CST_ROM0_2ND_1WAIT | CST_PREFETCH_ENABLE
-	REG_WSCNT = ( 5 << 2 ) | ( 1 << 14 );	// set rom-timing
+	// REG_WSCNT = ( 5 << 2 ) | ( 1 << 14 );	// set rom-timing
 	
 	while (1)
 	{

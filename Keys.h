@@ -20,6 +20,10 @@
 #ifndef _KEYS_HH_
 #define _KEYS_HH_
 
+#define KEY_BUTTONS (KEY_A|KEY_B|KEY_SELECT|KEY_START|KEY_R|KEY_L)
+#define KEY_PADDLE  (KEY_RIGHT|KEY_LEFT|KEY_UP|KEY_DOWN)
+#define KEY_ANY     (KEY_PADDLE | KEY_BUTTONS)
+
 enum KeyState { unchanged, pressed, released };
 enum KeyNames { keyA, keyB, keySelect, keyStart, keyRight, keyLeft, keyUp, keyDown, keyR, keyL};
 
@@ -46,7 +50,7 @@ public:
 			
 			oldstate[i] = currentstate[i];
 	
-			if (!(REG_JP & keymap[i]))
+			if (!(REG_KEYINPUT & keymap[i]))
 				currentstate[i] = pressed;
 			else
 				currentstate[i] = released;
@@ -65,7 +69,7 @@ public:
 	//! test if a key is currently down
 	inline bool IsPressed(u16 key)
 	{
-		return !(REG_JP & keymap[key]);
+		return !(REG_KEYINPUT & keymap[key]);
 	}	
 };
 

@@ -13,8 +13,7 @@
 
 ******************************************************/
 
-#include "gba.h"
-#include "typedefs.h"
+#include <gba.h>
 
 #define BG_TILESIZE 5984
 #define BG_PALSIZE 24

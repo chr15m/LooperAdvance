@@ -17,23 +17,25 @@ include $(DEVKITARM)/gba_rules
 TARGET		:=	LooperAdvance
 BUILD		:=	build
 SOURCES		:=	.
-INCLUDES	:=	./krawall/build/krawall/include
+INCLUDES	:=	-I $(CURDIR)/../krawall/build/krawall/include -I $(DEVKITPRO)/libgba/include/
 
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb -mthumb-interwork
 
-CFLAGS	:=	-g -Wall -O3\
+CFLAGS	:=	-std=gnu99 -Wall\
 			-mcpu=arm7tdmi -mtune=arm7tdmi\
  			-fomit-frame-pointer\
 			-ffast-math \
 			$(ARCH)
+CFLAGS	+=	$(INCLUDES)
 
-CFLAGS	+=	$(INCLUDE)
+CPPFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti -std=gnu++11
 
 ASFLAGS	:=	$(ARCH)
-LDFLAGS	=	-g $(ARCH) -Wl,-Map,$(notdir $@).map
+LDFLAGS	:=	$(CFLAGS) -Wl,-Map,$(notdir $@).map
+# -specs=gba.specs 
 
 #---------------------------------------------------------------------------------
 # path to tools - this can be deleted if you set the path in windows
@@ -43,7 +45,7 @@ export PATH		:=	$(DEVKITARM)/bin:$(PATH)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:=	-lgba $(CURDIR)/../krawall/build/krawall/lib/libkrawall.a $(CURDIR)/../krawall/build/krawall/src/krawall-cross-gba-build/examples/modules/libmodules.a
+LIBS	:=	-lgba $(CURDIR)/../krawall/build/krawall/lib/libkrawall-32k-60-medium.a $(CURDIR)/../krawall/build/krawall/src/krawall-cross-gba-build/examples/modules/libmodules.a
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -109,14 +111,19 @@ $(BUILD): samples.h
 	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
 #---------------------------------------------------------------------------------
-clean:
-	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).gba
-	@rm -f samplenames.cpp samplenames.h samples.S  samples.h instruments.S instruments.h modules.h
+clean: clean-looper
 	@rm -rf krawall/build
 
+clean-looper:
+	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).gba
+	@rm -f samplenames.cpp samplenames.h samples.S  samples.h instruments.s instruments.h modules.h
+	@echo clean ...
+
+run: LooperAdvance.gba
+	@VisualBoyAdvance LooperAdvance.gba
+
 #---------------------------------------------------------------------------------
-samplenames.cpp modules.h samples.h instruments.h samples.s instruments.S: samples.xm ./krawall/build/krawerter/krawerter
+samplenames.cpp modules.h samples.h instruments.h samples.s instruments.s: samples.xm ./krawall/build/krawerter/krawerter
 	./krawall/build/krawerter/krawerter samples.xm
 	./samplenames.py
 
@@ -129,11 +136,11 @@ unexport AR
 unexport AS
 unexport OBJCOPY
 unexport PORTLIBS
-./krawall/build/krawerter/krawerter krawall/build/krawall/src/krawall-cross-gba-build/lib/libkrawall.a krawall/build/krawall/src/krawall-cross-gba-build/examples/modules/libmodules.a: krawall
+./krawall/build/krawerter/krawerter ./krawall/build/krawall/lib/libkrawall-32k-60-medium.a ./krawall/build/krawall/src/krawall-cross-gba-build/examples/modules/libmodules.a: krawall
 	@echo Building Krawall library
 	mkdir -p $(CURDIR)/krawall/build
 	export
-	cd $(CURDIR)/krawall/build && cmake ..
+	cd $(CURDIR)/krawall/build && cmake -DKRAWALL_BUILD_ALL_VARIANTS:BOOLEAN=ON ..
 	make -C krawall/build
 
 else
@@ -145,11 +152,14 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 $(OUTPUT).gba	:	$(OUTPUT).elf
 
-$(OUTPUT).elf	:	$(OFILES) $(LIBGBA)/lib/libgba.a $(CURDIR)/../krawall/build/krawall/src/krawall-cross-gba-build/lib/libkrawall.a $(CURDIR)/../krawall/build/krawall/src/krawall-cross-gba-build/examples/modules/libmodules.a
+$(OUTPUT).elf	:	$(OFILES) $(LIBGBA)/lib/libgba.a $(CURDIR)/../krawall/build/krawall/lib/libkrawall-32k-60-medium.a $(CURDIR)/../krawall/build/krawall/src/krawall-cross-gba-build/examples/modules/libmodules.a
 
 %.o	:	%.bin
 	@echo	$(notdir $<)
 	@$(bin2o)
+
+%.o: %.cpp
+	arm-none-eabi-g++ $(CPPFLAGS) -c -o "$@" "$<"
 
 -include $(DEPENDS)
 

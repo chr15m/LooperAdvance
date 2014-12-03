@@ -1,4 +1,4 @@
-#include "typedefs.h"
+#include <gba.h>
 
 const u16 tiles[3232] =
 {

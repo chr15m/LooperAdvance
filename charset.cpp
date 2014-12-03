@@ -13,8 +13,6 @@
 
 ******************************************************/
 
-#include "gba.h"
-#include "typedefs.h"
 #include "charset.h"
 
 namespace font

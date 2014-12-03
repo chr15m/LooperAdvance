@@ -13,10 +13,10 @@
 
 ******************************************************/
 
-#include "gba.h"
-#include "stdio.h"
-#include "string.h"
-#include "typedefs.h"
+#include <gba.h>
+#include <stdio.h>
+#include <cstdio>
+#include <string.h>
 #include "emudp.h"
 #include "screenmode.h"
 #include "helpers.h"

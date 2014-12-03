@@ -13,8 +13,7 @@
 
 ******************************************************/
 
-#include "gba.h"
-#include "typedefs.h"
+#include <gba.h>
 
 #define SPLASH_TILESIZE 9344
 #define SPLASH_PALSIZE 96

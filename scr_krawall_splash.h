@@ -13,8 +13,7 @@
 
 ******************************************************/
 
-#include "gba.h"
-#include "typedefs.h"
+#include <gba.h>
 
 #define KRAWALL_SPLASH_TILESIZE 7040
 #define KRAWALL_SPLASH_PALSIZE 107

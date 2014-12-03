@@ -13,6 +13,8 @@
 
 ******************************************************/
 
+#include <stdio.h>
+#include <cstdio>
 #include "looper.h"
 #include "Widget.h"
 #include "string.h"

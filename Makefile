@@ -86,8 +86,7 @@ else
 endif
 #---------------------------------------------------------------------------------
 
-export OFILES	:= $(BINFILES:.bin=.o) $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
-
+export OFILES	:= $(BINFILES:.bin=.o) $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o) samples.o instruments.o samplenames.o
 
 #---------------------------------------------------------------------------------
 # build a list of include paths
@@ -112,11 +111,11 @@ $(BUILD): samples.h
 clean:
 	@echo clean ...
 	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).gba
-	@rm -f samplenames.cpp samplenames.h samples.S  samples.h instruments.S instruments.h modules.h
+	@rm -f samplenames.cpp samplenames.h samples.S samples.h instruments.S instruments.h modules.h
 	@rm -rf krawall/build
 
 #---------------------------------------------------------------------------------
-samplenames.cpp modules.h samples.h instruments.h samples.s instruments.S: samples.xm ./krawall/build/krawerter/krawerter
+samplenames.cpp modules.h samples.h instruments.h samples.S instruments.S: samples.xm ./krawall/build/krawerter/krawerter
 	./krawall/build/krawerter/krawerter samples.xm
 	./samplenames.py
 

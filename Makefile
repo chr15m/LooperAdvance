@@ -69,8 +69,9 @@ export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 #---------------------------------------------------------------------------------
 # automatically build a list of object files for our project
 #---------------------------------------------------------------------------------
+DYNAMIC_AUDIO	:=	samplenames.cpp samples.S instruments.S
 CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
-CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
+CPPFILES	:=	$(filter-out $(DYNAMIC_AUDIO),$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))) samplenames.cpp
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
 BINFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.bin)))
 
@@ -88,8 +89,7 @@ else
 endif
 #---------------------------------------------------------------------------------
 
-export OFILES	:= $(BINFILES:.bin=.o) $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
-
+export OFILES	:= $(BINFILES:.bin=.o) $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o) samples.o instruments.o
 
 #---------------------------------------------------------------------------------
 # build a list of include paths
@@ -111,7 +111,8 @@ $(BUILD): samples.h
 	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
 #---------------------------------------------------------------------------------
-clean: clean-looper
+clean:
+	@echo clean ...
 	@rm -rf krawall/build
 
 clean-looper:
@@ -123,7 +124,7 @@ run: LooperAdvance.gba
 	@VisualBoyAdvance LooperAdvance.gba
 
 #---------------------------------------------------------------------------------
-samplenames.cpp modules.h samples.h instruments.h samples.s instruments.s: samples.xm ./krawall/build/krawerter/krawerter
+samplenames.cpp modules.h samples.h instruments.h samples.S instruments.S: samples.xm ./krawall/build/krawerter/krawerter
 	./krawall/build/krawerter/krawerter samples.xm
 	./samplenames.py
 

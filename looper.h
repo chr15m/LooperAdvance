@@ -18,7 +18,6 @@
 #include <cstdio>
 #include <string.h>
 #include "emudp.h"
-#include "screenmode.h"
 #include "helpers.h"
 #include "callback.h"
 #include "GlobalData.h"

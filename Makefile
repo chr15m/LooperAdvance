@@ -124,6 +124,10 @@ run: LooperAdvance.gba
 	@VisualBoyAdvance LooperAdvance.gba
 
 #---------------------------------------------------------------------------------
+samples.xm:
+	@echo "You need a samples.xm module in this directory to link into the project."
+	@exit 1
+
 samplenames.cpp modules.h samples.h instruments.h samples.S instruments.S: samples.xm ./krawall/build/krawerter/krawerter
 	./krawall/build/krawerter/krawerter samples.xm
 	./samplenames.py

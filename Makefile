@@ -45,7 +45,7 @@ export PATH		:=	$(DEVKITARM)/bin:$(PATH)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:=	-lgba $(CURDIR)/../krawall/build/krawall/lib/libkrawall-32k-60-medium.a $(CURDIR)/../krawall/build/krawall/src/krawall-cross-gba-build/examples/modules/libmodules.a
+LIBS	:=	-lgba $(CURDIR)/../krawall/build/krawall/lib/libkrawall-32k-30-medium.a $(CURDIR)/../krawall/build/krawall/src/krawall-cross-gba-build/examples/modules/libmodules.a
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -141,7 +141,7 @@ unexport AR
 unexport AS
 unexport OBJCOPY
 unexport PORTLIBS
-./krawall/build/krawerter/krawerter ./krawall/build/krawall/lib/libkrawall-32k-60-medium.a ./krawall/build/krawall/src/krawall-cross-gba-build/examples/modules/libmodules.a: krawall
+./krawall/build/krawerter/krawerter ./krawall/build/krawall/lib/libkrawall-32k-30-medium.a ./krawall/build/krawall/src/krawall-cross-gba-build/examples/modules/libmodules.a: krawall
 	@echo Building Krawall library
 	mkdir -p $(CURDIR)/krawall/build
 	export
@@ -157,7 +157,7 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 $(OUTPUT).gba	:	$(OUTPUT).elf
 
-$(OUTPUT).elf	:	$(OFILES) $(LIBGBA)/lib/libgba.a $(CURDIR)/../krawall/build/krawall/lib/libkrawall-32k-60-medium.a $(CURDIR)/../krawall/build/krawall/src/krawall-cross-gba-build/examples/modules/libmodules.a
+$(OUTPUT).elf	:	$(OFILES) $(LIBGBA)/lib/libgba.a $(CURDIR)/../krawall/build/krawall/lib/libkrawall-32k-30-medium.a $(CURDIR)/../krawall/build/krawall/src/krawall-cross-gba-build/examples/modules/libmodules.a
 
 %.o	:	%.bin
 	@echo	$(notdir $<)

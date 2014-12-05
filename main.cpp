@@ -108,12 +108,12 @@ int main()
 	BlankScreen();
 	
 	// CST_ROM0_1ST_3WAIT | CST_ROM0_2ND_1WAIT | CST_PREFETCH_ENABLE
-	// REG_WSCNT = ( 5 << 2 ) | ( 1 << 14 );	// set rom-timing
+	REG_WSCNT = ( 5 << 2 ) | ( 1 << 14 );	// set rom-timing
 	
 	while (1)
 	{
-                while( !REG_VCOUNT );
-                while( REG_VCOUNT );
+                // while( !REG_VCOUNT );
+                // while( REG_VCOUNT );
 
 		// this is zerosync
 		SetBG(0, 0, 10);
@@ -131,7 +131,7 @@ int main()
 		
 		// this is vsync
 		// try and fit the drawing stuff into the off-screen sync
-		// while(REG_VCOUNT != 160);
+		while(REG_VCOUNT != 160);
 		SetBG(10, 0, 0);
 		// do all the display shit in here
 		BlankScreen();

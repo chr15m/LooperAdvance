@@ -45,7 +45,7 @@ export PATH		:=	$(DEVKITARM)/bin:$(PATH)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:=	-lgba $(CURDIR)/../krawall/build/krawall/lib/libkrawall-32k-30-medium.a $(CURDIR)/../krawall/build/krawall/src/krawall-cross-gba-build/examples/modules/libmodules.a
+LIBS	:=	-lgba $(CURDIR)/../krawall/build/krawall/lib/libkrawall-32k-30-medium.a
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -69,10 +69,10 @@ export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 #---------------------------------------------------------------------------------
 # automatically build a list of object files for our project
 #---------------------------------------------------------------------------------
-DYNAMIC_AUDIO	:=	samplenames.cpp samples.S instruments.S
+DYNAMIC_AUDIO	:=	samplenames.cpp samples.s instruments.s
 CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(filter-out $(DYNAMIC_AUDIO),$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))) samplenames.cpp
-SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
+SFILES		:=	$(filter-out $(DYNAMIC_AUDIO),$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))) samples.s instruments.s
 BINFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.bin)))
 
 #---------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ else
 endif
 #---------------------------------------------------------------------------------
 
-export OFILES	:= $(BINFILES:.bin=.o) $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o) samples.o instruments.o
+export OFILES	:= $(BINFILES:.bin=.o) $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
 
 #---------------------------------------------------------------------------------
 # build a list of include paths
@@ -117,20 +117,22 @@ clean:
 
 clean-looper:
 	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).gba
-	@rm -f samplenames.cpp samplenames.h samples.S  samples.h instruments.s instruments.h modules.h
+	@rm -f samplenames.cpp samplenames.h samples.[sS] samples.h instruments.[sS] instruments.h looper-samples.S modules.h .sdepend
 	@echo clean ...
 
 run: LooperAdvance.gba
 	@VisualBoyAdvance LooperAdvance.gba
 
 #---------------------------------------------------------------------------------
-samples.xm:
-	@echo "You need a samples.xm module in this directory to link into the project."
+looper-samples.xm:
+	@echo "You need an XM module called looper-samples.xm containing your samples in this directory."
 	@exit 1
 
-samplenames.cpp modules.h samples.h instruments.h samples.S instruments.S: samples.xm ./krawall/build/krawerter/krawerter
-	./krawall/build/krawerter/krawerter samples.xm
+samplenames.cpp modules.h samples.h instruments.h samples.s instruments.s: looper-samples.xm ./krawall/build/krawerter/krawerter
+	./krawall/build/krawerter/krawerter looper-samples.xm
 	./samplenames.py
+	mv samples.S samples.s
+	mv instruments.S instruments.s
 
 #---------------------------------------------------------------------------------
 
@@ -141,7 +143,7 @@ unexport AR
 unexport AS
 unexport OBJCOPY
 unexport PORTLIBS
-./krawall/build/krawerter/krawerter ./krawall/build/krawall/lib/libkrawall-32k-30-medium.a ./krawall/build/krawall/src/krawall-cross-gba-build/examples/modules/libmodules.a: krawall
+./krawall/build/krawerter/krawerter ./krawall/build/krawall/lib/libkrawall-32k-30-medium.a: krawall
 	@echo Building Krawall library
 	mkdir -p $(CURDIR)/krawall/build
 	export
@@ -157,7 +159,7 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 $(OUTPUT).gba	:	$(OUTPUT).elf
 
-$(OUTPUT).elf	:	$(OFILES) $(LIBGBA)/lib/libgba.a $(CURDIR)/../krawall/build/krawall/lib/libkrawall-32k-30-medium.a $(CURDIR)/../krawall/build/krawall/src/krawall-cross-gba-build/examples/modules/libmodules.a
+$(OUTPUT).elf	:	$(OFILES) $(LIBGBA)/lib/libgba.a $(CURDIR)/../krawall/build/krawall/lib/libkrawall-32k-30-medium.a
 
 %.o	:	%.bin
 	@echo	$(notdir $<)

@@ -6,5 +6,7 @@ depend
 modules.*
 samples.*
 samplenames.*
+looper-samples.S
 instruments.*
+looper-samples.xm
 LooperAdvance.*

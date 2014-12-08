@@ -27,7 +27,7 @@
 #include "scr_krawall_splash.h"
 #include "scr_bg.h"
 
-GlobalData globals;
+GlobalData *globals;
 
 int main()
 {
@@ -42,14 +42,13 @@ int main()
 	// starting
 	SetBG(10, 10, 0);
 	
-	// i don't get why this isn't run automatically when the globaldata object is created
-	// perhaps my understanding of c++ isn't so strong :]
-	globals.Init();
+	// create the globals object
+	globals = new GlobalData();
 	
 	// starting
 	SetBG(0, 10, 10);
 
-	globals.LoadSongs();
+	globals->LoadSongs();
 
 	// starting
 	SetBG(10, 0, 10);
@@ -119,7 +118,7 @@ int main()
 		SetBG(0, 0, 10);
 
 		// figure out all our latest song positions
-		globals.Tick();
+		globals->Tick();
 		// calculate audio stuff
 		kramWorker();
 		// check keys

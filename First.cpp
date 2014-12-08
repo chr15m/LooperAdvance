@@ -108,7 +108,7 @@ First::First(Keys *inkeys)
 
 	RebuildSongList();
 	Song(NULL);
-	debug("Songdata: 0x%lx", (u32)globals.songdata);
+	debug("Songdata: 0x%lx", (u32)globals->songdata);
 }
 
 // destructor
@@ -131,7 +131,7 @@ First::~First()
 void *First::SaveButton(void *data)
 {
 	debug("Save button callback");
-	globals.SaveSongs();
+	globals->SaveSongs();
 	return NULL;
 }
 
@@ -139,7 +139,7 @@ void *First::SaveButton(void *data)
 void *First::ChangeSongName(void *data)
 {
 	debug("Updating song name (callback)");
-	globals.SetName((char *)data);
+	globals->SetName((char *)data);
 	RebuildSongList();
 	return NULL;
 }
@@ -169,7 +169,7 @@ void *First::Song(void *data)
 	// remove all our old live loops
 	DelLiveLoops();
 	// change currentsong variable to point at the newly selected song
-	globals.SetSong(newsong);
+	globals->SetSong(newsong);
 
 	// for every loop in this song, create it's loop
 	loop = newsong->loops;
@@ -187,7 +187,7 @@ void *First::Song(void *data)
 	ebSongName->SetString(newsong->name);
 	
 	// reset the counters each time we change songs
-	globals.Reset();
+	globals->Reset();
 	
 	debug("Right page = 0x%lx", right);
 	debug("New song loaded successfully");
@@ -206,7 +206,7 @@ void *First::NewButton(void *data)
 	// delete all the live loops
 	DelLiveLoops();
 	// create a new song in the songdata
-	globals.NewSong();
+	globals->NewSong();
 	// rebuild the choices
 	RebuildSongList();
 	// change to the current song
@@ -225,7 +225,7 @@ void *First::DelButton(void *data)
 		DelLoopButton(NULL);
 	}
 	// delete the current song
-	globals.DelSong();
+	globals->DelSong();
 	// rebuild choices
 	RebuildSongList();
 	// change to the current song
@@ -240,14 +240,14 @@ void *First::AddLoopButton(void *data)
 	Page *old;
 	debug("AddLoop button callback");
 	// add a loop to currentsong
-	globals.NewLoop();
+	globals->NewLoop();
 	// add a live loop
 	if (right)
 	{
 		debug("Inserting a new loop");
 		// make our next loop have a new loop
 		old = right;
-		right->left = new Loop(keys, globals.currentloop);
+		right->left = new Loop(keys, globals->currentloop);
 		right = right->left;
 		right->left = this;
 		right->right = old;
@@ -255,7 +255,7 @@ void *First::AddLoopButton(void *data)
 	else
 	{
 		debug("Appending a new loop");
-		right = new Loop(keys, globals.currentloop);
+		right = new Loop(keys, globals->currentloop);
 		right->left = this;
 	}
 		
@@ -290,8 +290,8 @@ void *First::DelLoopButton(void *data)
 	if (right)
 	{
 		// delete the current loop in currentsong
-		globals.SetLoop(((Loop *)right)->GetAddress());
-		globals.DelLoop();
+		globals->SetLoop(((Loop *)right)->GetAddress());
+		globals->DelLoop();
 
 		old = right->right;
 		delete right;
@@ -306,7 +306,7 @@ void *First::DelLoopButton(void *data)
 void *First::BPM(void *data)
 {
 	debug("BPM: %d", *(u16 *)data);
-	globals.SetBPM(*(u16 *)data);
+	globals->SetBPM(*(u16 *)data);
 	return NULL;
 }
 
@@ -314,7 +314,7 @@ void *First::BPM(void *data)
 void First::RebuildSongList()
 {
 	debug("Rebuilding song list");
-	structSongData *traverse = globals.songdata;
+	structSongData *traverse = globals->songdata;
 	sbSong->ClearChoices();
 	
 	while (traverse)
@@ -325,9 +325,9 @@ void First::RebuildSongList()
 	
 	if (selected)
 	{
-		debug("Setting Name='%s' BPM='%d'", globals.currentsong->name, globals.currentsong->bpm);
+		debug("Setting Name='%s' BPM='%d'", globals->currentsong->name, globals->currentsong->bpm);
 		// with the selected song
-		sbSong->ChooseByValue((u32)globals.currentsong);
+		sbSong->ChooseByValue((u32)globals->currentsong);
 	}
 }
 

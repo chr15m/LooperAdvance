@@ -80,7 +80,7 @@ private:
 public:
 	u32 counter;
 	u32 setbeat;	// this is the beat which is calculated by formula
-	u32 beat;	// this is the beta which increments ever time the counter flips over
+	u32 beat;	// this is the beat which increments ever time the counter flips over
 		
 	structSongData *songdata;
 	structSongData *currentsong;
@@ -122,7 +122,7 @@ public:
 	}
 };
 
-extern GlobalData globals;
+extern GlobalData *globals;
 extern const u32 frequency[12];
 
 #endif // GLOBALDATA

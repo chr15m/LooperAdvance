@@ -39,7 +39,7 @@ void GlobalData::Init()
 void GlobalData::Tick()
 {
 	counter++;
-	if (globals.currentsong)
+	if (currentsong)
 	{
 		beat = (u32)(counter * currentsong->bpm / 3600);
 		//if (!(counter % 60/(currentsong->bpm/60)))

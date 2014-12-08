@@ -192,7 +192,7 @@ Loop::Loop(Keys *inkeys, structLoopData *whichloop)
 	sbOn->Select();
 	selected = sbOn;
 	
-	globals.SetCurrentLoop(data);
+	globals->SetCurrentLoop(data);
 	
 	SampleChange(NULL);
 	UpdateWidgets();
@@ -237,14 +237,14 @@ void *Loop::AddLoopButton(void *mydata)
 	Page *old;
 	debug("AddLoop button callback");
 	// add a loop to currentsong
-	globals.NewLoop();
+	globals->NewLoop();
 	// add a live loop
 	if (right)
 	{
 		debug("Inserting a new loop");
 		// make our next loop have a new loop
 		old = right;
-		right->left = new Loop(keys, globals.currentloop);
+		right->left = new Loop(keys, globals->currentloop);
 		right = right->left;
 		right->left = this;
 		right->right = old;
@@ -252,11 +252,11 @@ void *Loop::AddLoopButton(void *mydata)
 	else
 	{
 		debug("Appending a new loop");
-		right = new Loop(keys, globals.currentloop);
+		right = new Loop(keys, globals->currentloop);
 		right->left = this;
 	}
 	
-	globals.SetCurrentLoop(data);
+	globals->SetCurrentLoop(data);
 	
 	return NULL;
 }
@@ -270,8 +270,8 @@ void *Loop::DelLoopButton(void *data)
 	if (right)
 	{
 		// delete the current loop in currentsong
-		globals.SetLoop(((Loop *)right)->GetAddress());
-		globals.DelLoop();
+		globals->SetLoop(((Loop *)right)->GetAddress());
+		globals->DelLoop();
 		
 		old = right->right;
 		delete right;
@@ -331,7 +331,7 @@ void *Loop::Beats(void *number)
 	{
 		if (notes[i]->offset > data->divisions)
 		{
-			notes[i]->offset = (notes[i]->offset % globals.currentloop->divisions);
+			notes[i]->offset = (notes[i]->offset % globals->currentloop->divisions);
 		}
 	}
 	return NULL;
@@ -380,17 +380,17 @@ void *Loop::Notes(void *number)
 // add a note
 void Loop::AddNote()
 {
-	globals.NewNote();
+	globals->NewNote();
 	numnotes++;
 	// set the current note's default beat to be the current beat
-	globals.currentnote->offset = ((numnotes - 1) % globals.currentloop->divisions) + 1;
+	globals->currentnote->offset = ((numnotes - 1) % globals->currentloop->divisions) + 1;
 	UpdateNotes();
 }
 
 // delete a note
 void Loop::DelNote()
 {	
-	globals.DelNote();
+	globals->DelNote();
 	numnotes--;
 	UpdateNotes();
 }
@@ -399,7 +399,7 @@ void Loop::DelNote()
 void Loop::UpdateNotes()
 {
 	u32 i=0;
-	structNoteData *traverse = globals.currentloop->notes;
+	structNoteData *traverse = globals->currentloop->notes;
 	
 	debug("numnotes = %d", numnotes);
 	
@@ -440,7 +440,7 @@ void Loop::UpdateNotes()
 // if they change the name of this loop
 void *Loop::Name(void *name)
 {
-	globals.SetLoopName((char *)name);
+	globals->SetLoopName((char *)name);
 	return NULL;
 }
 
@@ -448,11 +448,11 @@ void *Loop::Name(void *name)
 void *Loop::Reset(void *ignore)
 {
 	// (1000 * (tracks[selected].sample->len) / (tracks[selected].sample->freq) ) / (tracks[selected].bpl * T * 4 / 1000	
-	u32 p1 = globals.currentsong->bpm * GetSize();
+	u32 p1 = globals->currentsong->bpm * GetSize();
 	u32 p2 = 2646 * nbBeats->GetValue();
 	u16 result = 0;
 	
-	debug("Bpm: %d", globals.currentsong->bpm);
+	debug("Bpm: %d", globals->currentsong->bpm);
 	debug("Size: %ld", GetSize());
 	debug("Top: %ld", p1);
 	debug("Bottom: %ld", p2);
@@ -478,7 +478,7 @@ void Loop::DoProcess()
 {
 	u32 diff = 0;
 	// figure out if we're at the swing point
-	diff = globals.counter - (globals.beat * 3600 / globals.currentsong->bpm);
+	diff = globals->counter - (globals->beat * 3600 / globals->currentsong->bpm);
 	
 	// are we playing a sample?
 	if ((sbSample->GetChoice() != 0xFF) && kramHandleValid(handle))
@@ -486,15 +486,15 @@ void Loop::DoProcess()
 		// if we have notes, then things are handled a bit differently
 		if (notes)
 		{
-			beat = globals.beat % numnotes;
+			beat = globals->beat % numnotes;
 			
 			debugloop("diff: %ld", diff);
-			if ((diff >= notes[beat]->swing) && (lastbeat != globals.beat))
+			if ((diff >= notes[beat]->swing) && (lastbeat != globals->beat))
 			{
 				debug("Swing detected: %ld", diff);
 				// update the parameters
 				UpdateParametersNotes();
-				lastbeat = globals.beat;
+				lastbeat = globals->beat;
 			}
 			
 			// if cont is not on
@@ -526,14 +526,14 @@ void Loop::DoProcess()
 		else
 		{
 			// otherwise it's simple style parameter updates
-			beat = globals.beat % nbBeats->GetValue();
+			beat = globals->beat % nbBeats->GetValue();
 			
 			debugloop("Diff: %ld", diff);
 			
-			if ((diff >= (u32)(nbSwing->GetValue() * (beat | 1))) && (lastbeat != globals.beat))
+			if ((diff >= (u32)(nbSwing->GetValue() * (beat | 1))) && (lastbeat != globals->beat))
 			{
 				UpdateParameters();
-				lastbeat = globals.beat;
+				lastbeat = globals->beat;
 			}
 		}
 	}
@@ -544,7 +544,7 @@ void Loop::DoProcess()
 // when a swap occurs, select the correct loop
 void Loop::DoSwap()
 {
-	globals.SetCurrentLoop(data);
+	globals->SetCurrentLoop(data);
 }
 
 // update the parameters of a specific loop

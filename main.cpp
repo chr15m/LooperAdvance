@@ -107,7 +107,7 @@ int main()
 	BlankScreen();
 	
 	// CST_ROM0_1ST_3WAIT | CST_ROM0_2ND_1WAIT | CST_PREFETCH_ENABLE
-	REG_WSCNT = ( 5 << 2 ) | ( 1 << 14 );	// set rom-timing
+	// REG_WSCNT = ( 5 << 2 ) | ( 1 << 14 );	// set rom-timing
 	
 	while (1)
 	{

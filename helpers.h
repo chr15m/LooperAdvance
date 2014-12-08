@@ -22,23 +22,6 @@
 
 #define VideoBuffer 		((vu16*)0x6000000)
 
-#define BIT00 1
-#define BIT01 2
-#define BIT02 4
-#define BIT03 8
-#define BIT04 16
-#define BIT05 32
-#define BIT06 64
-#define BIT07 128
-#define BIT08 256
-#define BIT09 512
-#define BIT10 1024
-#define BIT11 2048
-#define BIT12 4096
-#define BIT13 8192
-#define BIT14 16384
-#define BIT15 32768
-
 #define REG_WSCNT      *(volatile u16*)0x4000204
 
 #define CHAR_BUFFER_SIZE 255

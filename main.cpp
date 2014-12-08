@@ -61,7 +61,7 @@ int main()
 	kragInit( KRAG_INIT_STEREO );					// init krawall
 	
 	// make it so we can see the background
-	REG_BG1CNT = BIT07 | BIT08 | BIT09 | BIT10 | BIT11 | BIT12; // high priority, 256 colour, point the banks at the right place etc
+	REG_BG1CNT = BIT(7) | BIT(8) | BIT(9) | BIT(10) | BIT(11) | BIT(12); // high priority, 256 colour, point the banks at the right place etc
 	
 	// load the splash screen
 	DMA3COPY((void*)splash_tiles, (u16*)VideoBuffer, SPLASH_TILESIZE | DMA16 | DMA_IMMEDIATE | DMA_SRC_INC | DMA_DST_INC);

@@ -79,9 +79,8 @@ private:
 
 public:
 	u32 counter;
-	u32 setbeat;	// this is the beat which is calculated by formula
 	u32 beat;	// this is the beat which increments ever time the counter flips over
-		
+	
 	structSongData *songdata;
 	structSongData *currentsong;
 	structLoopData *currentloop;

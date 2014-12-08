@@ -20,6 +20,8 @@
 #include "looper.h"
 #include "charset.h"
 
+#include "midi.h"
+
 #include "Loop.h"
 #include "First.h"
 
@@ -31,10 +33,15 @@ GlobalData *globals;
 
 int main()
 {
+	// set up interrupts
 	irqInit();
 	irqSet( IRQ_TIMER1, kradInterrupt );
-	// not really needed, as kragInit also enables IRQ_TIMER1
 	irqEnable( IRQ_TIMER1 );
+	// midi setup
+	midiInit();
+	irqSet( IRQ_TIMER0, midiInterrupt );
+	irqEnable( IRQ_TIMER0 );
+
 	REG_IME = 1;
 	
 	SetMode( MODE_0 | BG1_ON );
@@ -116,11 +123,13 @@ int main()
 
 		// this is zerosync
 		SetBG(0, 0, 10);
-
+		
 		// figure out all our latest song positions
 		globals->Tick();
 		// calculate audio stuff
 		kramWorker();
+		// update midi progression
+		midiUpdateBeat(globals->beat);
 		// check keys
 		keys->Jiffie();
 		// automatically cascades all pages and processes them

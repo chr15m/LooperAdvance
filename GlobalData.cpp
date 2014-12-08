@@ -20,6 +20,7 @@ const u32 frequency[12] = {44100, 46722, 49500, 52444, 55562, 58866, 62366, 6607
 GlobalData::GlobalData()
 {
 	Init();
+	Reset();
 }
 
 // initialise everything
@@ -42,15 +43,12 @@ void GlobalData::Tick()
 	if (currentsong)
 	{
 		beat = (u32)(counter * currentsong->bpm / 3600);
-		//if (!(counter % 60/(currentsong->bpm/60)))
-		//	beat++;
 	}
 }
 
 void GlobalData::Reset()
 {
 	counter = 0;
-	setbeat = 0;
 	beat = 0;
 }
 
@@ -158,13 +156,13 @@ void GlobalData::SetSong(structSongData *whichsong)
 // find a song by index number
 void GlobalData::FindSong(u16 whichsong)
 {
-	u16 counter=0;
+	u16 songCounter = 0;
 	structSongData *songtrav = songdata;
 	
-	while(counter != whichsong && songtrav)
+	while(songCounter != whichsong && songtrav)
 	{
 		songtrav = songtrav->next;
-		counter++;
+		songCounter++;
 	}
 	
 	if (songtrav)

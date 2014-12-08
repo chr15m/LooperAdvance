@@ -106,7 +106,7 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 .PHONY: $(BUILD) clean
 
 #---------------------------------------------------------------------------------
-$(BUILD): samples.h
+$(BUILD): samples.h midi.h
 	@[ -d $@ ] || mkdir -p $@
 	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
@@ -121,7 +121,7 @@ clean-looper:
 	@echo clean ...
 
 run: LooperAdvance.gba
-	@VisualBoyAdvance LooperAdvance.gba
+	@VisualBoyAdvance LooperAdvance.gba &
 
 #---------------------------------------------------------------------------------
 looper-samples.xm:

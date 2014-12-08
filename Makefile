@@ -18,6 +18,7 @@ TARGET		:=	LooperAdvance
 BUILD		:=	build
 SOURCES		:=	.
 INCLUDES	:=	-I $(CURDIR)/../krawall/build/krawall/include -I $(DEVKITPRO)/libgba/include/
+BRANCH		:= 	$(filter-out -master,-$(shell git rev-parse --abbrev-ref HEAD))
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -111,17 +112,17 @@ $(BUILD): samples.h
 	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
 #---------------------------------------------------------------------------------
-clean:
-	@echo clean ...
+clean: clean-looper
+	@echo clean krawall
 	@rm -rf krawall/build
 
 clean-looper:
-	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).gba
+	@echo clean looper
+	@rm -fr $(BUILD) $(TARGET)*.elf $(TARGET)*.gba
 	@rm -f samplenames.cpp samplenames.h samples.[sS] samples.h instruments.[sS] instruments.h looper-samples.S modules.h .sdepend
-	@echo clean ...
 
 run: LooperAdvance.gba
-	@VisualBoyAdvance LooperAdvance.gba
+	@VisualBoyAdvance LooperAdvance.gba &
 
 #---------------------------------------------------------------------------------
 looper-samples.xm:
@@ -157,9 +158,9 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-$(OUTPUT).gba	:	$(OUTPUT).elf
+$(OUTPUT)$(BRANCH).gba	:	$(OUTPUT)$(BRANCH).elf
 
-$(OUTPUT).elf	:	$(OFILES) $(LIBGBA)/lib/libgba.a $(CURDIR)/../krawall/build/krawall/lib/libkrawall-32k-30-medium.a
+$(OUTPUT)$(BRANCH).elf	:	$(OFILES) $(LIBGBA)/lib/libgba.a $(CURDIR)/../krawall/build/krawall/lib/libkrawall-32k-30-medium.a
 
 %.o	:	%.bin
 	@echo	$(notdir $<)

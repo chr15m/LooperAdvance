@@ -23,6 +23,7 @@ SelectBox::SelectBox(u16 ix, u16 iy, u16 iwidth, Keys *inkeys): Widget (ix, iy, 
 	last = NULL;
 	timer = 0;
 	maxtime = 0;
+	sprintf(text, "[%-*s]", width, "");
 	debug("Width: %d", width);
 }
 
@@ -47,7 +48,12 @@ void SelectBox::Choose(u16 choice)
 	if (travel)
 	{
 		which = travel;
-//		Callback(which);
+	}
+	
+	if (which) {
+		sprintf(text, "[%-*s]", width, which->text);
+	} else {
+		sprintf(text, "[%-*s]", width, "");
 	}
 }
 
@@ -62,9 +68,14 @@ void SelectBox::ChooseByValue(u32 inval)
 		if (travel->value == inval)
 		{
 			which = travel;
-//			Callback(which);
 		}
 		travel = travel->next;
+	}
+	
+	if (which) {
+		sprintf(text, "[%-*s]", width, which->text);
+	} else {
+		sprintf(text, "[%-*s]", width, "");
 	}
 }
 
@@ -78,16 +89,17 @@ u32 SelectBox::GetChoice()
 }
 
 // get the string for the currently selected choice
+static char* blank = "";
 char *SelectBox::GetChoiceString()
 {
 	if (which)
 		return which->text;
 	else
-		return "";
+		return blank;
 }
 
 // add a new choice to the linked list of choices
-void SelectBox::NewChoice(char *text, u32 myval)
+void SelectBox::NewChoice(char *intext, u32 myval)
 {
 	// if we have at least one already then add another one
 	if (last != NULL)
@@ -108,11 +120,12 @@ void SelectBox::NewChoice(char *text, u32 myval)
 	// make a new character array
 	last->next = NULL;
 	last->text = new char[width+1];
-	strncpy(last->text, text, width);
+	strncpy(last->text, intext, width);
 	// make sure it's null terminated
 	last->text[width] = '\0';
 	last->value = myval;
 	
+	sprintf(text, "[%-*s]", width, which->text);
 	debug("%s -> %ld", last->text, last->value);
 }
 
@@ -131,6 +144,7 @@ void SelectBox::ClearChoices()
 	first = NULL;
 	last = NULL;
 	which = NULL;
+	sprintf(text, "[%-*s]", width, "");
 }
 
 // check if we have any in the list
@@ -149,6 +163,7 @@ void SelectBox::AutoOff(u16 time)
 Widget *SelectBox::Process()
 {
 	Widget *newselect = NULL;
+	structSelectList *oldwhich = which;
 	
 	if (keys->IsPressed(keyA))
 	{
@@ -184,6 +199,16 @@ Widget *SelectBox::Process()
 				else
 					timer = 2;
 			}
+			
+			// make sure we don't draw an empty select box
+			if (oldwhich != which) {
+				if (which) {
+					sprintf(text, "[%-*s]", width, which->text);
+				} else {
+					sprintf(text, "[%-*s]", width, "");
+				}
+				oldwhich = which;
+			}
 		}
 	}
 	else
@@ -215,12 +240,7 @@ Widget *SelectBox::Process()
 // draw us
 void SelectBox::Draw()
 {
-	// make sure we don't draw an empty select box
-	if (which)
-		sprintf(text, "[%-*s]", width, which->text);
-	else
-		sprintf(text, "[%-*s]", width, "");
-		
+	// char *text = "[SLCT]";
 	if (timer)
 	{
 		// if the timer is started, keep counting down
@@ -228,7 +248,6 @@ void SelectBox::Draw()
 		{	
 			if (maxtime)
 				Choose(0);
-			// do the callback
 			Callback(which);
 		}
 

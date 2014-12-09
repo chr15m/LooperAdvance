@@ -25,7 +25,7 @@ BRANCH		:= 	$(filter-out -master,-$(shell git rev-parse --abbrev-ref HEAD))
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb -mthumb-interwork
 
-CFLAGS	:=	-std=gnu99 -Wall\
+CFLAGS	:=	-std=gnu99 -O3 -Wall\
 			-mcpu=arm7tdmi -mtune=arm7tdmi\
  			-fomit-frame-pointer\
 			-ffast-math \

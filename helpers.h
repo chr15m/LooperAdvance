@@ -22,8 +22,6 @@
 
 #define VideoBuffer 		((vu16*)0x6000000)
 
-#define REG_WSCNT      *(volatile u16*)0x4000204
-
 #define CHAR_BUFFER_SIZE 255
 
 #define debug(format, args...)	\
@@ -76,9 +74,9 @@ inline void SetBG(u16 r, u16 g, u16 b)
 	(*(u16*)(BG_PALETTE + 6)=(RGB(r,g,b)));
 }
 
+static u32 zero=52;
 inline void BlankScreen()
 {
-	u32 zero=52;
 	DMA3COPY((void*)&zero, (u16*)&VideoBuffer[0x7C00], 0x400 | DMA16 | DMA_IMMEDIATE | DMA_SRC_FIXED | DMA_DST_INC);
 }
 

@@ -31,6 +31,10 @@ GlobalData *globals;
 
 int main()
 {
+	// INT_IE |= ( 1 << 13 ); 		// cart-remove-interrupt (handled by crt0)
+	// CST_ROM0_1ST_3WAIT | CST_ROM0_2ND_1WAIT | CST_PREFETCH_ENABLE
+	// REG_WSCNT = ( 5 << 2 ) | ( 1 << 14 );	// set rom-timing
+	
 	irqInit();
 	irqSet( IRQ_TIMER1, kradInterrupt );
 	// not really needed, as kragInit also enables IRQ_TIMER1
@@ -106,14 +110,8 @@ int main()
 	// clear out the whole area
 	BlankScreen();
 	
-	// CST_ROM0_1ST_3WAIT | CST_ROM0_2ND_1WAIT | CST_PREFETCH_ENABLE
-	// REG_WSCNT = ( 5 << 2 ) | ( 1 << 14 );	// set rom-timing
-	
 	while (1)
 	{
-                // while( !REG_VCOUNT );
-                // while( REG_VCOUNT );
-
 		// this is zerosync
 		SetBG(0, 0, 10);
 
@@ -129,6 +127,9 @@ int main()
 		SetBG(0, 0, 0);
 		
 		// this is vsync
+                //while( !REG_VCOUNT );
+                //while( REG_VCOUNT );
+
 		// try and fit the drawing stuff into the off-screen sync
 		while(REG_VCOUNT != 160);
 		SetBG(10, 0, 0);
@@ -136,6 +137,8 @@ int main()
 		BlankScreen();
 		selected = selected->Cycle();
 		selected->Draw();
+		
+		SetBG(0, 0, 0);
 	}
 	
 	return 1;

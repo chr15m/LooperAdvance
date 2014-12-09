@@ -17,6 +17,7 @@
 
 EditBox::EditBox(u16 ix, u16 iy, u16 inwidth, Keys *inkeys): Widget (ix, iy, inkeys)
 {
+	width = inwidth;
 	u16 i;
 	value = new char[width + 1];
 	
@@ -25,10 +26,9 @@ EditBox::EditBox(u16 ix, u16 iy, u16 inwidth, Keys *inkeys): Widget (ix, iy, ink
 	{
 		value[i] = NULL;
 	}
-	
+	sprintf(text, "[%-*s]", width, value);
 	which = 0;
-	width = inwidth;
-	blink = 0;	
+	blink = 0;
 }
 
 EditBox::~EditBox()
@@ -38,12 +38,17 @@ EditBox::~EditBox()
 
 void EditBox::SetString(char *instring)
 {
+	u8 inwidth = strlen(instring);
 	// copy the incoming string over our text
 	strncpy(value, instring, width);
 	// make sure last char is 0
-	value[strlen(instring)] = NULL;
+	value[inwidth] = NULL;
 	value[width] = NULL;
-//	Callback(value);
+	sprintf(text, "[%-*s]", width, value);
+	if (which > inwidth) {
+		which = inwidth;
+	}
+	blink = 0;
 }
 
 char *EditBox::GetString()
@@ -79,10 +84,18 @@ Widget *EditBox::Process()
 			which -= 1;
 			blink = 0;
 		}
-		if (keys->TestKey(keyRight) == pressed)
+		if (keys->TestKey(keyRight) == pressed && which < strlen(value))
 		{
 			which += 1;
 			blink = 0;
+		}
+		// key B at the same time as key A deletes remainder
+		if (keys->TestKey(keyB) == pressed)
+		{
+			for (int i=which; i<width; i++) {
+				value[i] = NULL;
+			}
+			changed = true;
 		}
 		
 		// check our bounds
@@ -110,12 +123,15 @@ Widget *EditBox::Process()
 	// if they've changed the text box
 	if (changed)
 	{
+		sprintf(text, "[%-*s]", width, value);
 		Callback(value);
 	}
 	
 	if (!newselect)
 	{
 		newselect = this;
+	} else {
+		sprintf(text, "[%-*s]", width, value);
 	}
 	
 	newselect->Select();
@@ -125,8 +141,8 @@ Widget *EditBox::Process()
 
 void EditBox::Draw()
 {
+	// char *text = "[EDIT]";
 	sprintf(text, "[%-*s]", width, value);
-	
 	if (selected)
 	{
 		// make the selected character toggle between _ and the letter

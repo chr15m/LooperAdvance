@@ -22,12 +22,15 @@ NumberBox::NumberBox(u16 ix, u16 iy, u16 iwidth, u16 imin, u16 imax, u16 ibigste
 	max = imax;
 	bigstep = ibigstep;	
 	value = min;
+	sprintf(text, "[%*d]", width, value);
 }
 
 void NumberBox::SetValue(u16 newVal)
 {
-	value = newVal;
-//	Callback(&value);
+	if (value != newVal) {
+		value = newVal;
+		sprintf(text, "[%*d]", width, value);
+	}
 }
 
 void NumberBox::SetMax(u16 imax)
@@ -35,7 +38,7 @@ void NumberBox::SetMax(u16 imax)
 	if (value > imax)
 	{
 		value = imax;
-//		Callback(&value);
+		sprintf(text, "[%*d]", width, value);
 	}
 	max = imax;
 }
@@ -71,7 +74,7 @@ Widget *NumberBox::Process()
 		if (value != tmpval)
 		{
 			value = tmpval;
-			
+			sprintf(text, "[%*d]", width, value);
 			Callback(&value);
 		}
 	}
@@ -102,9 +105,8 @@ Widget *NumberBox::Process()
 }
 
 void NumberBox::Draw()
-{	
-	sprintf(text, "[%*d]", width, value);
-	
+{
+	// char *text = "[NMBX]";
 	if (selected)
 	{
 		hprintf(x, y, text);

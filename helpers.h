@@ -24,14 +24,17 @@
 
 #define CHAR_BUFFER_SIZE 255
 
+#define debug(format, args...)
+#define debugloop(format, args...)
+
+#ifdef DEBUG
 #define debug(format, args...)	\
 ({	\
 	dprintf("[%s - %s()] Line %d: ", __FILE__, __FUNCTION__, __LINE__);	\
 	dprintf(format, ## args);	\
 	dprintf("\n");	\
 })
-
-#define debugloop(format, args...) ;
+#endif // DEBUG
 
 #ifdef DBLOOPS
 #define debugloop(format, args...)	\
@@ -40,7 +43,7 @@
 	dprintf(format, ## args);	\
 	dprintf("\n");	\
 })
-#endif
+#endif // DBLOOPS
 
 #define cprintf(x, y, format, args...)  ({    \
 	u16 i=0;\

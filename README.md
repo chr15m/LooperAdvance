@@ -2,6 +2,10 @@ Loop based music composition and live performance tool for Gameboy Advance.
 
 ![Splash screen](./screenshots/splash.png)
 
+# MIDI out #
+
+LooperAdvance can now send a "Song Position Pointer" (0xF2) synchronisation signal over MIDI. See the [MIDI readme](./midi/README.md) for more information.
+
 # Tutorial #
 
 turn on the gameboy advance or run the rom in your emulator of choice. press the A button to skip past the splash screens. because this is your first time running the rom, there are no saved songs in memory. you will be presented with a blank song screen like this:

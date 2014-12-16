@@ -46,7 +46,8 @@ inline void midiInit()
 	// MIDI is 31250 bsp at +/-1% tolerance (-1% => 30937, +1% => 31562)
 	// so 31242 bps is a valid bps value
 	REG_TM3CNT_L = 0xFDE7;   // 64999
-	REG_TM3CNT_H = TIMER_START | TIMER_IRQ | 0x0;   // start + irq + f (16MHz)
+	// use 0x3 below = slow enough divisor to watch (1024)
+	REG_TM3CNT_H = TIMER_START | TIMER_IRQ | 0x0;   // start + irq + f (16MHz) 
 }
 
 inline void midiStop() {
@@ -59,11 +60,13 @@ inline void midiStop() {
 inline void midiInterrupt(void) IWRAM_CODE;
 
 static u8 midi_bit;
-inline void midiInterrupt(void) {	
+inline void midiInterrupt(void) {
 	// dprintf("midiInterrupt\n");
 	
 	if (midi_send_struct.byte >= midi_send_struct.data_size) {
 		midi_bit = 1;
+		// dprintf("midiInterrupt OFF!\n");
+		midiStop();
 	} else if (midi_send_struct.next_bit == -1) {
 		midi_send_struct.next_bit = 0;
 		midi_bit = 0;
@@ -75,6 +78,9 @@ inline void midiInterrupt(void) {
 		midi_bit = 1 & (midi_send_struct.data[midi_send_struct.byte] >> midi_send_struct.next_bit);
 		midi_send_struct.next_bit++;
 	}
+	
+	// dprintf("midiInterrupt: %d\n", midi_bit);
+	
 	// perform the cable send
 	REG_RCNT = (midi_bit) ? REG_R_MIDI | GPIO_SC : REG_R_MIDI;
 	
@@ -86,6 +92,7 @@ inline void midiInterrupt(void) {
 inline u8 midiSend(u8 *data, u8 size) {
 	if (midi_send_struct.byte < midi_send_struct.data_size)
 		return 0;
+	midiInit();
 	midi_send_struct.data = data;
 	midi_send_struct.data_size = size;
 	midi_send_struct.next_bit = -1;

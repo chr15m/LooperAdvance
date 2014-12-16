@@ -14,10 +14,10 @@
 ******************************************************/
 
 #include <gba.h>
+#include <mappy.h>
 #include <stdio.h>
 #include <cstdio>
 #include <string.h>
-#include "emudp.h"
 #include "helpers.h"
 #include "callback.h"
 #include "GlobalData.h"

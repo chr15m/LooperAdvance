@@ -41,10 +41,10 @@ int main()
 	irqSet( IRQ_TIMER1, kradInterrupt );
 	irqEnable( IRQ_TIMER1 );
 	// midi setup
+	irqSet( IRQ_TIMER3, midiInterrupt );
+	irqEnable( IRQ_TIMER3 );
 	midiInit();
-	irqSet( IRQ_TIMER0, midiInterrupt );
-	irqEnable( IRQ_TIMER0 );
-
+	
 	REG_IME = 1;
 	
 	SetMode( MODE_0 | BG1_ON );
@@ -57,18 +57,19 @@ int main()
 	
 	// starting
 	SetBG(0, 10, 10);
-
+	
 	globals->LoadSongs();
-
+	
 	// starting
 	SetBG(10, 0, 10);
-
-	u16 i=0;
+	
+	u16 i = 0;
 	Keys *keys = new Keys();
 	First *firstpage = new First(keys);
 	Page *selected = firstpage;
 	
-	kragInit( KRAG_INIT_STEREO );					// init krawall
+	// init krawall
+	kragInit( KRAG_INIT_STEREO );
 	
 	// make it so we can see the background
 	REG_BG1CNT = BIT(7) | BIT(8) | BIT(9) | BIT(10) | BIT(11) | BIT(12); // high priority, 256 colour, point the banks at the right place etc
@@ -84,12 +85,12 @@ int main()
 		keys->Jiffie();
 	}
 	keys->Jiffie();
-
+	
 	// load the krawall splash screen
 	DMA3COPY((void*)krawall_splash_tiles, (u16*)VideoBuffer, KRAWALL_SPLASH_TILESIZE| DMA16 | DMA_IMMEDIATE | DMA_SRC_INC | DMA_DST_INC);
 	DMA3COPY((void*)krawall_splash_palette, (u16*)&BG_PALETTE[5], KRAWALL_SPLASH_PALSIZE | DMA16 | DMA_IMMEDIATE | DMA_SRC_INC | DMA_DST_INC);
 	DMA3COPY((void*)krawall_splash_map, (u16*)&VideoBuffer[0x7C00], 640 | DMA16 | DMA_IMMEDIATE | DMA_SRC_INC | DMA_DST_INC);
-
+	
 	// check keys
 	while (keys->TestKey(keyA) != pressed)
 	{
@@ -137,9 +138,10 @@ int main()
 		// this is vsync
                 //while( !REG_VCOUNT );
                 //while( REG_VCOUNT );
-
+		
 		// try and fit the drawing stuff into the off-screen sync
 		while(REG_VCOUNT != 160);
+		
 		SetBG(10, 0, 0);
 		// do all the display shit in here
 		BlankScreen();

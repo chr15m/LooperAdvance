@@ -6,6 +6,10 @@ Loop based music composition and live performance tool for Gameboy Advance.
 
 LooperAdvance can now send a "Song Position Pointer" (0xF2) synchronisation signal over MIDI. See the [MIDI readme](./midi/README.md) for more information.
 
+# Adding samples #
+
+If you want to create your own sample bank or modify the existing one, you will need to use the original [ModPlug Tracker from 2004](http://www.roncli.com/modplug/download.asp?FileID=5). It seems to be the only thing can produce the exact correct XM format that the Krawall sound library can convert for use on the Gameboy Advance. It runs fine under Wine.
+
 # Tutorial #
 
 turn on the gameboy advance or run the rom in your emulator of choice. press the A button to skip past the splash screens. because this is your first time running the rom, there are no saved songs in memory. you will be presented with a blank song screen like this:

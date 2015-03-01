@@ -83,4 +83,7 @@ inline void BlankScreen()
 	DMA3COPY((void*)&zero, (u16*)&VideoBuffer[0x7C00], 0x400 | DMA16 | DMA_IMMEDIATE | DMA_SRC_FIXED | DMA_DST_INC);
 }
 
+// constant of spaces
+const char *spaces = "                 ";
+
 #endif //_HELPERS_H_

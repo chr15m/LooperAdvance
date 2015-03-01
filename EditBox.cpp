@@ -26,7 +26,8 @@ EditBox::EditBox(u16 ix, u16 iy, u16 inwidth, Keys *inkeys): Widget (ix, iy, ink
 	{
 		value[i] = NULL;
 	}
-	sprintf(text, "[%-*s]", width, value);
+	// sprintf(text, "[%-*s]", width, value);
+	PrintBoxString(text, width, value);
 	which = 0;
 	blink = 0;
 }
@@ -44,7 +45,8 @@ void EditBox::SetString(char *instring)
 	// make sure last char is 0
 	value[inwidth] = NULL;
 	value[width] = NULL;
-	sprintf(text, "[%-*s]", width, value);
+	// sprintf(text, "[%-*s]", width, value);
+	PrintBoxString(text, width, value);
 	if (which > inwidth) {
 		which = inwidth;
 	}
@@ -62,7 +64,7 @@ Widget *EditBox::Process()
 	bool changed=false;
 	
 	if (keys->IsPressed(keyA))
-	{	
+	{
 		// what keys was pressed ey
 		if (keys->TestKey(keyUp) == pressed)
 		{
@@ -123,7 +125,8 @@ Widget *EditBox::Process()
 	// if they've changed the text box
 	if (changed)
 	{
-		sprintf(text, "[%-*s]", width, value);
+		// sprintf(text, "[%-*s]", width, value);
+		PrintBoxString(text, width, value);
 		Callback(value);
 	}
 	
@@ -131,7 +134,8 @@ Widget *EditBox::Process()
 	{
 		newselect = this;
 	} else {
-		sprintf(text, "[%-*s]", width, value);
+		// sprintf(text, "[%-*s]", width, value);
+		PrintBoxString(text, width, value);
 	}
 	
 	newselect->Select();
@@ -142,9 +146,10 @@ Widget *EditBox::Process()
 void EditBox::Draw()
 {
 	// char *text = "[EDIT]";
-	sprintf(text, "[%-*s]", width, value);
 	if (selected)
 	{
+		// sprintf(text, "[%-*s]", width, value);
+		PrintBoxString(text, width, value);
 		// make the selected character toggle between _ and the letter
 		if (!(blink / 10 % 2))
 			text[which + 1] = '_';

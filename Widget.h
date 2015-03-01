@@ -54,6 +54,26 @@ public:
 			debug("Making callback");
 			return callback->Execute(data);
 		}
+		return NULL;
+	}
+	
+	inline void PrintBoxString(char *out, int w, char* val)
+	{
+		// sprintf(out, "[%-*s]", w, val);
+		/*out[0] = '[';
+		out[1] = ']';
+		out[2] = NULL;
+		return;*/
+		int l = strnlen(val, w);
+		strncpy(out+1, val, l+1);
+		memcpy(out+l+1, spaces, w-l);
+		out[0] = '[';
+		out[w+1] = ']';
+		out[w+2] = (char)NULL;
+	}
+	
+	inline void PrintBoxInt(char *out, int w, int val)
+	{
 	}
 };
 
